@@ -1,0 +1,26 @@
+{
+    "name": "vscode-grain",
+    "displayName": "Grain",
+    "description": "Support for the Grain language.",
+    "version": "0.0.1",
+    "publisher": "ospencer",
+    "engines": {
+        "vscode": "^1.19.0"
+    },
+    "categories": [
+        "Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "grain",
+            "aliases": ["Grain", "grain"],
+            "extensions": [".gr",".grx",".grlib"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "grain",
+            "scopeName": "source.grain",
+            "path": "./syntaxes/grain.tmLanguage.json"
+        }]
+    }
+}
