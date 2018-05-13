@@ -417,6 +417,12 @@
 						},
 						{ "include": "#expressions" }
 					]
+				},
+				{
+					"match": "\\b([A-Z]\\w*)\\b",
+					"captures": {
+						"1": { "name": "support.type.grain" }
+					}
 				}
 			]
 		},
