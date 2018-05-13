@@ -110,7 +110,7 @@
 		"data-declarations": {
 			"patterns": [
 				{
-					"match": "\\b(data)\\b\\s+\\b([A-Z]\\w*)\\b\\s*=\\s*\\b([a-z]\\w*)\\b",
+					"match": "\\b(data)\\b\\s+\\b([A-Z]\\w*)\\b\\s*=\\s*\\b([A-Z]\\w*)\\b",
 					"captures": {
 						"1": { "name": "storage.type.grain" },
 						"2": { "name": "entity.name.type.grain" },
@@ -118,7 +118,7 @@
 					}
 				},
 				{
-					"begin": "(data)\\s+([A-Z]\\w*)(?=\\s*(<.*>\\s*)?=\\s*\\b([a-z]\\w*)\\b\\s*\\(.*\\))",
+					"begin": "(data)\\s+([A-Z]\\w*)(?=\\s*(<.*>\\s*)?=\\s*\\b([A-Z]\\w*)\\b\\s*\\(.*\\))",
 					"end": "(?<=\\))",
 					"beginCaptures": {
 						"1": { "name": "storage.type.grain" },
@@ -126,8 +126,23 @@
 					},
 					"patterns": [
 						{ "include": "#type-vector" },
-						{ "include": "#type-constructor" }
+						{ "include": "#type-variant" }
 					]
+				},
+				{
+					"begin": "(data)\\s+([A-Z]\\w*)\\s*=",
+					"end": "([A-Z]\\w*(\\(.*\\))?)",
+					"beginCaptures": {
+						"1": { "name": "storage.type.grain" },
+						"2": { "name": "entity.name.type.grain" }
+					},
+					"endCaptures": {
+						"1": {
+							"patterns": [
+								{ "include": "#type-variant" }
+							]
+						}
+					}
 				},
 				{
 					"begin": "(data)\\s+([A-Z]\\w*)",
@@ -141,14 +156,14 @@
 					]
 				},
 				{
-					"begin": "(?=\\|\\s*\\b([a-z]\\w*)\\b\\s*\\()",
+					"begin": "(?=\\|\\s*\\b([A-Z]\\w*)\\b\\s*\\()",
 					"end": "(?<=\\))",
 					"patterns": [
-						{ "include": "#type-constructor" }
+						{ "include": "#type-variant" }
 					]
 				},
 				{
-					"match": "\\|\\s*\\b([a-z]\\w*)\\b",
+					"match": "\\|\\s*\\b([A-Z]\\w*)\\b",
 					"captures": {
 						"1": {
 							"name": "support.type.grain"
@@ -219,6 +234,7 @@
 				{ "include": "#comments" },
 				{ "include": "#bindings" },
 				{ "include": "#function" },
+				{ "include": "#type-constructor" },
 				{ "include": "#tuple" },
 				{ "include": "#match" },
 				{ "include": "#pattern" },
@@ -371,10 +387,10 @@
 				}
 			]
 		},
-		"type-constructor": {
+		"type-variant": {
 			"patterns": [
 				{
-					"begin": "\\b([a-z]\\w*)\\b\\s*(\\()",
+					"begin": "\\b([A-Z]\\w*)\\b\\s*(\\()",
 					"end": "(\\))",
 					"beginCaptures": {
 						"1": { "name": "support.type.grain" },
@@ -392,6 +408,42 @@
 						},
 						{ "include": "#type-var" }
 					]
+				},
+				{
+					"match": "\\b([A-Z]\\w*)\\b",
+					"captures": {
+						"1": { "name": "support.type.grain" }
+					}
+				}
+			]
+		},
+		"type-constructor": {
+			"patterns": [
+				{
+					"begin": "\\b([A-Z]\\w*)\\b\\s*(\\()",
+					"end": "(\\))",
+					"beginCaptures": {
+						"1": { "name": "support.type.grain" },
+						"2": { "name": "support.type.grain" }
+					},
+					"endCaptures": {
+						"1": { "name": "support.type.grain" }
+					},
+					"patterns": [
+						{
+							"match": "(,)",
+							"captures": {
+								"1": { "name": "support.type.grain" }
+							}
+						},
+						{ "include": "#expressions" }
+					]
+				},
+				{
+					"match": "\\b([A-Z]\\w*)\\b",
+					"captures": {
+						"1": { "name": "support.type.grain" }
+					}
 				}
 			]
 		},
@@ -421,7 +473,7 @@
 		"type-destructor": {
 			"patterns": [
 				{
-					"begin": "\\b([a-z]\\w*)\\b(?=\\s*\\()",
+					"begin": "\\b([A-Z]\\w*)\\b(?=\\s*\\()",
 					"end": "(?<=\\))",
 					"beginCaptures": {
 						"1": { "name": "support.type.grain" }
@@ -460,7 +512,7 @@
 					]
 				},
 				{
-					"match": "\\b([a-z]\\w*)\\b",
+					"match": "\\b([A-Z]\\w*)\\b",
 					"captures": {
 						"1": { "name": "support.type.grain" }
 					}
