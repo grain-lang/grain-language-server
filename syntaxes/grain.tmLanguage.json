@@ -130,6 +130,21 @@
 					]
 				},
 				{
+					"begin": "(data)\\s+([A-Z]\\w*)\\s*=",
+					"end": "([A-Z]\\w*(\\(.*\\))?)",
+					"beginCaptures": {
+						"1": { "name": "storage.type.grain" },
+						"2": { "name": "entity.name.type.grain" }
+					},
+					"endCaptures": {
+						"1": {
+							"patterns": [
+								{ "include": "#type-variant" }
+							]
+						}
+					}
+				},
+				{
 					"begin": "(data)\\s+([A-Z]\\w*)",
 					"end": "=",
 					"beginCaptures": {
@@ -393,6 +408,12 @@
 						},
 						{ "include": "#type-var" }
 					]
+				},
+				{
+					"match": "\\b([A-Z]\\w*)\\b",
+					"captures": {
+						"1": { "name": "support.type.grain" }
+					}
 				}
 			]
 		},
