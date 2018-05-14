@@ -29,6 +29,30 @@
 					}
 				},
 				{
+					"comment": "Support for highlighting while typing a function definition.",
+					"begin": "\\b(let\\b\\s*rec|let)\\b\\s*([a-z]\\w*)\\s*(:.*)?(=)\\s*\\(",
+					"end": "\\)",
+					"beginCaptures": {
+						"1": {
+							"name": "storage.type.grain"
+						},
+						"2": {
+							"name": "entity.name.function.grain"
+						},
+						"3": {
+							"patterns": [
+								{ "include": "#type-annotation" }
+							]
+						},
+						"4": {
+							"name": "keyword.operator.grain"
+						}
+					},
+					"patterns": [
+						{ "include": "#binding-destructure" }
+					]
+				},
+				{
 					"match": "\\b(let\\b\\s*rec|let)\\b\\s*([a-z]\\w*)\\s*(:.*)?(=)(?=\\s*pattern\\b)",
 					"captures": {
 						"1": {
