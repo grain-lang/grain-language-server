@@ -326,6 +326,7 @@
 		"block": {
 			"patterns": [
 				{
+					"name": "grblock",
 					"begin": "(\\{)",
 					"end": "(\\})",
 					"beginCaptures": {
@@ -429,7 +430,7 @@
 		"keywords": {
 			"patterns": [{
 				"name": "keyword.control.grain",
-				"match": "\\b(let|rec|match|if|else|while)\\b"
+				"match": "\\b(let|rec|match|if|else|while|import)\\b"
 			}]
 		},
 		"strings": {
@@ -461,7 +462,7 @@
 		"expression-keywords": {
 			"patterns": [
 				{
-					"match": "\\b(throw|box|unbox|let|rec)\\b",
+					"match": "\\b(throw|box|unbox|let|rec|while|import|export)\\b",
 					"name": "keyword.control.grain"
 				}
 			]
@@ -628,7 +629,7 @@
 								{
 									"match": "\\b([a-z]\\w*)\\b",
 									"captures": {
-										"1": { "name": "variable.name.grain" }
+										"1": { "name": "variable.language.grain" }
 									}
 								},
 								{
@@ -673,7 +674,7 @@
 				},
 				{
 					"begin": "",
-					"end": "(?==>\\|\\})",
+					"end": "(?==>|\\|\\})",
 					"patterns": [
 						{
 							"include": "#type-destructor"
@@ -685,17 +686,19 @@
 		"match": {
 			"patterns": [
 				{
-					"begin": "\\b(match)\\b\\s*(\\().*(\\))\\s*(?=\\{)",
+					"begin": "(?=\\b(match)\\b\\s*\\(.*\\)\\s*\\{)",
 					"end": "(?<=\\})",
-					"beginCaptures": {
-						"1": { "name": "keyword.operator.grain" },
-						"2": { "name": "punctuation.definition.parameters.begin.grain" },
-						"3": { "name": "punctuation.definition.parameters.end.grain" }
-					},
 					"patterns": [
 						{
-							"begin": "(?<=\\||\\{)",
-							"end": "(?=\\||\\})",
+							"name": "grmatch",
+							"begin": "(\\{)",
+							"end": "(\\})",
+							"beginCaptures": {
+								"1": { "name": "punctuation.definition.parameters.begin.grain" }
+							},
+							"endCaptures": {
+								"1": { "name": "punctuation.definition.parameters.end.grain" }
+							},
 							"patterns": [
 								{
 									"include": "#pattern-variant"
@@ -703,26 +706,21 @@
 							]
 						},
 						{
-							"match": "\\{",
-							"name": "punctuation.definition.parameters.begin.grain"
-						},
-						{
-							"match": "\\}",
-							"name": "punctuation.definition.parameters.end.grain"
-						}
-					]
-				},
-				{
-					"begin": "\\b(match)\\b\\s*\\(",
-					"end": "\\)",
-					"beginCaptures": {
-						"1": {
-							"name": "keyword.operator.grain"
-						}
-					},
-					"patterns": [
-						{
-							"include": "#expression"
+							"name": "grwhere",
+							"begin": "\\b(match)\\b\\s*(\\()",
+							"end": "(\\))",
+							"beginCaptures": {
+								"1": { "name": "keyword.operator.grain" },
+								"2": { "name": "punctuation.definition.parameters.begin.grain" }
+							},
+							"endCaptures": {
+								"1": { "name": "punctuation.definition.parameters.end.grain" }
+							},
+							"patterns": [
+								{
+									"include": "#expressions"
+								}
+							]
 						}
 					]
 				}
