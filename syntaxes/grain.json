@@ -510,7 +510,7 @@
 		"keywords": {
 			"patterns": [
 				{
-					"match": "\\b(throw|box|unbox|let|rec|while|import|export|foreign)\\b",
+					"match": "\\b(throw|box|unbox|let|rec|while|import|export|foreign|from|except)\\b",
 					"name": "keyword.control.grain"
 				}
 			]
