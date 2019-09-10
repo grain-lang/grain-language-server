@@ -4,6 +4,9 @@
 	"patterns": [
 		{
 			"include": "#top-level-statements"
+		},
+		{
+			"include": "#comments"
 		}
 	],
 	"repository": {
@@ -139,11 +142,8 @@
 			]
 		},
 		"comments": {
-			"patterns": [{
-				"begin": "#",
-				"end": "$",
-				"name": "comment.line.grain"
-			}]
+			"match": "#.*$",
+			"name": "comment.line.grain"
 		},
 		"type-args": {
 			"patterns": [{
@@ -676,6 +676,7 @@
 					"begin": "",
 					"end": "(?==>|\\|\\})",
 					"patterns": [
+						{ "include": "#comments" },
 						{
 							"include": "#type-destructor"
 						}
@@ -690,7 +691,6 @@
 					"end": "(?<=\\})",
 					"patterns": [
 						{
-							"name": "grmatch",
 							"begin": "(\\{)",
 							"end": "(\\})",
 							"beginCaptures": {
@@ -706,7 +706,6 @@
 							]
 						},
 						{
-							"name": "grwhere",
 							"begin": "\\b(match)\\b\\s*(\\()",
 							"end": "(\\))",
 							"beginCaptures": {
