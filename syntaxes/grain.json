@@ -4,9 +4,6 @@
 	"patterns": [
 		{
 			"include": "#top-level-statements"
-		},
-		{
-			"include": "#comments"
 		}
 	],
 	"repository": {
@@ -23,7 +20,7 @@
 						},
 						"3": {
 							"patterns": [
-								{ "include": "#type-annotation" }
+								{ "include": "#type-annotations" }
 							]
 						},
 						"4": {
@@ -44,7 +41,7 @@
 						},
 						"3": {
 							"patterns": [
-								{ "include": "#type-annotation" }
+								{ "include": "#type-annotations" }
 							]
 						},
 						"4": {
@@ -66,7 +63,7 @@
 						},
 						"3": {
 							"patterns": [{
-								"include": "#type-annotation"
+								"include": "#type-annotations"
 							}]
 						},
 						"4": {
@@ -83,7 +80,7 @@
 					"endCaptures": {
 						"1": {
 							"patterns": [{
-								"include": "#type-annotation"
+								"include": "#type-annotations"
 							}]
 						},
 						"2": { "name": "keyword.operator.grain" }
@@ -103,7 +100,7 @@
 						},
 						"3": {
 							"patterns": [{
-								"include": "#type-annotation"
+								"include": "#type-annotations"
 							}]
 						},
 						"4": {
@@ -122,7 +119,7 @@
 						},
 						"3": {
 							"patterns": [
-								{ "include": "#type-annotation" }
+								{ "include": "#type-annotations" }
 							]
 						}
 					}
@@ -149,8 +146,8 @@
 			"patterns": [{
 				"match": "([a-z]\\w*)(,)?",
 				"captures": {
-					"1": { "name": "variable.language.grain" },
-					"2": { "name": "support.type.grain" }
+					"1": { "name": "variable.parameter.grain" },
+					"2": { "name": "punctuation.definition.parameters.begin.grain" }
 				}
 			}]
 		},
@@ -174,17 +171,18 @@
 				{
 					"begin": "(\\()",
 					"end": "(\\))",
-					"captures": {
-						"1": {
-							"name": "support.type.grain"
-						}
+					"beginCaptures": {
+						"1": { "name": "punctuation.definition.parameters.begin.grain" }
+					},
+					"endCaptures": {
+						"1": { "name": "punctuation.definition.parameters.end.grain" }
 					},
 					"patterns": [
 						{
 							"match": "(,)",
 							"captures": {
 								"1": {
-									"name": "support.type.grain"
+									"name": "punctuation.definition.parameters.grain"
 								}
 							}
 						},
@@ -195,20 +193,26 @@
 				{ "include": "#type-constructor" }
 			]
 		},
-		"type-annotation": {
+		"type-annotations": {
 			"patterns": [
+				{
+					"match": "(:)",
+					"captures": {
+						"1": { "name": "keyword.operator.grain" }
+					}
+				},
 				{
 					"match": "(.*)(->)(.*)",
 					"captures": {
 						"1": { 
 							"patterns": [
-								{ "include": "#type-annotation" }
+								{ "include": "#type-annotations" }
 							]
 						},
-						"2": { "name": "support.type.grain" },
+						"2": { "name": "keyword.operator.grain" },
 						"3": { 
 							"patterns": [
-								{ "include": "#type-annotation" }
+								{ "include": "#type-annotations" }
 							]
 						}
 					}
@@ -352,7 +356,7 @@
 				{ "include": "#pattern" },
 				{ "include": "#block" },
 				{ "include": "#function-call" },
-				{ "include": "#expression-keywords" },
+				{ "include": "#keywords" },
 				{ "include": "#constant" },
 				{ "include": "#identifier" }
 			]
@@ -373,7 +377,7 @@
 						"1": { "name": "variable.name.grain" },
 						"2": {
 							"patterns": [
-								{ "include": "#type-annotation" }
+								{ "include": "#type-annotations" }
 							]
 						}
 					}
@@ -384,7 +388,7 @@
 						"1": { "name": "variable.name.grain" },
 						"2": {
 							"patterns": [
-								{ "include": "#type-annotation" }
+								{ "include": "#type-annotations" }
 							]
 						}
 					}
@@ -427,11 +431,55 @@
 			]
 		},
 		"imports": {},
-		"keywords": {
-			"patterns": [{
-				"name": "keyword.control.grain",
-				"match": "\\b(let|rec|match|if|else|while|import)\\b"
-			}]
+		"exports": {
+			"patterns": [
+				{
+					"match": "\\b(export)\\b\\s*(\\*)\\s*\\b(except)\\b(.*?)(?=$|;)",
+					"captures": {
+						"1": { "name": "keyword.control.grain" },
+						"2": { "name": "punctuation.support.grain" },
+						"3": { "name": "keyword.control.grain" },
+						"4": { "patterns": [{
+								"include": "#expressions"
+							}]
+						}
+					}
+				},
+				{
+					"match": "\\b(export)\\b\\s*(\\*)",
+					"captures": {
+						"1": { "name": "keyword.control.grain" },
+						"2": { "name": "punctuation.support.grain" }
+					}
+				}
+			]
+		},
+		"foreigns": {
+			"patterns": [
+				{
+					"match": "\\b(foreign)\\b((\\s*\\b\\w+\\b){3})\\s*(:.*?)?(?=$|;)",
+					"captures": {
+						"1": { "name": "keyword.control.grain" },
+						"2": {
+							"patterns": [{
+								"match": "\\b(\\w+)\\b\\s*\\b(\\w+)\\b\\s*\\b(\\w+)\\b",
+								"captures": {
+									"1": { "name": "variable.language.grain" },
+									"2": { "name": "support.constant.grain" }
+								}
+							}]
+						},
+						"4": {
+							"patterns": [{
+								"match": "(:.*)",
+								"captures": {
+									"1": { "patterns": [{ "include": "#type-annotations" }] }
+								}
+							}]
+						}
+					}
+				}
+			]
 		},
 		"strings": {
 			"patterns": [
@@ -459,10 +507,10 @@
 				}
 			]
 		},
-		"expression-keywords": {
+		"keywords": {
 			"patterns": [
 				{
-					"match": "\\b(throw|box|unbox|let|rec|while|import|export)\\b",
+					"match": "\\b(throw|box|unbox|let|rec|while|import|export|foreign)\\b",
 					"name": "keyword.control.grain"
 				}
 			]
@@ -470,9 +518,17 @@
 		"top-level-statements": {
 			"patterns": [
 				{ "include": "#imports" },
+				{ "include": "#exports" },
+				{ "include": "#foreigns" },
 				{ "include": "#data-declarations" },
 				{ "include": "#expressions" },
-				{ "include": "#comments" }
+				{ "include": "#comments" },
+				{
+					"match": "(;)",
+					"captures": {
+						"1": { "name": "punctuation.definition.parameters.grain" }
+					}
+				}
 			]
 		},
 		"program": {
