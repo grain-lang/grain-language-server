@@ -350,7 +350,6 @@
 				{ "include": "#comments" },
 				{ "include": "#bindings" },
 				{ "include": "#function" },
-				{ "include": "#type-variant-constructor" },
 				{ "include": "#tuple" },
 				{ "include": "#match" },
 				{ "include": "#pattern" },
@@ -358,7 +357,9 @@
 				{ "include": "#function-call" },
 				{ "include": "#keywords" },
 				{ "include": "#constant" },
-				{ "include": "#identifier" }
+				{ "include": "#external-identifier" },
+				{ "include": "#identifier" },
+				{ "include": "#type-variant-constructor" }
 			]
 		},
 		"identifier": {
@@ -366,6 +367,21 @@
 				{
 					"match": "\\b[a-z]\\w*\\b",
 					"name": "variable.name.grain"
+				}
+			]
+		},
+		"external-identifier": {
+			"patterns": [
+				{
+					"match": "\\b([A-Z]\\w*)\\b(\\.)",
+					"captures": {
+						"1": {
+							"name": "entity.name.module.grain"
+						},
+						"2": {
+							"name": "keyword.operator.accessor.grain"
+						}
+					}
 				}
 			]
 		},
