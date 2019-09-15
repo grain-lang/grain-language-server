@@ -320,7 +320,7 @@
 					"patterns": [
 						{
 							"match": ",",
-							"name": "meta.function-call.grain"
+							"name": "punctuation.support.grain"
 						},
 						{ "include": "#expressions" }
 					]
@@ -446,7 +446,30 @@
 				}
 			]
 		},
-		"imports": {},
+		"imports": {
+			"patterns": [
+				{
+					"begin": "(?<=import)",
+					"end": "(?=from)",
+					"patterns": [
+						{
+							"match": "(\\*|\\,)",
+							"name": "punctuation.support.grain"
+						},
+						{
+							"begin": "(?=\\{)",
+							"end": "(?<=\\})",
+							"patterns": [ { "include": "#expressions" }
+							]
+						},
+						{
+							"match": "\\b[A-Z]\\w*\\b",
+							"name": "entity.name.module.grain"
+						}
+					]
+				}
+			]
+		},
 		"exports": {
 			"patterns": [
 				{
@@ -526,7 +549,7 @@
 		"keywords": {
 			"patterns": [
 				{
-					"match": "\\b(throw|box|unbox|let|rec|while|import|export|foreign|from|except)\\b",
+					"match": "\\b(throw|box|unbox|let|rec|while|import|export|foreign|from|except|as)\\b",
 					"name": "keyword.control.grain"
 				}
 			]
