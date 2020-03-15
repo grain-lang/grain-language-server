@@ -388,13 +388,12 @@
 			"patterns": [
 				{
 					"begin": "(\\()(?=.*=>)",
-					"end": "(\\))\\s*(=>)",
+					"end": "(\\))\\s*(?==>)",
 					"beginCaptures": {
 						"1": { "name": "punctuation.definition.parameters.begin.grain" }
 					},
 					"endCaptures": {
-						"1": { "name": "punctuation.definition.parameters.end.grain" },
-						"2": { "name": "keyword.operator.grain" }
+						"1": { "name": "punctuation.definition.parameters.end.grain" }
 					},
 					"patterns": [
 						{ "include": "#binding-destructure" }
@@ -424,14 +423,14 @@
 				}
 			]
 		},
-		"block": {
+		"function-body": {
 			"patterns": [
 				{
-					"name": "grblock",
-					"begin": "(\\{)",
+					"begin": "(=>)\\s*(\\{)",
 					"end": "(\\})",
 					"beginCaptures": {
-						"1": { "name": "punctuation.definition.parameters.begin.grain" }
+						"1": { "name": "keyword.operator.grain" },
+						"2": { "name": "punctuation.definition.parameters.begin.grain" }
 					},
 					"endCaptures": {
 						"1": { "name": "punctuation.definition.parameters.end.grain" }
@@ -439,6 +438,13 @@
 					"patterns": [
 						{ "include": "#expressions" }
 					]
+				},
+				{
+					"match": "(=>)(.*)",
+					"captures": {
+						"1": { "name": "keyword.operator.grain" },
+						"2": { "patterns": [{ "include": "#expressions" }] }
+					}
 				}
 			]
 		},
@@ -447,9 +453,9 @@
 				{ "include": "#comments" },
 				{ "include": "#bindings" },
 				{ "include": "#function" },
+				{ "include": "#function-body" },
 				{ "include": "#match" },
 				{ "include": "#pattern" },
-				{ "include": "#block" },
 				{ "include": "#function-call" },
 				{ "include": "#keywords" },
 				{ "include": "#constant" },
@@ -942,7 +948,7 @@
 			"patterns": [
 				{
 					"begin": "(=>)",
-					"end": "(?=\\||\\})",
+					"end": "((?=(?!\\|\\|)\\|)(?<!\\|)|(?=\\}))",
 					"beginCaptures": {
 						"1": { "name": "support.type.grain" }
 					},
