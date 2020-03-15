@@ -570,7 +570,7 @@
 		"boolean": {
 			"patterns": [
 				{
-					"match": "\\b(True|False)\\b",
+					"match": "\\b(true|false)\\b",
 					"name": "constant.language.grain"
 				}
 			]
