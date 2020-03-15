@@ -717,13 +717,13 @@
 					}
 				},
 				{
-					"begin": "([A-Z]\\w*)<",
-					"end": ">",
-					"captures": {
+					"begin": "([A-Z]\\w*)(?=<)",
+					"end": "(?<=>)",
+					"beginCaptures": {
 						"1": { "name": "support.type.grain" }
 					},
 					"patterns": [
-						{ "include": "#type-var" }
+						{ "include": "#type-vector" }
 					]
 				},
 				{
@@ -771,7 +771,7 @@
 								"1": { "name": "support.type.grain" }
 							}
 						},
-						{ "include": "#type-var" }
+						{ "include": "#type" }
 					]
 				},
 				{
