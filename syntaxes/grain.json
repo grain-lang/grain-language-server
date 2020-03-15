@@ -291,7 +291,7 @@
 					}
 				},
 				{
-					"begin": "(data)\\s+([A-Z]\\w*)(?=\\s*(<.*>\\s*)?=\\s*\\b([A-Z]\\w*)\\b\\s*\\(.*\\))",
+					"begin": "\\b(data)\\b\\s+([A-Z]\\w*)(?=\\s*(<.*>\\s*)?=\\s*\\b([A-Z]\\w*)\\b\\s*\\(.*\\))",
 					"end": "(?<=\\))",
 					"beginCaptures": {
 						"1": { "name": "storage.type.grain" },
@@ -300,6 +300,33 @@
 					"patterns": [
 						{ "include": "#type-vector" },
 						{ "include": "#type-variant" }
+					]
+				},
+				{
+					"begin": "\\b(data)\\b\\s+([A-Z]\\w*\\s*(<.*>\\s*)?)(=)\\s*(\\{)",
+					"end": "(\\})",
+					"beginCaptures": {
+						"1": { "name": "storage.type.grain" },
+						"2": { "name": "entity.name.type.grain" },
+						"3": { "patterns": [ { "include": "#type-vector" } ] },
+						"4": { "name": "keyword.operator.grain" },
+						"5": { "name": "punctuation.definition.parameters.begin" }
+					},
+					"endCaptures": {
+						"1": { "name": "punctuation.definition.parameters.end" }
+					},
+					"patterns": [
+						{
+							"match": "\\w+(?=\\s*:)",
+							"name": "entity.other.grain"
+						},
+						{
+							"include": "#type-annotations"
+						},
+						{
+							"match": ",",
+							"name": "punctuation.definition.grain"
+						}
 					]
 				},
 				{
