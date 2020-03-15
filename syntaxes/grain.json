@@ -543,6 +543,24 @@
 				}
 			]
 		},
+		"arrays": {
+			"patterns": [
+				{
+					"begin": "(\\[>)",
+					"end": "(\\])",
+					"captures": {
+						"1": { "name": "punctuation.description.grain" }
+					},
+					"patterns": [
+						{ "include": "#expressions" },
+						{
+							"match": ",",
+							"name": "punctuation.description.parameters.grain"
+						}
+					]
+				}
+			]
+		},
 		"expressions": {
 			"patterns": [
 				{ "include": "#comments" },
@@ -551,6 +569,7 @@
 				{ "include": "#block-body" },
 				{ "include": "#tuple" },
 				{ "include": "#records" },
+				{ "include": "#arrays" },
 				{ "include": "#lists" },
 				{ "include": "#match" },
 				{ "include": "#pattern" },
