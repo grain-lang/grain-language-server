@@ -448,6 +448,56 @@
 				}
 			]
 		},
+		"records": {
+			"patterns": [
+				{
+					"begin": "(\\{)",
+					"end": "(\\})",
+					"captures": {
+						"1": { "name": "punctuation.description.grain" }
+					},
+					"patterns": [
+						{
+							"begin": "\\b(\\w+)\\b\\s*(:)",
+							"end": "(?=(,|\\}))",
+							"beginCaptures": {
+								"1": { "name": "entity.name.grain" },
+								"2": { "name": "punctuation.description.grain" }
+							},
+							"patterns": [
+								{ "include": "#expressions" }
+							]
+						},
+						{
+							"match": "\\b(\\w+)\\b",
+							"name": "entity.name.grain"
+						},
+						{
+							"match": ",",
+							"name": "punctuation.description.parameters.grain"
+						}
+					]
+				}
+			]
+		},
+		"lists": {
+			"patterns": [
+				{
+					"begin": "(\\[)",
+					"end": "(\\])",
+					"captures": {
+						"1": { "name": "punctuation.description.grain" }
+					},
+					"patterns": [
+						{ "include": "#expressions" },
+						{
+							"match": ",",
+							"name": "punctuation.description.parameters.grain"
+						}
+					]
+				}
+			]
+		},
 		"expressions": {
 			"patterns": [
 				{ "include": "#comments" },
@@ -462,6 +512,8 @@
 				{ "include": "#external-identifier" },
 				{ "include": "#identifier" },
 				{ "include": "#tuple" },
+				{ "include": "#records" },
+				{ "include": "#lists" },
 				{ "include": "#type-variant-constructor" },
 				{ "include": "#type-annotations" }
 			]
