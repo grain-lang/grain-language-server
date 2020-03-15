@@ -387,6 +387,32 @@
 				}
 			]
 		},
+		"statement": {
+			"patterns": [
+				{
+					"begin": "\\b(if|while)\\b\\s*(\\()",
+					"end": "(\\))",
+					"beginCaptures": {
+						"1": { "name": "keyword.control.grain" },
+						"2": { "name": "punctuation.description.parameters.start.grain" }
+					},
+					"endCaptures": {
+						"1": { "name": "punctuation.description.parameters.end.grain" }
+					},
+					"patterns": [
+						{
+							"match": ",",
+							"name": "punctuation.support.grain"
+						},
+						{ "include": "#expressions" }
+					]
+				},
+				{
+					"match": "\\b(if|else|while)\\b",
+					"name": "keyword.control.grain"
+				}
+			]
+		},
 		"function-call": {
 			"patterns": [
 				{
@@ -431,6 +457,36 @@
 						"1": { "name": "keyword.operator.grain" },
 						"2": { "patterns": [{ "include": "#expressions" }] }
 					}
+				}
+			]
+		},
+		"block-body": {
+			"patterns": [
+				{
+					"begin": "(?<=\\))\\s*(\\{)",
+					"end": "(\\})",
+					"beginCaptures": {
+						"1": { "name": "punctuation.definition.parameters.begin.grain" }
+					},
+					"endCaptures": {
+						"1": { "name": "punctuation.definition.parameters.end.grain" }
+					},
+					"patterns": [
+						{ "include": "#expressions" }
+					]
+				},
+				{
+					"begin": "(?<=else)\\s*(\\{)",
+					"end": "(\\})",
+					"beginCaptures": {
+						"1": { "name": "punctuation.definition.parameters.begin.grain" }
+					},
+					"endCaptures": {
+						"1": { "name": "punctuation.definition.parameters.end.grain" }
+					},
+					"patterns": [
+						{ "include": "#expressions" }
+					]
 				}
 			]
 		},
@@ -492,11 +548,13 @@
 				{ "include": "#comments" },
 				{ "include": "#bindings" },
 				{ "include": "#function-body" },
+				{ "include": "#block-body" },
 				{ "include": "#tuple" },
 				{ "include": "#records" },
 				{ "include": "#lists" },
 				{ "include": "#match" },
 				{ "include": "#pattern" },
+				{ "include": "#statement" },
 				{ "include": "#function-call" },
 				{ "include": "#keywords" },
 				{ "include": "#constant" },
@@ -517,7 +575,7 @@
 					"name": "variable.name.grain"
 				},
 				{
-					"match": "((\\+|-|\\*|\\/|%|<=|>=|<|>|==|\\!|&&|\\|\\||\\.\\.\\.|\\.))",
+					"match": "((\\+|-|\\*|\\/|%|<=|>=|<|>|==|:=|\\!|&&|\\|\\||\\.\\.\\.|\\.))",
 					"captures": {
 						"1": {"name": "keyword.operator.grain" }
 					}
