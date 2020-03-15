@@ -326,6 +326,9 @@
 						{
 							"match": ",",
 							"name": "punctuation.definition.grain"
+						},
+						{
+							"include": "#comments"
 						}
 					]
 				},
@@ -442,7 +445,7 @@
 					"patterns": [
 						{
 							"begin": "\\b(\\w+)\\b\\s*(:)",
-							"end": "(?=(,|\\}))",
+							"end": "(?=(,|\\}|#))",
 							"beginCaptures": {
 								"1": { "name": "entity.name.grain" },
 								"2": { "name": "punctuation.description.grain" }
@@ -458,6 +461,9 @@
 						{
 							"match": ",",
 							"name": "punctuation.description.parameters.grain"
+						},
+						{
+							"include": "#comments"
 						}
 					]
 				}
