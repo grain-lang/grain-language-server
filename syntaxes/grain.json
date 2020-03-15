@@ -384,23 +384,6 @@
 				}
 			]
 		},
-		"function": {
-			"patterns": [
-				{
-					"begin": "(\\()(?=.*=>)",
-					"end": "(\\))\\s*(?==>)",
-					"beginCaptures": {
-						"1": { "name": "punctuation.definition.parameters.begin.grain" }
-					},
-					"endCaptures": {
-						"1": { "name": "punctuation.definition.parameters.end.grain" }
-					},
-					"patterns": [
-						{ "include": "#binding-destructure" }
-					]
-				}
-			]
-		},
 		"function-call": {
 			"patterns": [
 				{
@@ -408,10 +391,10 @@
 					"end": "(\\))",
 					"beginCaptures": {
 						"1": { "name": "entity.name.function.grain" },
-						"2": { "name": "meta.function-call.grain" }
+						"2": { "name": "punctuation.description.parameters.start.grain" }
 					},
 					"endCaptures": {
-						"1": { "name": "meta.function-call.grain" }
+						"1": { "name": "punctuation.description.parameters.end.grain" }
 					},
 					"patterns": [
 						{
@@ -502,8 +485,10 @@
 			"patterns": [
 				{ "include": "#comments" },
 				{ "include": "#bindings" },
-				{ "include": "#function" },
 				{ "include": "#function-body" },
+				{ "include": "#tuple" },
+				{ "include": "#records" },
+				{ "include": "#lists" },
 				{ "include": "#match" },
 				{ "include": "#pattern" },
 				{ "include": "#function-call" },
@@ -511,15 +496,16 @@
 				{ "include": "#constant" },
 				{ "include": "#external-identifier" },
 				{ "include": "#identifier" },
-				{ "include": "#tuple" },
-				{ "include": "#records" },
-				{ "include": "#lists" },
 				{ "include": "#type-variant-constructor" },
 				{ "include": "#type-annotations" }
 			]
 		},
 		"identifier": {
 			"patterns": [
+				{
+					"match": "\\b(box|unbox)\\b",
+					"name": "buil"
+				},
 				{
 					"match": "\\b[a-z]\\w*\\b",
 					"name": "variable.name.grain"
@@ -600,10 +586,21 @@
 		"tuple": {
 			"patterns": [
 				{
-					"begin": "\\(",
-					"end": "\\)(?!\\s*=>)",
+					"begin": "(\\()",
+					"end": "(\\))",
+					"beginCaptures": {
+						"1": { "name": "punctuation.definition.parameters.begin.grain" }
+					},
+					"endCaptures": {
+						"1": { "name": "punctuation.definition.parameters.end.grain" }
+					},
 					"patterns": [
-						{ "include": "#expressions" }
+						{
+							"match": ",",
+							"name": "punctuation.definition.parameters.grain"
+						},
+						{ "include": "#expressions" },
+						{ "include": "#binding-destructure" }
 					]
 				}
 			]
