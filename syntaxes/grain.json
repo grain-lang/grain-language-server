@@ -1079,6 +1079,20 @@
 		"pattern-variant": {
 			"patterns": [
 				{
+					"begin": "(=>)\\s*(\\{)",
+					"end": "(\\})",
+					"beginCaptures": {
+						"1": { "name": "support.type.grain" },
+						"2": { "name": "punctuation.definition.parameters.start.grain" }
+					},
+					"endCaptures": {
+						"1": { "name": "punctuation.definition.parameters.end.grain" }
+					},
+					"patterns": [
+						{ "include": "#expressions" }
+					]
+				},
+				{
 					"begin": "(=>)",
 					"end": "((?=(?!\\|\\|)\\|)(?<!\\|)|(?=\\}))",
 					"beginCaptures": {
@@ -1088,16 +1102,8 @@
 						{ "include": "#expressions" }
 					]
 				},
-				{
-					"begin": "",
-					"end": "(?==>|\\|\\})",
-					"patterns": [
-						{ "include": "#comments" },
-						{
-							"include": "#type-destructor"
-						}
-					]
-				}
+				{ "include": "#comments" },
+				{ "include": "#type-destructor" }
 			]
 		},
 		"match": {
