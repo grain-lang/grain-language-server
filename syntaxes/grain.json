@@ -90,7 +90,7 @@
 					]
 				},
 				{
-					"match": "\\b(let\\b\\s*rec|let)\\s*([a-z]\\w*)\\s*(:.*)?(=)",
+					"match": "\\b(let\\b\\s*rec|let)\\b\\s*([a-z]\\w*)\\s*(:.*)?(=)",
 					"captures": {
 						"1": {
 							"name": "storage.type.grain"
@@ -109,7 +109,7 @@
 					}
 				},
 				{
-					"match": "\\b(let\\b\\s*rec|let)\\s*([a-z]\\w*)\\b\\s*(:.*)?",
+					"match": "\\b(let\\b\\s*rec|let)\\b\\s*([a-z]\\w*)\\b\\s*(:.*)?",
 					"captures": {
 						"1": {
 							"name": "storage.type.grain"
@@ -813,7 +813,7 @@
 		"keywords": {
 			"patterns": [
 				{
-					"match": "\\b(throw|let|rec|data|while|import|export|foreign|primitive|from|except|as)\\b",
+					"match": "\\b(throw|let|rec|data|while|match|import|export|foreign|primitive|from|except|as)\\b",
 					"name": "keyword.control.grain"
 				}
 			]
@@ -1138,6 +1138,12 @@
 							]
 						}
 					]
+				},
+				{
+					"match": "\\b(match)\\b\\s*(?=\\()",
+					"captures": {
+						"1": { "name": "keyword.operator.grain" }
+					}
 				}
 			]
 		},
