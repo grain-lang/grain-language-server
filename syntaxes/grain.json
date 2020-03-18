@@ -813,7 +813,7 @@
 		"keywords": {
 			"patterns": [
 				{
-					"match": "\\b(throw|let|rec|data|while|match|import|export|foreign|primitive|from|except|as)\\b",
+					"match": "\\b(throw|let|rec|data|while|match|assert|fail|import|export|foreign|primitive|from|except|as)\\b",
 					"name": "keyword.control.grain"
 				}
 			]
