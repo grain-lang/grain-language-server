@@ -29,30 +29,6 @@
 					}
 				},
 				{
-					"comment": "Support for highlighting while typing a function definition.",
-					"begin": "\\b(let\\b\\s*rec|let)\\b\\s*([a-z]\\w*)\\s*(:.*)?(=)\\s*\\(",
-					"end": "\\)",
-					"beginCaptures": {
-						"1": {
-							"name": "storage.type.grain"
-						},
-						"2": {
-							"name": "entity.name.function.grain"
-						},
-						"3": {
-							"patterns": [
-								{ "include": "#type-annotations" }
-							]
-						},
-						"4": {
-							"name": "keyword.operator.grain"
-						}
-					},
-					"patterns": [
-						{ "include": "#binding-destructure" }
-					]
-				},
-				{
 					"match": "\\b(let\\b\\s*rec|let)\\b\\s*([a-z]\\w*)\\s*(:.*)?(=)(?=\\s*pattern\\b)",
 					"captures": {
 						"1": {
@@ -310,10 +286,10 @@
 						"2": { "name": "entity.name.type.grain" },
 						"3": { "patterns": [ { "include": "#type-vector" } ] },
 						"4": { "name": "keyword.operator.grain" },
-						"5": { "name": "punctuation.definition.parameters.begin" }
+						"5": { "name": "punctuation.definition.parameters.begin.grain" }
 					},
 					"endCaptures": {
-						"1": { "name": "punctuation.definition.parameters.end" }
+						"1": { "name": "punctuation.definition.parameters.end.grain" }
 					},
 					"patterns": [
 						{
@@ -592,10 +568,6 @@
 		},
 		"identifier": {
 			"patterns": [
-				{
-					"match": "\\b(box|unbox)\\b",
-					"name": "buil"
-				},
 				{
 					"match": "\\b[a-z]\\w*\\b",
 					"name": "variable.name.grain"
