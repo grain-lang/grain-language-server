@@ -10,7 +10,7 @@
 		"bindings": {
 			"patterns": [
 				{
-					"match": "\\b(let\\b\\s*rec|let)\\b\\s*([a-z]\\w*)\\s*(:.*)?(=)(?=.*=>)",
+					"match": "\\b(let\\b\\s*rec|let)\\b\\s*([a-z]\\w*)\\s*(:.*?)?(=)(?=.*=>)",
 					"captures": {
 						"1": {
 							"name": "storage.type.grain"
@@ -29,7 +29,7 @@
 					}
 				},
 				{
-					"match": "\\b(let\\b\\s*rec|let)\\b\\s*([a-z]\\w*)\\s*(:.*)?(=)(?=\\s*pattern\\b)",
+					"match": "\\b(let\\b\\s*rec|let)\\b\\s*([a-z]\\w*)\\s*(:.*?)?(=)(?=\\s*pattern\\b)",
 					"captures": {
 						"1": {
 							"name": "storage.type.grain"
@@ -48,25 +48,27 @@
 					}
 				},
 				{
-					"begin": "\\b(let\\b\\s*rec|let)\\b\\s*\\(",
-					"end": "\\)\\s*(:.*)?(=)",
+					"begin": "\\b(let\\b\\s*rec|let)\\b\\s*(\\()",
+					"end": "(\\))\\s*(:.*?)?(=)",
 					"beginCaptures": {
-						"1": { "name": "storage.type.grain" }
+						"1": { "name": "storage.type.grain" },
+						"2": { "name": "punctuation.definition.parameters.start.grain" }
 					},
 					"endCaptures": {
-						"1": {
+						"1": { "name": "punctuation.definition.parameters.end.grain" },
+						"2": {
 							"patterns": [{
 								"include": "#type-annotations"
 							}]
 						},
-						"2": { "name": "keyword.operator.grain" }
+						"3": { "name": "keyword.operator.grain" }
 					},
 					"patterns": [
 						{ "include": "#binding-destructure" }
 					]
 				},
 				{
-					"match": "\\b(let\\b\\s*rec|let)\\b\\s*([a-z]\\w*)\\s*(:.*)?(=)",
+					"match": "\\b(let\\b\\s*rec|let)\\b\\s*([a-z]\\w*)\\s*(:.*?)?(=)",
 					"captures": {
 						"1": {
 							"name": "storage.type.grain"
@@ -573,7 +575,7 @@
 					"name": "variable.name.grain"
 				},
 				{
-					"match": "((\\+|-|\\*|\\/|%|<=|>=|<|>|==|:=|\\!|&&|\\|\\||\\.\\.\\.|\\.))",
+					"match": "(((\\+|-|\\*|\\/)=|\\+|-|\\*|\\/|%|<=|>=|<|>|==|:=|\\!|&&|\\|\\||\\^|\\.\\.\\.|\\.))",
 					"captures": {
 						"1": {"name": "keyword.operator.grain" }
 					}
