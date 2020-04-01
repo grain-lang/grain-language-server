@@ -405,10 +405,19 @@
 					},
 					"patterns": [
 						{
+							"begin": "(?<=\\()",
+							"end": "(?=\\)|,)",
+							"patterns": [{ "include": "#expressions" }]
+						},
+						{
+							"begin": "(?<=,)",
+							"end": "(?=\\)|,)",
+							"patterns": [{ "include": "#expressions" }]
+						},
+						{
 							"match": ",",
 							"name": "punctuation.support.grain"
-						},
-						{ "include": "#expressions" }
+						}
 					]
 				}
 			]
@@ -430,14 +439,15 @@
 					]
 				},
 				{
-					"match": "(=>)\\s*(\\(.*\\))\\s*(?=$|,|\\))",
+					"begin": "(=>)\\s*(?=\\()",
+					"end": "(?<=\\))",
 					"captures": {
-						"1": { "name": "keyword.operator.grain" },
-						"2": { "patterns": [{ "include": "#expressions" }] }
-					}
+						"1": { "name": "keyword.operator.grain" }
+					},
+					"patterns": [{ "include": "#expressions" }]
 				},
 				{
-					"match": "(=>)(.*?)(?=$|,|\\))",
+					"match": "(=>)(.*?)",
 					"captures": {
 						"1": { "name": "keyword.operator.grain" },
 						"2": { "patterns": [{ "include": "#expressions" }] }
@@ -719,26 +729,29 @@
 		"foreigns": {
 			"patterns": [
 				{
-					"match": "\\b(foreign)\\b((\\s*\\b\\w+\\b){3})\\s*(:.*?)?(?=$|;)",
+					"match": "\\b(import|export)\\s*\\b(foreign)\\b((\\s*\\b\\w+\\b){2})\\s*(:.*?)?\\s+(from)\\b\\s+(.*)(?=$|;)",
 					"captures": {
 						"1": { "name": "keyword.control.grain" },
-						"2": {
+						"2": { "name": "keyword.control.grain" },
+						"3": {
 							"patterns": [{
-								"match": "\\b(\\w+)\\b\\s*\\b(\\w+)\\b\\s*\\b(\\w+)\\b",
+								"match": "\\b(\\w+)\\b\\s*\\b(\\w+)\\b\\s*\\b",
 								"captures": {
 									"1": { "name": "variable.language.grain" },
-									"2": { "name": "support.constant.grain" }
+									"2": { "name": "variable.name.grain" }
 								}
 							}]
 						},
-						"4": {
+						"5": {
 							"patterns": [{
 								"match": "(:.*)",
 								"captures": {
 									"1": { "patterns": [{ "include": "#type-annotations" }] }
 								}
 							}]
-						}
+						},
+						"6": { "name": "keyword.control.grain" },
+						"7": { "patterns": [{ "include": "#strings" }] }
 					}
 				}
 			]
@@ -801,9 +814,9 @@
 		},
 		"top-level-statements": {
 			"patterns": [
+				{ "include": "#foreigns" },
 				{ "include": "#imports" },
 				{ "include": "#exports" },
-				{ "include": "#foreigns" },
 				{ "include": "#primitives" },
 				{ "include": "#data-declarations" },
 				{ "include": "#expressions" },
