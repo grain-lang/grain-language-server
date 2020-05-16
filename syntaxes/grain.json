@@ -261,11 +261,12 @@
 		"data-declarations": {
 			"patterns": [
 				{
-					"match": "\\b(data)\\b\\s+\\b([A-Z]\\w*)\\b\\s*=\\s*\\b([A-Z]\\w*)\\b",
+					"match": "\\b(data)\\b\\s+\\b([A-Z]\\w*)\\b\\s*(<.*>\\s*)?=\\s*(\\b[A-Z]\\w*\\b(\\s*\\(.*\\))?)",
 					"captures": {
 						"1": { "name": "storage.type.grain" },
 						"2": { "name": "entity.name.type.grain" },
-						"3": { "name": "support.type.grain" }
+						"3": { "patterns": [{ "include": "#type-vector" }] },
+						"4": { "patterns": [{ "include": "#type-variant" }] }
 					}
 				},
 				{
