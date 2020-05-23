@@ -324,6 +324,15 @@
 					}
 				},
 				{
+					"comment": "Special highlighting for the constant data types in Pervasives.",
+					"match": "(data) (Bool|Void) = ((\\w+\\s*\\|?\\s*)+)",
+					"captures": {
+						"1": { "name": "storage.type.grain" },
+						"2": { "name": "entity.name.type.grain" },
+						"3": { "patterns": [{ "include": "#constant" }] }
+					}
+				},
+				{
 					"begin": "(data)\\s+([A-Z]\\w*)\\s*=",
 					"end": "([A-Z]\\w*(\\(.*\\))?)",
 					"beginCaptures": {
@@ -716,9 +725,13 @@
 							"name": "punctuation.support.grain"
 						},
 						{
-							"begin": "(?=\\{)",
-							"end": "(?<=\\})",
-							"patterns": [ { "include": "#expressions" }
+							"begin": "(\\{)",
+							"end": "(\\})",
+							"beginCaptures": { "1": { "name": "punctuation.definition.start.grain" }},
+							"endCaptures": { "1": { "name": "punctuation.definition.end.grain" }},
+							"patterns": [ 
+								{ "match": ",", "name": "punctuation.definition.grain" },
+								{ "include": "#expressions" } 
 							]
 						},
 						{
@@ -976,6 +989,9 @@
 					"captures": {
 						"1": { "name": "support.type.grain" }
 					}
+				},
+				{
+					"include": "#constant"
 				}
 			]
 		},
