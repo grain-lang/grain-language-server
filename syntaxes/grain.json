@@ -177,11 +177,14 @@
 					]
 				},
 				{
-					"name": "bro",
 					"match": "(<)",
 					"captures": {
 						"1": { "name": "punctuation.definition.parameters.begin.grain" }
 					}
+				},
+				{
+					"match": "->",
+					"name": "keyword.operator.grain"
 				},
 				{ "include": "#type-args" },
 				{ "include": "#type-constructor" }
