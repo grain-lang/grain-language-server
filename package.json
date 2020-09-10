@@ -1,11 +1,21 @@
 {
     "name": "vscode-grain",
     "displayName": "Grain",
-    "description": "Support for the Grain language.",
+    "description": "Grain support for Visual Studio Code",
     "version": "0.0.1",
-    "publisher": "ospencer",
+    "publisher": "grain-lang",
+    "keywords": ["grain", "grain-lang"],
+    "icon": "grain_shorthand_white.png",
     "engines": {
         "vscode": "^1.19.0"
+    },
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/grain-lang/vscode-grain"
+    },
+    "bugs": {
+        "url": "https://github.com/grain-lang/vscode-grain/issues"
     },
     "categories": [
         "Programming Languages"
@@ -14,7 +24,7 @@
         "languages": [{
             "id": "grain",
             "aliases": ["Grain", "grain"],
-            "extensions": [".gr",".grx"],
+            "extensions": [".gr"],
             "configuration": "./language-configuration.json"
         }],
         "grammars": [{
