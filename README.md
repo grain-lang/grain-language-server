@@ -1,6 +1,6 @@
 # Grain support for Visual Studio Code
 
-This extension provides language support for [Grain](grain-lang.org) to Visual Studio Code.
+This extension adds language support for [Grain](grain-lang.org) to Visual Studio Code.
 
 ## Contributing
 

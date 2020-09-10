@@ -1,7 +1,7 @@
 {
     "name": "vscode-grain",
     "displayName": "Grain",
-    "description": "Grain support for Visual Studio Code",
+    "description": "Grain support for Visual Studio Code.",
     "version": "0.1.0",
     "publisher": "grain-lang",
     "keywords": [
