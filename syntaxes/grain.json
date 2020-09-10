@@ -882,7 +882,11 @@
 					},
 					"patterns": [
 						{ "include": "#type-var" },
-						{ "include": "#type-constructor" }
+						{ "include": "#type-constructor" },
+						{
+							"match": ",",
+							"name": "punctuation.definition.parameters.grain"
+						}
 					]
 				}
 			]
