@@ -665,6 +665,18 @@
 		"number": {
 			"patterns": [
 				{
+					"match": "\\b(\\d[\\d_]*)\\.([\\d_]*)?[fd]?\\b",
+					"name": "constant.numeric.grain"
+				},
+				{
+					"match": "\\b\\.(\\d[\\d_]*)?[fd]?\\b",
+					"name": "constant.numeric.grain"
+				},
+				{
+					"match": "\\b(\\d[\\d_]*)\\s*/\\s*(\\d[\\d_]*)\\b",
+					"name": "constant.numeric.grain"
+				},
+				{
 					"match": "\\b(\\d[\\d_]*)([lL]?)\\b",
 					"name": "constant.numeric.grain"
 				},
@@ -1081,7 +1093,8 @@
 				},
 				{ "include": "#type-destructor-tuple" },
 				{ "include": "#type-destructor-record" },
-				{ "include": "#type-destructor-list" }
+				{ "include": "#type-destructor-list" },
+				{ "include": "#constant" }
 			]
 		},
 		"pattern-variant": {
