@@ -2,7 +2,7 @@
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
 ## v0.2.0
-- Adds support for constant pattenrs when pattern matching
+- Adds support for constant patterns when pattern matching
 
 ## v0.1.0
 - Initial release
