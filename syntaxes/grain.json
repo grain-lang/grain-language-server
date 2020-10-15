@@ -117,8 +117,21 @@
 			]
 		},
 		"comments": {
-			"match": "#.*$",
-			"name": "comment.line.grain"
+			"patterns": [
+				{
+					"match": "\\/\\/.*$",
+					"name": "comment.line.grain"
+				},
+				{
+					"match": "#!.*$",
+					"name": "comment.line.grain"
+				},
+				{
+					"begin": "\\/\\*",
+					"end": "\\*\\/",
+					"name": "comment.block.grain"
+				}
+			]
 		},
 		"type-args": {
 			"patterns": [{
