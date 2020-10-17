@@ -7,7 +7,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const vscode_languageserver_1 = require("vscode-languageserver");
 const vscode_languageserver_textdocument_1 = require("vscode-languageserver-textdocument");
 const childProcess = require("child_process");
-const path_1 = require("path");
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
 let connection = vscode_languageserver_1.createConnection(vscode_languageserver_1.ProposedFeatures.all);
@@ -95,27 +94,30 @@ documents.onDidChangeContent(change => {
 async function validateWithCompiler(textDocument) {
     let text = textDocument.getText();
     let name = textDocument.uri;
-    let filename = path_1.basename(name);
     let diagnostics = [];
-    let cliPath = globalSettings.cliPath;
-    try {
-        let result_json_buffer = childProcess.execFileSync(cliPath, ["lsp", filename], { input: text });
-        let error = JSON.parse(result_json_buffer.toString());
-        let spos = vscode_languageserver_1.Position.create(error.line - 1, error.startchar);
-        let epos = vscode_languageserver_1.Position.create(error.endline - 1, error.endchar);
-        let diagnostic = {
-            severity: vscode_languageserver_1.DiagnosticSeverity.Error,
-            range: {
-                start: spos,
-                end: epos,
-            },
-            message: "Error: " + error.lsp_message,
-            source: 'grainc'
-        };
-        diagnostics.push(diagnostic);
-    }
-    catch (e) {
-        connection.console.log(e);
+    if (name.startsWith("file://")) {
+        let filename = name.substring(7);
+        let cliPath = globalSettings.cliPath;
+        //connection.console.log("Validating " + name);
+        try {
+            let result_json_buffer = childProcess.execFileSync(cliPath, ["lsp", filename], { input: text });
+            let error = JSON.parse(result_json_buffer.toString());
+            let spos = vscode_languageserver_1.Position.create(error.line - 1, error.startchar);
+            let epos = vscode_languageserver_1.Position.create(error.endline - 1, error.endchar);
+            let diagnostic = {
+                severity: vscode_languageserver_1.DiagnosticSeverity.Error,
+                range: {
+                    start: spos,
+                    end: epos,
+                },
+                message: "Error: " + error.lsp_message,
+                source: 'grainc'
+            };
+            diagnostics.push(diagnostic);
+        }
+        catch (e) {
+            connection.console.log(e);
+        }
     }
     // Send the computed diagnostics to VSCode.
     connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });

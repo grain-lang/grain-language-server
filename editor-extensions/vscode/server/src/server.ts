@@ -147,47 +147,53 @@ async function validateWithCompiler(textDocument: TextDocument): Promise<void> {
 
 	let text = textDocument.getText();
 	let name = textDocument.uri;
-	let filename = basename(name);
 	let diagnostics: Diagnostic[] = [];
 
-	let cliPath = globalSettings.cliPath;
+	if (name.startsWith("file://")) {
 
-	try {
+		let filename = name.substring(7);
 
-		let result_json_buffer = childProcess.execFileSync(cliPath, ["lsp", filename], { input: text });
+		let cliPath = globalSettings.cliPath;
 
-		interface LSP_Error {
-			file: string;
-			line: number;
-			startchar: number,
-			endline: number,
-			endchar: number,
-			lsp_message: string
+		//connection.console.log("Validating " + name);
+
+		try {
+
+			let result_json_buffer = childProcess.execFileSync(cliPath, ["lsp", filename], { input: text });
+
+			interface LSP_Error {
+				file: string;
+				line: number;
+				startchar: number,
+				endline: number,
+				endchar: number,
+				lsp_message: string
+			}
+
+			let error: LSP_Error = JSON.parse(result_json_buffer.toString());
+
+			let spos = Position.create(error.line - 1, error.startchar);
+			let epos = Position.create(error.endline - 1, error.endchar);
+
+
+			let diagnostic: Diagnostic = {
+				severity: DiagnosticSeverity.Error,
+				range: {
+					start: spos,
+					end: epos,
+				},
+				message: "Error: " + error.lsp_message,
+				source: 'grainc'
+			};
+
+			diagnostics.push(diagnostic);
+
 		}
 
-		let error: LSP_Error = JSON.parse(result_json_buffer.toString());
 
-		let spos = Position.create(error.line - 1, error.startchar);
-		let epos = Position.create(error.endline - 1, error.endchar);
-
-
-		let diagnostic: Diagnostic = {
-			severity: DiagnosticSeverity.Error,
-			range: {
-				start: spos,
-				end: epos,
-			},
-			message: "Error: " + error.lsp_message,
-			source: 'grainc'
-		};
-
-		diagnostics.push(diagnostic);
-
-	}
-
-
-	catch (e) {
-		connection.console.log(e)
+		catch (e) {
+			connection.console.log(e)
+		}
 	}
 
 	// Send the computed diagnostics to VSCode.
