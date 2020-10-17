@@ -26,7 +26,8 @@
 	"activationEvents": [
 		"onLanguage:grain"
 	],
-	"main": "./client/out/extension",
+	"oldmain": "./client/out/extension",
+	"main": "./dist/extension",
 	"contributes": {
 		"languages": [
 			{
@@ -52,7 +53,7 @@
 			"type": "object",
 			"title": "Grain Language Server configuration",
 			"properties": {
-				"grain_language_server.enabled": {
+				"grain_language_server.enableLSP": {
 					"scope": "window",
 					"type": "boolean",
 					"default": true,
@@ -85,19 +86,25 @@
 		}
 	},
 	"scripts": {
-		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -b",
 		"watch": "tsc -b -w",
 		"postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
-		"test": "sh ./scripts/e2e.sh"
+		"test": "sh ./scripts/e2e.sh",
+		"vscode:prepublish": "webpack --mode production",
+		"webpack": "webpack --mode development",
+		"webpack-dev": "webpack --mode development --watch",
+		"test-compile": "tsc -p ./"
 	},
 	"devDependencies": {
 		"@types/mocha": "^8.0.3",
-		"mocha": "^8.1.1",
 		"@types/node": "^12.12.0",
-		"eslint": "^6.4.0",
 		"@typescript-eslint/parser": "^2.3.0",
-		"typescript": "^4.0.2"
+		"eslint": "^6.4.0",
+		"mocha": "^8.1.1",
+		"ts-loader": "^8.0.5",
+		"typescript": "^4.0.2",
+		"webpack": "^5.1.3",
+		"webpack-cli": "^4.0.0"
 	},
 	"__metadata": {
 		"id": "b95eb54f-dbaf-4bb5-a18c-8b56da8a0829",

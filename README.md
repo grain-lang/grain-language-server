@@ -1,6 +1,10 @@
-# Grain support for Visual Studio Code
+# Language Server and editor extension support for Grain 
 
 This extension adds language support for [Grain](grain-lang.org) to Visual Studio Code.
+
+Currently the LSP server is embedded in the vscode extension and is
+written in Typescript.  The next version will be written in ReasonML and will be a separate language server, with just the client in the 
+vscode extension.
 
 ## Contributing
 

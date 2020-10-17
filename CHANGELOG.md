@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
+## v0.5.0
+- Adds support for the LSP server which provides type checking
+
 ## v0.4.0
 - Adds support for the new comment syntax
 

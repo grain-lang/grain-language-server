@@ -24,7 +24,15 @@ import {
 } from 'vscode-languageserver-textdocument';
 
 import * as childProcess from 'child_process';
-import { basename } from 'path';
+
+interface LSP_Error {
+	file: string;
+	line: number;
+	startchar: number,
+	endline: number,
+	endchar: number,
+	lsp_message: string
+}
 
 
 // Create a connection for the server, using Node's IPC as a transport.
@@ -90,13 +98,13 @@ connection.onInitialized(() => {
 interface GrainSettings {
 	maxNumberOfProblems: number;
 	cliPath: string;
-	enabled: boolean;
+	enableLSP: boolean;
 }
 
 // The global settings, used when the `workspace/configuration` request is not supported by the client.
 // Please note that this is not the case when using this server with the client provided in this example
 // but could happen with other clients.
-const defaultSettings: GrainSettings = { maxNumberOfProblems: 1000, cliPath: "grain", enabled: true };
+const defaultSettings: GrainSettings = { maxNumberOfProblems: 1000, cliPath: "grain", enableLSP: true };
 let globalSettings: GrainSettings = defaultSettings;
 
 // Cache the settings of all open documents
@@ -114,6 +122,7 @@ connection.onDidChangeConfiguration(change => {
 
 	// Revalidate all open text documents
 	documents.all().forEach(validateWithCompiler);
+
 });
 
 function getDocumentSettings(resource: string): Thenable<GrainSettings> {
@@ -125,7 +134,7 @@ function getDocumentSettings(resource: string): Thenable<GrainSettings> {
 		result = connection.workspace.getConfiguration({
 			scopeUri: resource,
 			section: 'grain_language_server'
-		});
+		})
 		documentSettings.set(resource, result);
 	}
 	return result;
@@ -139,67 +148,66 @@ documents.onDidClose(e => {
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(change => {
-	if (globalSettings.enabled)
-		validateWithCompiler(change.document);
+	validateWithCompiler(change.document);
 });
+
+async function clearDiagnostics(textDocument: TextDocument): Promise<void> {
+	let diagnostics: Diagnostic[] = [];
+	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
+}
 
 
 // simple approach, pass the whole text buffer as stdin to the compiler
 async function validateWithCompiler(textDocument: TextDocument): Promise<void> {
 
-	let text = textDocument.getText();
-	let name = textDocument.uri;
+	let settings = await getDocumentSettings(textDocument.uri);
 	let diagnostics: Diagnostic[] = [];
 
-	if (name.startsWith("file://")) {
+	if (settings.enableLSP) {
 
-		let filename = name.substring(7);
+		let documentUri = textDocument.uri;
 
-		let cliPath = globalSettings.cliPath;
+		let fileProtocol = "file://"
 
+		if (documentUri.startsWith(fileProtocol)) {
 
-		try {
+			let filename = documentUri.substring(fileProtocol.length);
+			let cliPath = settings.cliPath;
 
-			let result_json_buffer = childProcess.execFileSync(cliPath, ["lsp", filename], { input: text });
+			try {
 
-			interface LSP_Error {
-				file: string;
-				line: number;
-				startchar: number,
-				endline: number,
-				endchar: number,
-				lsp_message: string
+				let text = textDocument.getText();
+
+				let result_json_buffer = childProcess.execFileSync(cliPath, ["lsp", filename], { input: text });
+
+				let json_string = result_json_buffer.toString();
+
+				if (json_string.length > 0) {
+
+					let error: LSP_Error = JSON.parse(json_string);
+					let spos = Position.create(error.line - 1, error.startchar);
+					let epos = Position.create(error.endline - 1, error.endchar);
+
+					let diagnostic: Diagnostic = {
+						severity: DiagnosticSeverity.Error,
+						range: {
+							start: spos,
+							end: epos,
+						},
+						message: "Error: " + error.lsp_message,
+						source: 'grainc'
+					};
+
+					diagnostics.push(diagnostic);
+				}
+
 			}
 
-			let json_string = result_json_buffer.toString();
 
-			if (json_string.length > 0) {
-
-				let error: LSP_Error = JSON.parse(json_string);
-
-				let spos = Position.create(error.line - 1, error.startchar);
-				let epos = Position.create(error.endline - 1, error.endchar);
-
-
-				let diagnostic: Diagnostic = {
-					severity: DiagnosticSeverity.Error,
-					range: {
-						start: spos,
-						end: epos,
-					},
-					message: "Error: " + error.lsp_message,
-					source: 'grainc'
-				};
-
-				diagnostics.push(diagnostic);
+			catch (e) {
+				connection.console.log("Exception:");
+				connection.console.log(e)
 			}
-
-		}
-
-
-		catch (e) {
-			connection.console.log("Exception:");
-			connection.console.log(e)
 		}
 	}
 
@@ -213,6 +221,7 @@ connection.onDidChangeWatchedFiles(_change => {
 });
 
 // This handler provides the initial list of the completion items.
+// Leaving this commented for when work on completion is done
 connection.onCompletion(
 	(_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
 		// The pass parameter contains the position of the text document in
