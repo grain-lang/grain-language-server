@@ -2,5 +2,4 @@ node_modules
 *.vsix
 *.gr
 dist/
-
 server/out
