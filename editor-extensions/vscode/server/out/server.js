@@ -52,7 +52,7 @@ connection.onInitialized(() => {
 // The global settings, used when the `workspace/configuration` request is not supported by the client.
 // Please note that this is not the case when using this server with the client provided in this example
 // but could happen with other clients.
-const defaultSettings = { maxNumberOfProblems: 1000, cliPath: "grain" };
+const defaultSettings = { maxNumberOfProblems: 1000, cliPath: "grain", enabled: true };
 let globalSettings = defaultSettings;
 // Cache the settings of all open documents
 let documentSettings = new Map();
@@ -88,7 +88,8 @@ documents.onDidClose(e => {
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(change => {
-    validateWithCompiler(change.document);
+    if (globalSettings.enabled)
+        validateWithCompiler(change.document);
 });
 // simple approach, pass the whole text buffer as stdin to the compiler
 async function validateWithCompiler(textDocument) {
@@ -98,24 +99,27 @@ async function validateWithCompiler(textDocument) {
     if (name.startsWith("file://")) {
         let filename = name.substring(7);
         let cliPath = globalSettings.cliPath;
-        //connection.console.log("Validating " + name);
         try {
             let result_json_buffer = childProcess.execFileSync(cliPath, ["lsp", filename], { input: text });
-            let error = JSON.parse(result_json_buffer.toString());
-            let spos = vscode_languageserver_1.Position.create(error.line - 1, error.startchar);
-            let epos = vscode_languageserver_1.Position.create(error.endline - 1, error.endchar);
-            let diagnostic = {
-                severity: vscode_languageserver_1.DiagnosticSeverity.Error,
-                range: {
-                    start: spos,
-                    end: epos,
-                },
-                message: "Error: " + error.lsp_message,
-                source: 'grainc'
-            };
-            diagnostics.push(diagnostic);
+            let json_string = result_json_buffer.toString();
+            if (json_string.length > 0) {
+                let error = JSON.parse(json_string);
+                let spos = vscode_languageserver_1.Position.create(error.line - 1, error.startchar);
+                let epos = vscode_languageserver_1.Position.create(error.endline - 1, error.endchar);
+                let diagnostic = {
+                    severity: vscode_languageserver_1.DiagnosticSeverity.Error,
+                    range: {
+                        start: spos,
+                        end: epos,
+                    },
+                    message: "Error: " + error.lsp_message,
+                    source: 'grainc'
+                };
+                diagnostics.push(diagnostic);
+            }
         }
         catch (e) {
+            connection.console.log("Exception:");
             connection.console.log(e);
         }
     }

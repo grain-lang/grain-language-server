@@ -90,12 +90,13 @@ connection.onInitialized(() => {
 interface GrainSettings {
 	maxNumberOfProblems: number;
 	cliPath: string;
+	enabled: boolean;
 }
 
 // The global settings, used when the `workspace/configuration` request is not supported by the client.
 // Please note that this is not the case when using this server with the client provided in this example
 // but could happen with other clients.
-const defaultSettings: GrainSettings = { maxNumberOfProblems: 1000, cliPath: "grain" };
+const defaultSettings: GrainSettings = { maxNumberOfProblems: 1000, cliPath: "grain", enabled: true };
 let globalSettings: GrainSettings = defaultSettings;
 
 // Cache the settings of all open documents
@@ -138,7 +139,8 @@ documents.onDidClose(e => {
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(change => {
-	validateWithCompiler(change.document);
+	if (globalSettings.enabled)
+		validateWithCompiler(change.document);
 });
 
 
@@ -155,7 +157,6 @@ async function validateWithCompiler(textDocument: TextDocument): Promise<void> {
 
 		let cliPath = globalSettings.cliPath;
 
-		//connection.console.log("Validating " + name);
 
 		try {
 
@@ -170,28 +171,34 @@ async function validateWithCompiler(textDocument: TextDocument): Promise<void> {
 				lsp_message: string
 			}
 
-			let error: LSP_Error = JSON.parse(result_json_buffer.toString());
+			let json_string = result_json_buffer.toString();
 
-			let spos = Position.create(error.line - 1, error.startchar);
-			let epos = Position.create(error.endline - 1, error.endchar);
+			if (json_string.length > 0) {
+
+				let error: LSP_Error = JSON.parse(json_string);
+
+				let spos = Position.create(error.line - 1, error.startchar);
+				let epos = Position.create(error.endline - 1, error.endchar);
 
 
-			let diagnostic: Diagnostic = {
-				severity: DiagnosticSeverity.Error,
-				range: {
-					start: spos,
-					end: epos,
-				},
-				message: "Error: " + error.lsp_message,
-				source: 'grainc'
-			};
+				let diagnostic: Diagnostic = {
+					severity: DiagnosticSeverity.Error,
+					range: {
+						start: spos,
+						end: epos,
+					},
+					message: "Error: " + error.lsp_message,
+					source: 'grainc'
+				};
 
-			diagnostics.push(diagnostic);
+				diagnostics.push(diagnostic);
+			}
 
 		}
 
 
 		catch (e) {
+			connection.console.log("Exception:");
 			connection.console.log(e)
 		}
 	}

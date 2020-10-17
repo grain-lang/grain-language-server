@@ -52,6 +52,12 @@
 			"type": "object",
 			"title": "Grain Language Server configuration",
 			"properties": {
+				"grain_language_server.enabled": {
+					"scope": "window",
+					"type": "boolean",
+					"default": true,
+					"description": "Enable the language server"
+				},
 				"grain_language_server.maxNumberOfProblems": {
 					"scope": "resource",
 					"type": "number",
@@ -70,7 +76,7 @@
 					"description": "Traces the communication between VS Code and the language server."
 				},
 				"grain_language_server.cliPath": {
-					"scope": "resource",
+					"scope": "window",
 					"type": "string",
 					"default": "grain",
 					"description": "Path to the grain cli"
