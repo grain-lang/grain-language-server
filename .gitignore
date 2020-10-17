@@ -4,3 +4,4 @@ node_modules
 dist/
 client/out
 server/out
+.DS_Store
