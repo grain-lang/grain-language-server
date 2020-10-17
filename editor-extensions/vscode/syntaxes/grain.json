@@ -257,35 +257,33 @@
 		"data-declarations": {
 			"patterns": [
 				{
-					"match": "\\b(data)\\b\\s+\\b([A-Z]\\w*)\\b\\s*(<.*>\\s*)?=\\s*(\\b[A-Z]\\w*\\b(\\s*\\(.*\\))?)",
-					"captures": {
-						"1": { "name": "storage.type.grain" },
-						"2": { "name": "entity.name.type.grain" },
-						"3": { "patterns": [{ "include": "#type-vector" }] },
-						"4": { "patterns": [{ "include": "#type-variant" }] }
-					}
-				},
-				{
-					"begin": "\\b(data)\\b\\s+([A-Z]\\w*)(?=\\s*(<.*>\\s*)?=\\s*\\b([A-Z]\\w*)\\b\\s*\\(.*\\))",
-					"end": "(?<=\\))",
-					"beginCaptures": {
-						"1": { "name": "storage.type.grain" },
-						"2": { "name": "entity.name.type.grain" }
-					},
-					"patterns": [
-						{ "include": "#type-vector" },
-						{ "include": "#type-variant" }
-					]
-				},
-				{
-					"begin": "\\b(data)\\b\\s+([A-Z]\\w*\\s*(<.*>\\s*)?)(=)\\s*(\\{)",
+					"begin": "\\b(enum)\\b\\s+([A-Z]\\w*\\s*(<.*>\\s*)?)\\s*(\\{)",
 					"end": "(\\})",
 					"beginCaptures": {
 						"1": { "name": "storage.type.grain" },
 						"2": { "name": "entity.name.type.grain" },
 						"3": { "patterns": [ { "include": "#type-vector" } ] },
-						"4": { "name": "keyword.operator.grain" },
-						"5": { "name": "punctuation.definition.parameters.begin.grain" }
+						"4": { "name": "punctuation.definition.parameters.begin.grain" }
+					},
+					"endCaptures": {
+						"1": { "name": "punctuation.definition.parameters.end.grain" }
+					},
+					"patterns": [
+						{ "include": "#type-variant" },
+						{
+							"match": ",",
+							"name": "punctuation.definition.grain"
+						}
+					]
+				},
+				{
+					"begin": "\\b(record)\\b\\s+([A-Z]\\w*\\s*(<.*>\\s*)?)\\s*(\\{)",
+					"end": "(\\})",
+					"beginCaptures": {
+						"1": { "name": "storage.type.grain" },
+						"2": { "name": "entity.name.type.grain" },
+						"3": { "patterns": [ { "include": "#type-vector" } ] },
+						"4": { "name": "punctuation.definition.parameters.begin.grain" }
 					},
 					"endCaptures": {
 						"1": { "name": "punctuation.definition.parameters.end.grain" }
@@ -315,69 +313,11 @@
 					]
 				},
 				{
-					"comment": "Special highlighting for the List data type in Pervasives.",
-					"match": "(data) (List)(<a>) = (\\[\\] \\| \\[(\\.\\.\\.)])(\\(a, List<a>\\))",
+					"match": "(record|enum)\\s+([A-Z]\\w*)(<.*>)?",
 					"captures": {
 						"1": { "name": "storage.type.grain" },
 						"2": { "name": "entity.name.type.grain" },
-						"3": { "patterns": [{ "include": "#type-vector" }] },
-						"4": { "name": "support.type.grain" },
-						"5": { "name": "keyword.operator.grain" },
-						"6": { "patterns": [{ "include": "#type" }] }
-					}
-				},
-				{
-					"comment": "Special highlighting for the constant data types in Pervasives.",
-					"match": "(data) (Bool|Void) = ((\\w+\\s*\\|?\\s*)+)",
-					"captures": {
-						"1": { "name": "storage.type.grain" },
-						"2": { "name": "entity.name.type.grain" },
-						"3": { "patterns": [{ "include": "#constant" }] }
-					}
-				},
-				{
-					"begin": "(data)\\s+([A-Z]\\w*)\\s*=",
-					"end": "([A-Z]\\w*(\\(.*\\))?)",
-					"beginCaptures": {
-						"1": { "name": "storage.type.grain" },
-						"2": { "name": "entity.name.type.grain" }
-					},
-					"endCaptures": {
-						"1": {
-							"patterns": [
-								{ "include": "#type-variant" }
-							]
-						}
-					},
-					"patterns": [
-						{ "include": "#comments" }
-					]
-				},
-				{
-					"begin": "(data)\\s+([A-Z]\\w*)",
-					"end": "=",
-					"beginCaptures": {
-						"1": { "name": "storage.type.grain" },
-						"2": { "name": "entity.name.type.grain" }
-					},
-					"patterns": [
-						{ "include": "#type-vector" }
-					]
-				},
-				{
-					"begin": "(?=\\|\\s*\\b([A-Z]\\w*)\\b\\s*\\()",
-					"end": "(?<=\\))",
-					"patterns": [
-						{ "include": "#comments" },
-						{ "include": "#type-variant" }
-					]
-				},
-				{
-					"match": "\\|\\s*\\b([A-Z]\\w*)\\b",
-					"captures": {
-						"1": {
-							"name": "support.type.grain"
-						}
+						"3": { "patterns": [{ "include": "#type-vector" }] }
 					}
 				}
 			]
@@ -851,7 +791,7 @@
 		"keywords": {
 			"patterns": [
 				{
-					"match": "\\b(throw|let|rec|mut|data|while|match|when|pattern|assert|fail|import|export|foreign|primitive|from|except|as)\\b",
+					"match": "\\b(throw|let|rec|mut|record|enum|while|match|when|pattern|assert|fail|import|export|foreign|primitive|from|except|as)\\b",
 					"name": "keyword.control.grain"
 				}
 			]
@@ -944,6 +884,20 @@
 					"captures": {
 						"1": { "name": "support.type.grain" }
 					}
+				},
+				{
+					"comment": "Special support for the List type in Pervasives.",
+					"match": "((\\[\\])|(\\[\\.\\.\\.])(\\(a, List<a>\\)))",
+					"captures": {
+						"2": { "name": "support.type.grain" },
+						"3": { "name": "support.type.grain" },
+						"4": { "patterns": [{ "include": "#type" }] }
+					}
+				},
+				{
+					"comment": "Special support for the Bool type in Pervasives.",
+					"match": "(true|false)",
+					"patterns": [{ "include": "#constant" }]
 				}
 			]
 		},
@@ -1138,13 +1092,17 @@
 				},
 				{
 					"begin": "(=>)",
-					"end": "((?=(?!\\|\\|)\\|)(?<!\\|)|(?=\\}))",
+					"end": "((?=,)(?<!,)|(?=\\}))",
 					"beginCaptures": {
 						"1": { "name": "support.type.grain" }
 					},
 					"patterns": [
 						{ "include": "#expressions" }
 					]
+				},
+				{ 
+					"match": ",",
+					"name": "punctuation.definition.parameters.grain"
 				},
 				{ "include": "#comments" },
 				{ "include": "#type-destructor" }
