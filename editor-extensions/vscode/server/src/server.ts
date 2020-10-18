@@ -88,8 +88,6 @@ connection.onInitialize((params: InitializeParams) => {
 		};
 	}
 
-
-
 	return result;
 });
 
@@ -104,8 +102,7 @@ connection.onInitialized(() => {
 		});
 	}
 
-	// start the debounce timer
-
+	// start the debounce time
 	if (hasConfigurationCapability) {
 		// get the debounce rate from settings
 		connection.workspace.getConfiguration({
@@ -184,10 +181,10 @@ documents.onDidClose(e => {
 documents.onDidChangeContent(change => {
 
 	// Debounce the actual work as we don't want to run a compile on every keystroke
+	// So here we store the uri of the document that has changed
 
 	changedDocuments.add(change.document.uri);
 
-	//	validateWithCompiler(change.document.uri);
 });
 
 async function clearDiagnostics(textDocument: TextDocument): Promise<void> {
@@ -266,15 +263,10 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
 		}
 	}
 
-
 	// Send the computed diagnostics to VSCode.
 	connection.sendDiagnostics({ uri: textDocumentUri, diagnostics });
 };
 
-connection.onDidChangeWatchedFiles(_change => {
-	// Monitored files have change in VSCode
-	connection.console.log('We received an file change event');
-});
 
 // This handler provides the initial list of the completion items.
 // Leaving this commented for when work on completion is done
@@ -283,35 +275,9 @@ connection.onCompletion(
 		// The pass parameter contains the position of the text document in
 		// which code complete got requested. For the example we ignore this
 		// info and always provide the same completion items.
-		return [
-			// {
-			// 	label: 'TypeScript',
-			// 	kind: CompletionItemKind.Text,
-			// 	data: 1
-			// },
-			// {
-			// 	label: 'JavaScript',
-			// 	kind: CompletionItemKind.Text,
-			// 	data: 2
-			// }
-		];
+		return [];
 	}
 );
-
-// This handler resolves additional information for the item selected in
-// the completion list.
-// connection.onCompletionResolve(
-// 	(item: CompletionItem): CompletionItem => {
-// 		if (item.data === 1) {
-// 			item.detail = 'TypeScript details';
-// 			item.documentation = 'TypeScript documentation';
-// 		} else if (item.data === 2) {
-// 			item.detail = 'JavaScript details';
-// 			item.documentation = 'JavaScript documentation';
-// 		}
-// 		return item;
-// 	}
-// );
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events
