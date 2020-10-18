@@ -1,3 +1,7 @@
 node_modules
-.vsix
+*.vsix
 *.gr
+dist/
+client/out
+server/out
+.DS_Store
