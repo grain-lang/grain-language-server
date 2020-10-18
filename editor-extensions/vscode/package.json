@@ -65,7 +65,7 @@
 					"default": 100,
 					"description": "Controls the maximum number of problems produced by the server."
 				},
-				"grain_language_server.trace.server": {
+				"grain_language_server.trace": {
 					"scope": "window",
 					"type": "string",
 					"enum": [
@@ -81,6 +81,12 @@
 					"type": "string",
 					"default": "grain",
 					"description": "Path to the grain cli"
+				},
+				"grain_language_server.debounce": {
+					"scope": "window",
+					"type": "number",
+					"default": 1000,
+					"description": "Interval in milliseconds to debounce compiler call"
 				}
 			}
 		}

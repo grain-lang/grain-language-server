@@ -24,6 +24,7 @@ import {
 } from 'vscode-languageserver-textdocument';
 
 import * as childProcess from 'child_process';
+import { compileFunction } from 'vm';
 
 interface LSP_Error {
 	file: string;
@@ -42,9 +43,16 @@ let connection = createConnection(ProposedFeatures.all);
 // Create a simple text document manager. 
 let documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 
+let changedDocuments = new Set<string>();
+let debounceTimer: NodeJS.Timer;
+
 let hasConfigurationCapability: boolean = false;
 let hasWorkspaceFolderCapability: boolean = false;
 let hasDiagnosticRelatedInformationCapability: boolean = false;
+
+async function processChangedDocuments(): Promise<void> {
+	changedDocuments.forEach(uri => { validateWithCompiler(uri); changedDocuments.delete(uri) });
+}
 
 connection.onInitialize((params: InitializeParams) => {
 	let capabilities = params.capabilities;
@@ -79,6 +87,9 @@ connection.onInitialize((params: InitializeParams) => {
 			}
 		};
 	}
+
+
+
 	return result;
 });
 
@@ -92,6 +103,18 @@ connection.onInitialized(() => {
 			connection.console.log('Workspace folder change event received.');
 		});
 	}
+
+	// start the debounce timer
+
+	if (hasConfigurationCapability) {
+		// get the debounce rate from settings
+		connection.workspace.getConfiguration({
+			section: 'grain_language_server'
+		}).then(settings =>
+			debounceTimer = global.setInterval(processChangedDocuments, settings.debounce));
+	} else {
+		debounceTimer = global.setInterval(processChangedDocuments, globalSettings.debounce);
+	};
 });
 
 // The grain cli settings
@@ -99,18 +122,24 @@ interface GrainSettings {
 	maxNumberOfProblems: number;
 	cliPath: string;
 	enableLSP: boolean;
+	trace: string;
+	debounce: number;
 }
 
 // The global settings, used when the `workspace/configuration` request is not supported by the client.
 // Please note that this is not the case when using this server with the client provided in this example
 // but could happen with other clients.
-const defaultSettings: GrainSettings = { maxNumberOfProblems: 1000, cliPath: "grain", enableLSP: true };
+const defaultSettings: GrainSettings = {
+	maxNumberOfProblems: 1000, cliPath: "grain",
+	enableLSP: true, trace: "off", debounce: 1000
+};
 let globalSettings: GrainSettings = defaultSettings;
 
 // Cache the settings of all open documents
 let documentSettings: Map<string, Thenable<GrainSettings>> = new Map();
 
 connection.onDidChangeConfiguration(change => {
+	connection.console.log("Configuration changed");
 	if (hasConfigurationCapability) {
 		// Reset all cached document settings
 		documentSettings.clear();
@@ -120,8 +149,11 @@ connection.onDidChangeConfiguration(change => {
 		);
 	}
 
+	// clear down the list as we're going to process them all below.
+	changedDocuments = new Set();
+
 	// Revalidate all open text documents
-	documents.all().forEach(validateWithCompiler);
+	documents.all().forEach(doc => validateWithCompiler(doc.uri));
 
 });
 
@@ -141,14 +173,21 @@ function getDocumentSettings(resource: string): Thenable<GrainSettings> {
 }
 
 // Only keep settings for open documents
+// don't process closed documents
 documents.onDidClose(e => {
 	documentSettings.delete(e.document.uri);
+	if (changedDocuments.has(e.document.uri)) changedDocuments.delete(e.document.uri);
 });
 
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(change => {
-	validateWithCompiler(change.document);
+
+	// Debounce the actual work as we don't want to run a compile on every keystroke
+
+	changedDocuments.add(change.document.uri);
+
+	//	validateWithCompiler(change.document.uri);
 });
 
 async function clearDiagnostics(textDocument: TextDocument): Promise<void> {
@@ -158,61 +197,78 @@ async function clearDiagnostics(textDocument: TextDocument): Promise<void> {
 
 
 // simple approach, pass the whole text buffer as stdin to the compiler
-async function validateWithCompiler(textDocument: TextDocument): Promise<void> {
+async function validateWithCompiler(textDocumentUri: string): Promise<void> {
 
-	let settings = await getDocumentSettings(textDocument.uri);
+	let settings = await getDocumentSettings(textDocumentUri);
 	let diagnostics: Diagnostic[] = [];
 
 	if (settings.enableLSP) {
 
-		let documentUri = textDocument.uri;
+		if (settings.trace == "verbose") {
+			connection.console.log("Validating " + textDocumentUri);
+		}
 
 		let fileProtocol = "file://"
 
-		if (documentUri.startsWith(fileProtocol)) {
+		if (textDocumentUri.startsWith(fileProtocol)) {
 
-			let filename = documentUri.substring(fileProtocol.length);
+			let filename = textDocumentUri.substring(fileProtocol.length);
 			let cliPath = settings.cliPath;
 
 			try {
 
-				let text = textDocument.getText();
+				// get the latest text from the cache
 
-				let result_json_buffer = childProcess.execFileSync(cliPath, ["lsp", filename], { input: text });
+				let textDocument = documents.get(textDocumentUri);
 
-				let json_string = result_json_buffer.toString();
+				if (textDocument != undefined) {
 
-				if (json_string.length > 0) {
+					let text = textDocument.getText();
 
-					let error: LSP_Error = JSON.parse(json_string);
-					let spos = Position.create(error.line - 1, error.startchar);
-					let epos = Position.create(error.endline - 1, error.endchar);
+					let result_json_buffer = childProcess.execFileSync(cliPath, ["lsp", filename], { input: text });
 
-					let diagnostic: Diagnostic = {
-						severity: DiagnosticSeverity.Error,
-						range: {
-							start: spos,
-							end: epos,
-						},
-						message: "Error: " + error.lsp_message,
-						source: 'grainc'
-					};
+					let json_string = result_json_buffer.toString();
 
-					diagnostics.push(diagnostic);
+					if (json_string.length > 0) {
+
+						let error: LSP_Error = JSON.parse(json_string);
+						let spos = Position.create(error.line - 1, error.startchar);
+						let epos = Position.create(error.endline - 1, error.endchar);
+
+						let diagnostic: Diagnostic = {
+							severity: DiagnosticSeverity.Error,
+							range: {
+								start: spos,
+								end: epos,
+							},
+							message: "Error: " + error.lsp_message,
+							source: 'grainc'
+						};
+
+						diagnostics.push(diagnostic);
+					}
+
+
 				}
-
+				else {
+					if (settings.trace == "verbose") {
+						connection.console.log("Warning: Text document queued but not defined")
+					}
+				}
 			}
-
-
 			catch (e) {
-				connection.console.log("Exception:");
-				connection.console.log(e)
+				if (settings.trace == "verbose" || settings.trace == "messages") {
+					connection.console.log("Exception:");
+					connection.console.log(e)
+				}
 			}
+
 		}
 	}
 
+
 	// Send the computed diagnostics to VSCode.
-	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
+	connection.sendDiagnostics({ uri: textDocumentUri, diagnostics });
 };
 
 connection.onDidChangeWatchedFiles(_change => {
@@ -263,3 +319,7 @@ documents.listen(connection);
 
 // Listen on the connection
 connection.listen();
+
+
+
+
