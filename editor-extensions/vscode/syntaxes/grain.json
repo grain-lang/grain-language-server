@@ -895,8 +895,8 @@
 					}
 				},
 				{
-					"comment": "Special support for the Bool type in Pervasives.",
-					"match": "(true|false)",
+					"comment": "Special support for the constant types in Pervasives.",
+					"match": "(true|false|void)",
 					"patterns": [{ "include": "#constant" }]
 				}
 			]
