@@ -6,7 +6,8 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path';
-import { workspace, ExtensionContext } from 'vscode';
+import { workspace, ExtensionContext, languages, Disposable } from 'vscode';
+
 
 import {
 	LanguageClient,
@@ -17,7 +18,13 @@ import {
 
 let client: LanguageClient;
 
+let disposables: Disposable[] = [];
+
+
 export function activate(context: ExtensionContext) {
+
+
+
 	// The server is implemented in node
 	let serverModule = context.asAbsolutePath(
 		path.join('server', 'out', 'server.js')
@@ -60,6 +67,10 @@ export function activate(context: ExtensionContext) {
 }
 
 export function deactivate(): Thenable<void> | undefined {
+	if (disposables) {
+		disposables.forEach(item => item.dispose());
+	}
+	disposables = [];
 	if (!client) {
 		return undefined;
 	}

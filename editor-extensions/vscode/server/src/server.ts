@@ -17,7 +17,9 @@ import {
 	TextDocumentPositionParams,
 	TextDocumentSyncKind,
 	InitializeResult,
-	Position
+	Position,
+	Range,
+	CodeLens
 } from 'vscode-languageserver';
 
 import {
@@ -37,6 +39,15 @@ interface LSP_Error {
 	lsp_message: string
 }
 
+interface LSP_Lens {
+	line: number,
+	signature: string
+}
+
+interface LSP_Result {
+	errors: LSP_Error[],
+	lenses: LSP_Lens[]
+}
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -52,9 +63,16 @@ let hasConfigurationCapability: boolean = false;
 let hasWorkspaceFolderCapability: boolean = false;
 let hasDiagnosticRelatedInformationCapability: boolean = false;
 
+let codeLenses: CodeLens[] = [];
+
+let docLenses: LSP_Lens[] = [];
+
+
 async function processChangedDocuments(): Promise<void> {
 	changedDocuments.forEach(uri => { validateWithCompiler(uri); changedDocuments.delete(uri) });
 }
+
+
 
 connection.onInitialize((params: InitializeParams) => {
 	let capabilities = params.capabilities;
@@ -76,6 +94,9 @@ connection.onInitialize((params: InitializeParams) => {
 	const result: InitializeResult = {
 		capabilities: {
 			textDocumentSync: TextDocumentSyncKind.Incremental,
+			codeLensProvider: {
+				resolveProvider: true
+			}
 			// Tell the client that this server supports code completion.
 			// completionProvider: {
 			// 	resolveProvider: true
@@ -230,21 +251,38 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
 
 					if (json_string.length > 0) {
 
-						let error: LSP_Error = JSON.parse(json_string);
-						let spos = Position.create(error.line - 1, error.startchar);
-						let epos = Position.create(error.endline - 1, error.endchar);
+						let result: LSP_Result = JSON.parse(json_string);
 
-						let diagnostic: Diagnostic = {
-							severity: DiagnosticSeverity.Error,
-							range: {
-								start: spos,
-								end: epos,
-							},
-							message: "Error: " + error.lsp_message,
-							source: 'grainc'
-						};
+						let errors = result.errors;
 
-						diagnostics.push(diagnostic);
+						let lenses = result.lenses;
+
+						if (lenses.length > 0) {
+							connection.console.log("We have lenses");
+							docLenses = lenses;
+						}
+
+						if (errors.length > 0) {
+
+							let error = errors[0];
+
+							let spos = Position.create(error.line - 1, error.startchar);
+							let epos = Position.create(error.endline - 1, error.endchar);
+
+							let diagnostic: Diagnostic = {
+								severity: DiagnosticSeverity.Error,
+								range: {
+									start: spos,
+									end: epos,
+								},
+								message: "Error: " + error.lsp_message,
+								source: 'grainc'
+							};
+
+							diagnostics.push(diagnostic);
+						} else {
+							connection.console.log("No errors");
+						}
 					}
 
 
@@ -280,6 +318,48 @@ connection.onCompletion(
 		return [];
 	}
 );
+
+connection.onCodeLens(_handler => {
+	connection.console.log("onCodeLens called");
+	codeLenses = [];
+
+	if (docLenses.length > 0) {
+
+		docLenses.forEach(lens => {
+
+			const sposition1 = Position.create(lens.line - 1, 1);
+			const eposition1 = Position.create(lens.line - 1, 1);
+			const range1 = Range.create(sposition1, eposition1);
+			codeLenses.push(CodeLens.create(range1));
+
+		})
+
+	}
+	return codeLenses;
+
+}
+);
+
+connection.onCodeLensResolve(codeLens => {
+	connection.console.log("onCodeLensResolve called");
+
+	docLenses.forEach(lens => {
+		if (codeLens.range.start.line == lens.line - 1) {
+			codeLens.command = {
+				title: lens.signature,
+				command: "codelens-sample.codelensAction",
+				arguments: ["Argument 1", false]
+			};
+
+		}
+
+	});
+
+
+
+	return codeLens;
+});
+
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events
