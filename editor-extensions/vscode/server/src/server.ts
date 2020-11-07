@@ -76,7 +76,6 @@ async function processChangedDocuments(): Promise<void> {
 
 connection.onInitialize((params: InitializeParams) => {
 
-	connection.console.log("onInitialize");
 
 	let capabilities = params.capabilities;
 
@@ -125,7 +124,7 @@ connection.onInitialized(() => {
 	}
 	if (hasWorkspaceFolderCapability) {
 		connection.workspace.onDidChangeWorkspaceFolders(_event => {
-			connection.console.log('Workspace folder change event received.');
+			//	connection.console.log('Workspace folder change event received.');
 		});
 	}
 
@@ -260,7 +259,6 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
 						if (settings.enableStatementLenses) {
 
 							if (lenses.length > 0) {
-								connection.console.log("We have lenses");
 								if (documentLenses.has(textDocumentUri)) {
 									documentLenses.delete(textDocumentUri);
 								}
@@ -268,7 +266,6 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
 
 								// work around LSP not having an onDidChangeCodeLenses yet
 								// If we don' call this we are always one step behind
-								connection.console.log("Sending notification");
 								connection.sendNotification("grainlsp/lensesLoaded", []);
 							}
 						} else {
