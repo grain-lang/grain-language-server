@@ -101,7 +101,7 @@ connection.onInitialize((params: InitializeParams) => {
 				resolveProvider: true
 			}
 			// Tell the client that this server supports code completion.
-			// Comiing soon!
+			// Coming soon!
 			// completionProvider: {
 			// 	resolveProvider: true
 			// }
@@ -119,7 +119,6 @@ connection.onInitialize((params: InitializeParams) => {
 });
 
 connection.onInitialized(() => {
-	connection.console.log("onInitialized");
 	if (hasConfigurationCapability) {
 		// Register for all configuration changes.
 		connection.client.register(DidChangeConfigurationNotification.type, undefined);
@@ -149,6 +148,7 @@ interface GrainSettings {
 	enableLSP: boolean;
 	trace: string;
 	debounce: number;
+	enableStatementLenses: boolean;
 }
 
 // The global settings, used when the `workspace/configuration` request is not supported by the client.
@@ -156,7 +156,7 @@ interface GrainSettings {
 // but could happen with other clients.
 const defaultSettings: GrainSettings = {
 	maxNumberOfProblems: 1000, cliPath: "grain",
-	enableLSP: true, trace: "off", debounce: 1000
+	enableLSP: true, trace: "off", debounce: 1000, enableStatementLenses: true
 };
 let globalSettings: GrainSettings = defaultSettings;
 
@@ -255,17 +255,28 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
 						let errors = result.errors;
 						let lenses = result.lenses;
 
-						if (lenses.length > 0) {
-							connection.console.log("We have lenses");
-							if (documentLenses.has(textDocumentUri)) {
-								documentLenses.delete(textDocumentUri);
-							}
-							documentLenses.set(textDocumentUri, result.lenses);
 
-							// work around LSP not having an onDidChangeCodeLenses yet
-							// If we don' call this we are always one step behind
-							connection.console.log("Sending notification");
-							connection.sendNotification("grainlsp/lensesLoaded", []);
+
+						if (settings.enableStatementLenses) {
+
+							if (lenses.length > 0) {
+								connection.console.log("We have lenses");
+								if (documentLenses.has(textDocumentUri)) {
+									documentLenses.delete(textDocumentUri);
+								}
+								documentLenses.set(textDocumentUri, result.lenses);
+
+								// work around LSP not having an onDidChangeCodeLenses yet
+								// If we don' call this we are always one step behind
+								connection.console.log("Sending notification");
+								connection.sendNotification("grainlsp/lensesLoaded", []);
+							}
+						} else {
+							// clear the lenses the first time we find any left over
+							// after a switch to no lenses
+							if (documentLenses.keys.length > 0) {
+								documentLenses = new Map();
+							}
 						}
 
 						if (errors.length > 0) {
@@ -328,10 +339,11 @@ connection.onCodeLens(handler => {
 
 	let codeLenses: CodeLens[] = [];
 
+
+
 	if (documentLenses.has(handler.textDocument.uri)) {
 
 		let docLenses = documentLenses.get(handler.textDocument.uri);
-
 		if (docLenses && docLenses.length > 0) {
 
 			docLenses.forEach(lens => {
@@ -345,6 +357,7 @@ connection.onCodeLens(handler => {
 		}
 
 	}
+
 	return codeLenses;
 
 });
@@ -357,7 +370,7 @@ connection.onCodeLensResolve(codeLens => {
 	codeLens.command = {
 		title: data,
 		command: "codelens-sample.codelensAction",
-		arguments: ["Argument 1", false]
+		arguments: []
 	};
 	return codeLens;
 });

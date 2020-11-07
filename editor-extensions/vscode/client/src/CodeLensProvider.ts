@@ -2,6 +2,9 @@ import * as vscode from 'vscode';
 
 /**
  * CodelensProvider
+ * 
+ * Dummy, used to trigger lens updates until LSP protocol supports onDidChangeCodeLenses 
+ * (coming in 3.16.0)
  */
 export class CodelensProvider implements vscode.CodeLensProvider {
 
@@ -19,46 +22,14 @@ export class CodelensProvider implements vscode.CodeLensProvider {
 	}
 
 	public provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken): vscode.CodeLens[] | Thenable<vscode.CodeLens[]> {
-		console.log("DUMMY provideCodeLenses called");
-		// if (vscode.workspace.getConfiguration("codelens-sample").get("enableCodeLens", true)) {
-		//     this.codeLenses = [];
-		//     const regex = new RegExp(this.regex);
-		//     const text = document.getText();
-		//     let matches;
-		//     while ((matches = regex.exec(text)) !== null) {
-		//         const line = document.lineAt(document.positionAt(matches.index).line);
-		//         const indexOf = line.text.indexOf(matches[0]);
-		//         const position = new vscode.Position(line.lineNumber, indexOf);
-		//         const range = document.getWordRangeAtPosition(position, new RegExp(this.regex));
-		//         if (range) {
-		//             this.codeLenses.push(new vscode.CodeLens(range));
-		//         }
-		//     }
-		//     return this.codeLenses;
-		// }
 		return [];
 	}
 
 	public resolveCodeLens(codeLens: vscode.CodeLens, token: vscode.CancellationToken) {
-		console.log("DUMMY resolveCodeLens called");
-
-		// if (vscode.workspace.getConfiguration("codelens-sample").get("enableCodeLens", true)) {
-		//     codeLens.command = {
-		//         title: "Codelens provided by sample extension",
-		//         tooltip: "Tooltip provided by sample extension",
-		//         command: "codelens-sample.codelensAction",
-		//         arguments: ["Argument 1", false]
-		//     };
-		//     return codeLens;
-		// }
-		// return null;
 		return codeLens;
 	}
 
 	public triggerRefresh() {
-
-		console.log("triggerRefresh");
-
 		this._onDidChangeCodeLenses.fire();
 	}
 }

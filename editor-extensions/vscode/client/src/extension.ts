@@ -25,10 +25,7 @@ let disposables: Disposable[] = [];
 
 let codelensProvider: CodelensProvider;
 
-
 export function activate(context: ExtensionContext) {
-
-
 
 	// The server is implemented in node
 	let serverModule = context.asAbsolutePath(
@@ -75,11 +72,8 @@ export function activate(context: ExtensionContext) {
 	);
 
 	client.onReady().then(() => {
-		console.log("adding notification handler");
 		client.onNotification("grainlsp/lensesLoaded", (files: Array<String>) => {
-			console.log("lensesLoaded called");
 			codelensProvider.triggerRefresh();
-
 		});
 	});
 
