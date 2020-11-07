@@ -339,8 +339,6 @@ connection.onCodeLens(handler => {
 
 	let codeLenses: CodeLens[] = [];
 
-
-
 	if (documentLenses.has(handler.textDocument.uri)) {
 
 		let docLenses = documentLenses.get(handler.textDocument.uri);
@@ -369,7 +367,7 @@ connection.onCodeLensResolve(codeLens => {
 
 	codeLens.command = {
 		title: data,
-		command: "codelens-sample.codelensAction",
+		command: "",
 		arguments: []
 	};
 	return codeLens;
