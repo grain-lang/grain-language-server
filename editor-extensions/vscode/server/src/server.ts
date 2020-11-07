@@ -63,18 +63,21 @@ let hasConfigurationCapability: boolean = false;
 let hasWorkspaceFolderCapability: boolean = false;
 let hasDiagnosticRelatedInformationCapability: boolean = false;
 
-let codeLenses: CodeLens[] = [];
+interface Dictionary<T> {
+	[Key: string]: T;
+}
 
-let docLenses: LSP_Lens[] = [];
-
+// store lenses per document by uri
+let documentLenses: Map<string, LSP_Lens[]> = new Map();
 
 async function processChangedDocuments(): Promise<void> {
 	changedDocuments.forEach(uri => { validateWithCompiler(uri); changedDocuments.delete(uri) });
 }
 
-
-
 connection.onInitialize((params: InitializeParams) => {
+
+	connection.console.log("onInitialize");
+
 	let capabilities = params.capabilities;
 
 	// Does the client support the `workspace/configuration` request?
@@ -98,6 +101,7 @@ connection.onInitialize((params: InitializeParams) => {
 				resolveProvider: true
 			}
 			// Tell the client that this server supports code completion.
+			// Comiing soon!
 			// completionProvider: {
 			// 	resolveProvider: true
 			// }
@@ -115,6 +119,7 @@ connection.onInitialize((params: InitializeParams) => {
 });
 
 connection.onInitialized(() => {
+	connection.console.log("onInitialized");
 	if (hasConfigurationCapability) {
 		// Register for all configuration changes.
 		connection.client.register(DidChangeConfigurationNotification.type, undefined);
@@ -159,7 +164,6 @@ let globalSettings: GrainSettings = defaultSettings;
 let documentSettings: Map<string, Thenable<GrainSettings>> = new Map();
 
 connection.onDidChangeConfiguration(change => {
-	connection.console.log("Configuration changed");
 	if (hasConfigurationCapability) {
 		// Reset all cached document settings
 		documentSettings.clear();
@@ -171,7 +175,6 @@ connection.onDidChangeConfiguration(change => {
 
 	// clear down the list as we're going to process them all below.
 	changedDocuments = new Set();
-
 	// Revalidate all open text documents
 	documents.all().forEach(doc => validateWithCompiler(doc.uri));
 
@@ -202,12 +205,9 @@ documents.onDidClose(e => {
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(change => {
-
 	// Debounce the actual work as we don't want to run a compile on every keystroke
 	// So here we store the uri of the document that has changed
-
 	changedDocuments.add(change.document.uri);
-
 });
 
 async function clearDiagnostics(textDocument: TextDocument): Promise<void> {
@@ -244,7 +244,6 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
 				if (textDocument != undefined) {
 
 					let text = textDocument.getText();
-
 					let result_json_buffer = childProcess.execFileSync(cliPath, ["lsp", filename], { input: text });
 
 					let json_string = result_json_buffer.toString();
@@ -254,18 +253,24 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
 						let result: LSP_Result = JSON.parse(json_string);
 
 						let errors = result.errors;
-
 						let lenses = result.lenses;
 
 						if (lenses.length > 0) {
 							connection.console.log("We have lenses");
-							docLenses = lenses;
+							if (documentLenses.has(textDocumentUri)) {
+								documentLenses.delete(textDocumentUri);
+							}
+							documentLenses.set(textDocumentUri, result.lenses);
+
+							// work around LSP not having an onDidChangeCodeLenses yet
+							// If we don' call this we are always one step behind
+							connection.console.log("Sending notification");
+							connection.sendNotification("grainlsp/lensesLoaded", []);
 						}
 
 						if (errors.length > 0) {
 
 							let error = errors[0];
-
 							let spos = Position.create(error.line - 1, error.startchar);
 							let epos = Position.create(error.endline - 1, error.endchar);
 
@@ -281,11 +286,9 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
 
 							diagnostics.push(diagnostic);
 						} else {
-							connection.console.log("No errors");
+							//connection.console.log("No errors");
 						}
 					}
-
-
 				}
 				else {
 					if (settings.trace == "verbose") {
@@ -319,44 +322,43 @@ connection.onCompletion(
 	}
 );
 
-connection.onCodeLens(_handler => {
-	connection.console.log("onCodeLens called");
-	codeLenses = [];
+// look the lenses up from the info from the last compile
 
-	if (docLenses.length > 0) {
+connection.onCodeLens(handler => {
 
-		docLenses.forEach(lens => {
+	let codeLenses: CodeLens[] = [];
 
-			const sposition1 = Position.create(lens.line - 1, 1);
-			const eposition1 = Position.create(lens.line - 1, 1);
-			const range1 = Range.create(sposition1, eposition1);
-			codeLenses.push(CodeLens.create(range1));
+	if (documentLenses.has(handler.textDocument.uri)) {
 
-		})
+		let docLenses = documentLenses.get(handler.textDocument.uri);
+
+		if (docLenses && docLenses.length > 0) {
+
+			docLenses.forEach(lens => {
+				const sposition1 = Position.create(lens.line - 1, 1);
+				const eposition1 = Position.create(lens.line - 1, 1);
+				const range1 = Range.create(sposition1, eposition1);
+				let alens: CodeLens = CodeLens.create(range1);
+				alens.data = lens.signature;
+				codeLenses.push(alens);
+			})
+		}
 
 	}
 	return codeLenses;
 
-}
-);
+});
 
+// we already know the info to return so this is a simple function
 connection.onCodeLensResolve(codeLens => {
-	connection.console.log("onCodeLensResolve called");
 
-	docLenses.forEach(lens => {
-		if (codeLens.range.start.line == lens.line - 1) {
-			codeLens.command = {
-				title: lens.signature,
-				command: "codelens-sample.codelensAction",
-				arguments: ["Argument 1", false]
-			};
+	let data = codeLens.data;
 
-		}
-
-	});
-
-
-
+	codeLens.command = {
+		title: data,
+		command: "codelens-sample.codelensAction",
+		arguments: ["Argument 1", false]
+	};
 	return codeLens;
 });
 

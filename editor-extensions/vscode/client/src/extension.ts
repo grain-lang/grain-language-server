@@ -16,9 +16,14 @@ import {
 	TransportKind
 } from 'vscode-languageclient';
 
+import { CodelensProvider } from './CodelensProvider';
+
+
 let client: LanguageClient;
 
 let disposables: Disposable[] = [];
+
+let codelensProvider: CodelensProvider;
 
 
 export function activate(context: ExtensionContext) {
@@ -44,6 +49,13 @@ export function activate(context: ExtensionContext) {
 		}
 	};
 
+	// register a dummy code lens provider
+	// so I can trigger lens updates
+	// until LSP 3.16.0 arrives
+	codelensProvider = new CodelensProvider();
+	languages.registerCodeLensProvider("grain", codelensProvider);
+
+
 	// Options to control the language client
 	let clientOptions: LanguageClientOptions = {
 		// Register the server for plain text documents
@@ -61,6 +73,15 @@ export function activate(context: ExtensionContext) {
 		serverOptions,
 		clientOptions
 	);
+
+	client.onReady().then(() => {
+		console.log("adding notification handler");
+		client.onNotification("grainlsp/lensesLoaded", (files: Array<String>) => {
+			console.log("lensesLoaded called");
+			codelensProvider.triggerRefresh();
+
+		});
+	});
 
 	// Start the client. This will also launch the server
 	client.start();
