@@ -172,10 +172,15 @@ connection.onDidChangeConfiguration(change => {
 		);
 	}
 
+	documentLenses = new Map();
+
+
 	// clear down the list as we're going to process them all below.
 	changedDocuments = new Set();
 	// Revalidate all open text documents
 	documents.all().forEach(doc => validateWithCompiler(doc.uri));
+
+
 
 });
 
