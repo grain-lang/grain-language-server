@@ -1,7 +1,7 @@
 {
 	"name": "grain-language-server",
 	"description": "Grain Language Server",
-	"version": "0.5.0",
+	"version": "0.6.0",
 	"publisher": "grain-lang",
 	"license": "MIT",
 	"engines": {
