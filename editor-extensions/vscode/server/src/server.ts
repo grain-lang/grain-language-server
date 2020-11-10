@@ -17,7 +17,9 @@ import {
 	TextDocumentPositionParams,
 	TextDocumentSyncKind,
 	InitializeResult,
-	Position
+	Position,
+	Range,
+	CodeLens
 } from 'vscode-languageserver';
 
 import {
@@ -37,6 +39,15 @@ interface LSP_Error {
 	lsp_message: string
 }
 
+interface LSP_Lens {
+	line: number,
+	signature: string
+}
+
+interface LSP_Result {
+	errors: LSP_Error[],
+	lenses: LSP_Lens[]
+}
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -52,11 +63,20 @@ let hasConfigurationCapability: boolean = false;
 let hasWorkspaceFolderCapability: boolean = false;
 let hasDiagnosticRelatedInformationCapability: boolean = false;
 
+interface Dictionary<T> {
+	[Key: string]: T;
+}
+
+// store lenses per document by uri
+let documentLenses: Map<string, LSP_Lens[]> = new Map();
+
 async function processChangedDocuments(): Promise<void> {
 	changedDocuments.forEach(uri => { validateWithCompiler(uri); changedDocuments.delete(uri) });
 }
 
 connection.onInitialize((params: InitializeParams) => {
+
+
 	let capabilities = params.capabilities;
 
 	// Does the client support the `workspace/configuration` request?
@@ -76,7 +96,11 @@ connection.onInitialize((params: InitializeParams) => {
 	const result: InitializeResult = {
 		capabilities: {
 			textDocumentSync: TextDocumentSyncKind.Incremental,
+			codeLensProvider: {
+				resolveProvider: true
+			}
 			// Tell the client that this server supports code completion.
+			// Coming soon!
 			// completionProvider: {
 			// 	resolveProvider: true
 			// }
@@ -100,7 +124,7 @@ connection.onInitialized(() => {
 	}
 	if (hasWorkspaceFolderCapability) {
 		connection.workspace.onDidChangeWorkspaceFolders(_event => {
-			connection.console.log('Workspace folder change event received.');
+			//	connection.console.log('Workspace folder change event received.');
 		});
 	}
 
@@ -123,6 +147,7 @@ interface GrainSettings {
 	enableLSP: boolean;
 	trace: string;
 	debounce: number;
+	enableStatementLenses: boolean;
 }
 
 // The global settings, used when the `workspace/configuration` request is not supported by the client.
@@ -130,7 +155,7 @@ interface GrainSettings {
 // but could happen with other clients.
 const defaultSettings: GrainSettings = {
 	maxNumberOfProblems: 1000, cliPath: "grain",
-	enableLSP: true, trace: "off", debounce: 1000
+	enableLSP: true, trace: "off", debounce: 1000, enableStatementLenses: true
 };
 let globalSettings: GrainSettings = defaultSettings;
 
@@ -138,7 +163,6 @@ let globalSettings: GrainSettings = defaultSettings;
 let documentSettings: Map<string, Thenable<GrainSettings>> = new Map();
 
 connection.onDidChangeConfiguration(change => {
-	connection.console.log("Configuration changed");
 	if (hasConfigurationCapability) {
 		// Reset all cached document settings
 		documentSettings.clear();
@@ -148,11 +172,15 @@ connection.onDidChangeConfiguration(change => {
 		);
 	}
 
+	documentLenses = new Map();
+
+
 	// clear down the list as we're going to process them all below.
 	changedDocuments = new Set();
-
 	// Revalidate all open text documents
 	documents.all().forEach(doc => validateWithCompiler(doc.uri));
+
+
 
 });
 
@@ -181,12 +209,9 @@ documents.onDidClose(e => {
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent(change => {
-
 	// Debounce the actual work as we don't want to run a compile on every keystroke
 	// So here we store the uri of the document that has changed
-
 	changedDocuments.add(change.document.uri);
-
 });
 
 async function clearDiagnostics(textDocument: TextDocument): Promise<void> {
@@ -223,31 +248,60 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
 				if (textDocument != undefined) {
 
 					let text = textDocument.getText();
-
 					let result_json_buffer = childProcess.execFileSync(cliPath, ["lsp", filename], { input: text });
 
 					let json_string = result_json_buffer.toString();
 
 					if (json_string.length > 0) {
 
-						let error: LSP_Error = JSON.parse(json_string);
-						let spos = Position.create(error.line - 1, error.startchar);
-						let epos = Position.create(error.endline - 1, error.endchar);
+						let result: LSP_Result = JSON.parse(json_string);
 
-						let diagnostic: Diagnostic = {
-							severity: DiagnosticSeverity.Error,
-							range: {
-								start: spos,
-								end: epos,
-							},
-							message: "Error: " + error.lsp_message,
-							source: 'grainc'
-						};
+						let errors = result.errors;
+						let lenses = result.lenses;
 
-						diagnostics.push(diagnostic);
+
+
+						if (settings.enableStatementLenses) {
+
+							if (lenses.length > 0) {
+								if (documentLenses.has(textDocumentUri)) {
+									documentLenses.delete(textDocumentUri);
+								}
+								documentLenses.set(textDocumentUri, result.lenses);
+
+								// work around LSP not having an onDidChangeCodeLenses yet
+								// If we don' call this we are always one step behind
+								connection.sendNotification("grainlsp/lensesLoaded", []);
+							}
+						} else {
+							// clear the lenses the first time we find any left over
+							// after a switch to no lenses
+							if (documentLenses.keys.length > 0) {
+								documentLenses = new Map();
+							}
+						}
+
+						if (errors.length > 0) {
+
+							let error = errors[0];
+							let spos = Position.create(error.line - 1, error.startchar);
+							let epos = Position.create(error.endline - 1, error.endchar);
+
+							let diagnostic: Diagnostic = {
+								severity: DiagnosticSeverity.Error,
+								range: {
+									start: spos,
+									end: epos,
+								},
+								message: "Error: " + error.lsp_message,
+								source: 'grainc'
+							};
+
+							diagnostics.push(diagnostic);
+						} else {
+							//connection.console.log("No errors");
+						}
 					}
-
-
 				}
 				else {
 					if (settings.trace == "verbose") {
@@ -280,6 +334,47 @@ connection.onCompletion(
 		return [];
 	}
 );
+
+// look the lenses up from the info from the last compile
+
+connection.onCodeLens(handler => {
+
+	let codeLenses: CodeLens[] = [];
+
+	if (documentLenses.has(handler.textDocument.uri)) {
+
+		let docLenses = documentLenses.get(handler.textDocument.uri);
+		if (docLenses && docLenses.length > 0) {
+
+			docLenses.forEach(lens => {
+				const sposition1 = Position.create(lens.line - 1, 1);
+				const eposition1 = Position.create(lens.line - 1, 1);
+				const range1 = Range.create(sposition1, eposition1);
+				let alens: CodeLens = CodeLens.create(range1);
+				alens.data = lens.signature;
+				codeLenses.push(alens);
+			})
+		}
+
+	}
+
+	return codeLenses;
+
+});
+
+// we already know the info to return so this is a simple function
+connection.onCodeLensResolve(codeLens => {
+
+	let data = codeLens.data;
+
+	codeLens.command = {
+		title: data,
+		command: "",
+		arguments: []
+	};
+	return codeLens;
+});
+
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events

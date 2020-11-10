@@ -6,7 +6,8 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path';
-import { workspace, ExtensionContext } from 'vscode';
+import { workspace, ExtensionContext, languages, Disposable } from 'vscode';
+
 
 import {
 	LanguageClient,
@@ -15,9 +16,17 @@ import {
 	TransportKind
 } from 'vscode-languageclient';
 
+import { CodelensProvider } from './CodelensProvider';
+
+
 let client: LanguageClient;
 
+let disposables: Disposable[] = [];
+
+let codelensProvider: CodelensProvider;
+
 export function activate(context: ExtensionContext) {
+
 	// The server is implemented in node
 	let serverModule = context.asAbsolutePath(
 		path.join('server', 'out', 'server.js')
@@ -37,6 +46,13 @@ export function activate(context: ExtensionContext) {
 		}
 	};
 
+	// register a dummy code lens provider
+	// so I can trigger lens updates
+	// until LSP 3.16.0 arrives
+	codelensProvider = new CodelensProvider();
+	languages.registerCodeLensProvider("grain", codelensProvider);
+
+
 	// Options to control the language client
 	let clientOptions: LanguageClientOptions = {
 		// Register the server for plain text documents
@@ -55,11 +71,21 @@ export function activate(context: ExtensionContext) {
 		clientOptions
 	);
 
+	client.onReady().then(() => {
+		client.onNotification("grainlsp/lensesLoaded", (files: Array<String>) => {
+			codelensProvider.triggerRefresh();
+		});
+	});
+
 	// Start the client. This will also launch the server
 	client.start();
 }
 
 export function deactivate(): Thenable<void> | undefined {
+	if (disposables) {
+		disposables.forEach(item => item.dispose());
+	}
+	disposables = [];
 	if (!client) {
 		return undefined;
 	}
