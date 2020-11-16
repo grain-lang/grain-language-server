@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
+## v0.6.1
+- Minor fix where code lenses were not picked up on Linux.
+
 ## v0.6.0
 - Code lenses! See the types of top-level statements in your editor.
 
