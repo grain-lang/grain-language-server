@@ -28,7 +28,30 @@ import {
 } from 'vscode-languageserver-textdocument';
 
 import * as childProcess from 'child_process';
-import { compileFunction } from 'vm';
+
+const isWindows = /^win32/.test(process.platform);
+// Not sure if this can technically change between VSCode restarts. Even if it does,
+// it is likely to be swapped with PowerShell, which understands the `.cmd` executables.
+const needsCMD = isWindows && process.env.ComSpec && /cmd.exe$/.test(process.env.ComSpec);
+
+const fileProtocol = "file://"
+
+function filenameFromUri(textDocumentUri: string) {
+	let filename = textDocumentUri.substring(fileProtocol.length)
+
+	// Fix for VSCode creating invalid URIs on Windows
+	// Ref https://github.com/microsoft/vscode-languageserver-node/issues/105
+	if (isWindows) {
+		filename = filename.replace('%3A', ':');
+
+		// `grainc` doesn't understand a Windows path starting with `/C:/` as absolute, only `C:/`
+		if (filename.startsWith("/")) {
+			filename = filename.substring(1);
+		}
+	}
+
+	return filename;
+}
 
 interface LSP_Error {
 	file: string;
@@ -53,7 +76,7 @@ interface LSP_Result {
 // Also include all preview / proposed LSP features.
 let connection = createConnection(ProposedFeatures.all);
 
-// Create a simple text document manager. 
+// Create a simple text document manager.
 let documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 
 let changedDocuments = new Set<string>();
@@ -232,12 +255,16 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
 			connection.console.log("Validating " + textDocumentUri);
 		}
 
-		let fileProtocol = "file://"
-
 		if (textDocumentUri.startsWith(fileProtocol)) {
 
-			let filename = textDocumentUri.substring(fileProtocol.length);
+			let filename = filenameFromUri(textDocumentUri);
 			let cliPath = settings.cliPath;
+
+			// If we are executing Grain on Windows in `cmd.exe`,
+			// the command must end in `.cmd` otherwise it fails
+			if (needsCMD && !cliPath.endsWith('.cmd')) {
+				cliPath += '.cmd';
+			}
 
 			try {
 
