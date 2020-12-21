@@ -12,6 +12,8 @@ import {
 	ProposedFeatures,
 	InitializeParams,
 	DidChangeConfigurationNotification,
+	Hover,
+	MarkedString,
 	CompletionItem,
 	CompletionItemKind,
 	TextDocumentPositionParams,
@@ -28,6 +30,9 @@ import {
 } from 'vscode-languageserver-textdocument';
 
 import * as childProcess from 'child_process';
+
+var path = require('path');
+
 
 const isWindows = /^win32/.test(process.platform);
 // Not sure if this can technically change between VSCode restarts. Even if it does,
@@ -63,13 +68,17 @@ interface LSP_Error {
 }
 
 interface LSP_Lens {
-	line: number,
-	signature: string
+	sl: number,
+	sc: number,
+	el: number,
+	ec: number,
+	s: string,
+	t: string
 }
 
 interface LSP_Result {
 	errors: LSP_Error[],
-	lenses: LSP_Lens[]
+	values: LSP_Lens[]
 }
 
 // Create a connection for the server, using Node's IPC as a transport.
@@ -121,7 +130,8 @@ connection.onInitialize((params: InitializeParams) => {
 			textDocumentSync: TextDocumentSyncKind.Incremental,
 			codeLensProvider: {
 				resolveProvider: true
-			}
+			},
+			hoverProvider: true,
 			// Tell the client that this server supports code completion.
 			// Coming soon!
 			// completionProvider: {
@@ -275,58 +285,77 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
 				if (textDocument != undefined) {
 
 					let text = textDocument.getText();
-					let result_json_buffer = childProcess.execFileSync(cliPath, ["lsp", filename], { input: text });
+
+					let cwd = path.dirname(filename);
+
+
+					let result_json_buffer = childProcess.execFileSync(cliPath, ["lsp", filename], { input: text, cwd });
 
 					let json_string = result_json_buffer.toString();
 
+
 					if (json_string.length > 0) {
 
-						let result: LSP_Result = JSON.parse(json_string);
+						try {
+							let result: LSP_Result = JSON.parse(json_string);
+							let errors = result.errors;
+							let lenses = result.values;
+							if (settings.enableStatementLenses) {
 
-						let errors = result.errors;
-						let lenses = result.lenses;
 
+								if (lenses.length > 0) {
+									if (documentLenses.has(textDocumentUri)) {
+										documentLenses.delete(textDocumentUri);
+									}
+									documentLenses.set(textDocumentUri, lenses);
 
+									connection.console.log("setting lenses for " + textDocumentUri);
 
-						if (settings.enableStatementLenses) {
-
-							if (lenses.length > 0) {
-								if (documentLenses.has(textDocumentUri)) {
-									documentLenses.delete(textDocumentUri);
+									// work around LSP not having an onDidChangeCodeLenses yet
+									// If we don' call this we are always one step behind
+									connection.sendNotification("grainlsp/lensesLoaded", []);
+								} else {
+									//connection.console.log("no lenses for " + textDocumentUri);
 								}
-								documentLenses.set(textDocumentUri, result.lenses);
-
-								// work around LSP not having an onDidChangeCodeLenses yet
-								// If we don' call this we are always one step behind
-								connection.sendNotification("grainlsp/lensesLoaded", []);
+							} else {
+								// clear the lenses the first time we find any left over
+								// after a switch to no lenses
+								if (documentLenses.keys.length > 0) {
+									documentLenses = new Map();
+								}
 							}
-						} else {
-							// clear the lenses the first time we find any left over
-							// after a switch to no lenses
-							if (documentLenses.keys.length > 0) {
-								documentLenses = new Map();
+
+							if (errors.length > 0) {
+
+								let error = errors[0];
+
+								let schar = error.startchar < 0 ? 0 : error.startchar;
+								let echar = error.endchar < 0 ? 0 : error.endchar;
+
+
+								let spos = Position.create(error.line - 1, schar);
+								let epos = Position.create(error.endline - 1, echar);
+
+								let diagnostic: Diagnostic = {
+									severity: DiagnosticSeverity.Error,
+									range: {
+										start: spos,
+										end: epos,
+									},
+									message: "Error: " + error.lsp_message,
+									source: 'grainc'
+								};
+
+								diagnostics.push(diagnostic);
+							} else {
+								//connection.console.log("No errors");
 							}
-						}
+						} catch (ex) {
 
-						if (errors.length > 0) {
+							connection.console.log("Json Exception:");
+							connection.console.log(ex.message());
+							connection.console.log(ex.stack())
 
-							let error = errors[0];
-							let spos = Position.create(error.line - 1, error.startchar);
-							let epos = Position.create(error.endline - 1, error.endchar);
-
-							let diagnostic: Diagnostic = {
-								severity: DiagnosticSeverity.Error,
-								range: {
-									start: spos,
-									end: epos,
-								},
-								message: "Error: " + error.lsp_message,
-								source: 'grainc'
-							};
-
-							diagnostics.push(diagnostic);
-						} else {
-							//connection.console.log("No errors");
 						}
 					}
 				}
@@ -373,14 +402,31 @@ connection.onCodeLens(handler => {
 		let docLenses = documentLenses.get(handler.textDocument.uri);
 		if (docLenses && docLenses.length > 0) {
 
-			docLenses.forEach(lens => {
-				const sposition1 = Position.create(lens.line - 1, 1);
-				const eposition1 = Position.create(lens.line - 1, 1);
-				const range1 = Range.create(sposition1, eposition1);
-				let alens: CodeLens = CodeLens.create(range1);
-				alens.data = lens.signature;
-				codeLenses.push(alens);
-			})
+			docLenses.forEach((lens, index, lenses) => {
+
+				// check the previous lens to see if it was a statement
+				// if so, we use this value for it if the line numbers
+				// are the same
+
+				if (index > 0) {
+					let previous = lenses[index - 1];
+					if (previous.t == "S") {
+						if (previous.sl == lens.sl) {
+							const sposition1 = Position.create(lens.sl - 1, 1);
+							const eposition1 = Position.create(lens.sl - 1, 1);
+							const range1 = Range.create(sposition1, eposition1);
+							let alens: CodeLens = CodeLens.create(range1);
+							alens.data = lens.s;
+							codeLenses.push(alens);
+						}
+					}
+				}
+
+
+
+			});
+
+
 		}
 
 	}
@@ -400,6 +446,85 @@ connection.onCodeLensResolve(codeLens => {
 		arguments: []
 	};
 	return codeLens;
+});
+
+connection.onHover((params: TextDocumentPositionParams): Hover | undefined => {
+
+	let bestmatch: LSP_Lens | undefined = undefined;
+	let bestrange = 0;
+
+	let line = params.position.line + 1;  // editor is offset 0
+	let pos = params.position.character + 1;
+
+	connection.console.log("line is " + line);
+	connection.console.log("pos is " + pos);
+
+
+	if (documentLenses.has(params.textDocument.uri)) {
+
+		let docLenses = documentLenses.get(params.textDocument.uri);
+
+		if (docLenses && docLenses.length > 0) {
+
+			docLenses.forEach(lens => {
+
+				if (line >= lens.sl && line <= lens.el) {
+
+					// need to take account which line we are on
+					// when looking at position
+
+					let match = false;
+
+					// easy case when all on one line
+					if (lens.sl == lens.el) {
+						if (pos >= lens.sc && pos <= lens.ec) {
+							match = true;
+						}
+					} else {
+
+						if (line > lens.sl && line < lens.el) {
+							match = true;
+						} else {
+							if (line == lens.sl && pos >= lens.sc) {
+								match = true;
+							}
+							if (line == lens.el && pos <= lens.ec) {
+								match = true;
+							}
+						}
+					}
+
+					if (match) {
+
+						if (lens.t != "S") {
+
+							let range = lens.ec - lens.sc;
+
+							if (bestrange == 0 || range <= bestrange) {
+								bestmatch = lens;
+								bestrange = range;
+							}
+						}
+
+					}
+				}
+
+			})
+		}
+
+	} else {
+		//connection.console.log("No lenses loaded")
+	}
+
+	if (bestmatch == undefined) {
+		return undefined;
+	} else {
+		connection.console.log("hover val : " + bestmatch!.s);
+		let doc = [{ language: "grain", value: bestmatch!.s }];
+		return {
+			contents: doc
+		}
+	}
 });
 
 
