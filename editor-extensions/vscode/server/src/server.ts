@@ -70,8 +70,10 @@ interface LSP_Error {
 interface LSP_Lens {
 	sl: number,
 	sc: number,
+	sb: number,
 	el: number,
 	ec: number,
+	eb: number,
 	s: string,
 	t: string
 }
@@ -309,14 +311,10 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
 									}
 									documentLenses.set(textDocumentUri, lenses);
 
-									connection.console.log("setting lenses for " + textDocumentUri);
-
 									// work around LSP not having an onDidChangeCodeLenses yet
 									// If we don' call this we are always one step behind
 									connection.sendNotification("grainlsp/lensesLoaded", []);
-								} else {
-									//connection.console.log("no lenses for " + textDocumentUri);
-								}
+								} 
 							} else {
 								// clear the lenses the first time we find any left over
 								// after a switch to no lenses
@@ -351,10 +349,11 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
 								//connection.console.log("No errors");
 							}
 						} catch (ex) {
-
-							connection.console.log("Json Exception:");
-							connection.console.log(ex.message());
-							connection.console.log(ex.stack())
+							if (settings.trace == "verbose") {
+								connection.console.log("Json Exception:");
+								connection.console.log(ex.message());
+								connection.console.log(ex.stack())
+							}
 
 						}
 					}
@@ -394,6 +393,7 @@ connection.onCompletion(
 // look the lenses up from the info from the last compile
 
 connection.onCodeLens(handler => {
+
 
 	let codeLenses: CodeLens[] = [];
 
@@ -456,9 +456,6 @@ connection.onHover((params: TextDocumentPositionParams): Hover | undefined => {
 	let line = params.position.line + 1;  // editor is offset 0
 	let pos = params.position.character + 1;
 
-	connection.console.log("line is " + line);
-	connection.console.log("pos is " + pos);
-
 
 	if (documentLenses.has(params.textDocument.uri)) {
 
@@ -467,7 +464,6 @@ connection.onHover((params: TextDocumentPositionParams): Hover | undefined => {
 		if (docLenses && docLenses.length > 0) {
 
 			docLenses.forEach(lens => {
-
 				if (line >= lens.sl && line <= lens.el) {
 
 					// need to take account which line we are on
@@ -496,9 +492,17 @@ connection.onHover((params: TextDocumentPositionParams): Hover | undefined => {
 
 					if (match) {
 
-						if (lens.t != "S") {
+						if (lens.t != "S") {  // don't hover for top level statements
 
-							let range = lens.ec - lens.sc;
+							// if the same line, just use the start/end characters
+
+							let range =  (lens.ec - lens.sc);
+
+							// if on different lines take bol into account
+
+							if (lens.sl != lens.el) {
+								range = (lens.eb - lens.sb) + range;
+							}
 
 							if (bestrange == 0 || range <= bestrange) {
 								bestmatch = lens;
@@ -512,14 +516,11 @@ connection.onHover((params: TextDocumentPositionParams): Hover | undefined => {
 			})
 		}
 
-	} else {
-		//connection.console.log("No lenses loaded")
-	}
+	} 
 
 	if (bestmatch == undefined) {
 		return undefined;
 	} else {
-		connection.console.log("hover val : " + bestmatch!.s);
 		let doc = [{ language: "grain", value: bestmatch!.s }];
 		return {
 			contents: doc

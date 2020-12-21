@@ -30,6 +30,7 @@ export class CodelensProvider implements vscode.CodeLensProvider {
 	}
 
 	public triggerRefresh() {
+		console.log("triggerRefresh");
 		this._onDidChangeCodeLenses.fire();
 	}
 }
