@@ -1,0 +1,36 @@
+name: Publish to marketplaces
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  microsoft-publish:
+    name: Publish to Microsoft marketplace
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+
+    defaults:
+      run:
+        working-directory: editor-extensions/vscode/
+
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v2.1.2
+        with:
+          node-version: '14'
+          check-latest: true
+
+      - name: Checkout project
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Publish it
+        run: npm run deploy
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
