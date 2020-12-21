@@ -73,7 +73,6 @@ export function activate(context: ExtensionContext) {
 
 	client.onReady().then(() => {
 		client.onNotification("grainlsp/lensesLoaded", (files: Array<String>) => {
-
 			codelensProvider.triggerRefresh();
 		});
 	});
