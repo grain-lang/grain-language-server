@@ -1,7 +1,9 @@
 node_modules
-*.vsix
-*.gr
 dist/
-client/out
-server/out
+*.gr
 .DS_Store
+
+# VSCode stuff
+*.vsix
+editor-extensions/vscode/client/out
+editor-extensions/vscode/server/out
