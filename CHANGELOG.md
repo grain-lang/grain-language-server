@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
+## v0.6.3
+- Adds syntax highlighting support for bitwise operators and `and` bindings.
+
 ## v0.6.2
 - Minor fix where the lsp would not work properly on Windows.
 

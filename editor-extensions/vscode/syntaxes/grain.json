@@ -10,7 +10,7 @@
 		"bindings": {
 			"patterns": [
 				{
-					"match": "\\b(let\\b\\s*(?:rec\\b)?\\s*(?:mut\\b)?)\\b\\s*(?!rec|mut)([a-z]\\w*)\\s*(:.*?)?(=)(?=.*=>)",
+					"match": "\\b((?:let|and)\\b\\s*(?:rec\\b)?\\s*(?:mut\\b)?)\\b\\s*(?!rec|mut)([a-z]\\w*)\\s*(:.*?)?(=)(?=.*=>)",
 					"captures": {
 						"1": {
 							"name": "storage.type.grain"
@@ -29,7 +29,7 @@
 					}
 				},
 				{
-					"match": "\\b(let\\b\\s*(?:rec\\b)?\\s*(?:mut\\b)?)\\b\\s*(?!rec|mut)([a-z]\\w*)\\s*(:.*?)?(=)(?=\\s*pattern\\b)",
+					"match": "\\b((?:let|and)\\b\\s*(?:rec\\b)?\\s*(?:mut\\b)?)\\b\\s*(?!rec|mut)([a-z]\\w*)\\s*(:.*?)?(=)(?=\\s*pattern\\b)",
 					"captures": {
 						"1": {
 							"name": "storage.type.grain"
@@ -48,7 +48,7 @@
 					}
 				},
 				{
-					"begin": "\\b(let\\b\\s*(?:rec\\b)?\\s*(?:mut\\b)?)\\b\\s*(\\()",
+					"begin": "\\b((?:let|and)\\b\\s*(?:rec\\b)?\\s*(?:mut\\b)?)\\b\\s*(\\()",
 					"end": "(\\))\\s*(:.*?)?(=)",
 					"beginCaptures": {
 						"1": { "name": "storage.type.grain" },
@@ -68,7 +68,7 @@
 					]
 				},
 				{
-					"match": "\\b(let\\b\\s*(?:rec\\b)?\\s*(?:mut\\b)?)\\b\\s*(?!rec|mut)([a-z]\\w*)\\s*(:.*?)?(=)",
+					"match": "\\b((?:let|and)\\b\\s*(?:rec\\b)?\\s*(?:mut\\b)?)\\b\\s*(?!rec|mut)([a-z]\\w*)\\s*(:.*?)?(=)",
 					"captures": {
 						"1": {
 							"name": "storage.type.grain"
@@ -87,7 +87,7 @@
 					}
 				},
 				{
-					"match": "\\b(let\\b\\s*(?:rec\\b)?\\s*(?:mut\\b)?)\\b\\s*(?!rec|mut)([a-z]\\w*)\\b\\s*(:.*)?",
+					"match": "\\b((?:let|and)\\b\\s*(?:rec\\b)?\\s*(?:mut\\b)?)\\b\\s*(?!rec|mut)([a-z]\\w*)\\b\\s*(:.*)?",
 					"captures": {
 						"1": {
 							"name": "storage.type.grain"
@@ -538,7 +538,7 @@
 		"identifier": {
 			"patterns": [
 				{
-					"match": "(\\bis\\b|=|(\\+|-|\\*|\\/)=|\\+|-|\\*|\\/|%|<=|>=|<|>|==|!=|:=|\\!|&&|\\|\\||\\^|\\.\\.\\.|\\.)",
+					"match": "(\\bis\\b|=|(\\+|-|\\*|\\/)=|\\+|-|\\*|\\/|%|<=|>=|<|>|==|!=|:=|\\!|&&|&|\\|\\||\\||\\^|\\.\\.\\.|\\.)",
 					"captures": {
 						"1": {"name": "keyword.operator.grain" }
 					}
@@ -791,7 +791,7 @@
 		"keywords": {
 			"patterns": [
 				{
-					"match": "\\b(throw|let|rec|mut|record|enum|while|match|when|pattern|assert|fail|import|export|foreign|primitive|from|except|as)\\b",
+					"match": "\\b(throw|let|rec|mut|and|record|enum|while|match|when|pattern|assert|fail|import|export|foreign|primitive|from|except|as)\\b",
 					"name": "keyword.control.grain"
 				}
 			]
