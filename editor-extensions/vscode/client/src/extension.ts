@@ -46,12 +46,6 @@ export function activate(context: ExtensionContext) {
 		}
 	};
 
-	// register a dummy code lens provider
-	// so I can trigger lens updates
-	// until LSP 3.16.0 arrives
-	codelensProvider = new CodelensProvider();
-	languages.registerCodeLensProvider("grain", codelensProvider);
-
 
 	// Options to control the language client
 	let clientOptions: LanguageClientOptions = {
@@ -72,6 +66,13 @@ export function activate(context: ExtensionContext) {
 	);
 
 	client.onReady().then(() => {
+		// register a dummy code lens provider
+		// so I can trigger lens updates
+		// until LSP 3.16.0 arrives
+		codelensProvider = new CodelensProvider(client);
+		languages.registerCodeLensProvider("grain", codelensProvider);
+
+		codelensProvider.triggerRefresh();
 		client.onNotification("grainlsp/lensesLoaded", (files: Array<String>) => {
 			codelensProvider.triggerRefresh();
 		});
@@ -79,6 +80,7 @@ export function activate(context: ExtensionContext) {
 
 	// Start the client. This will also launch the server
 	client.start();
+
 }
 
 export function deactivate(): Thenable<void> | undefined {

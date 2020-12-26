@@ -128,9 +128,9 @@ connection.onInitialize((params: InitializeParams) => {
 	const result: InitializeResult = {
 		capabilities: {
 			textDocumentSync: TextDocumentSyncKind.Incremental,
-			codeLensProvider: {
-				resolveProvider: true
-			},
+			// codeLensProvider: {
+			// 	resolveProvider: true
+			// },
 			hoverProvider: true,
 			// Tell the client that this server supports code completion.
 			// Coming soon!
@@ -302,17 +302,19 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
 							let lenses = result.values;
 							if (settings.enableStatementLenses) {
 
+								if (documentLenses.has(textDocumentUri)) {
+									documentLenses.delete(textDocumentUri);
+								}
 
-								if (lenses.length > 0) {
-									if (documentLenses.has(textDocumentUri)) {
-										documentLenses.delete(textDocumentUri);
-									}
-									documentLenses.set(textDocumentUri, lenses);
+								// always set it, it may just be empty
+								documentLenses.set(textDocumentUri, lenses);
 
-									// work around LSP not having an onDidChangeCodeLenses yet
-									// If we don' call this we are always one step behind
-									connection.sendNotification("grainlsp/lensesLoaded", []);
-								} 
+								// work around LSP not having an onDidChangeCodeLenses yet
+								// If we don' call this we are always one step behind
+
+								connection.sendNotification("grainlsp/lensesLoaded", []);
+
+
 							} else {
 								// clear the lenses the first time we find any left over
 								// after a switch to no lenses
@@ -413,8 +415,7 @@ connection.onCodeLens(handler => {
 							const sposition1 = Position.create(lens.sl - 1, 1);
 							const eposition1 = Position.create(lens.sl - 1, 1);
 							const range1 = Range.create(sposition1, eposition1);
-							let alens: CodeLens = CodeLens.create(range1);
-							alens.data = lens.s;
+							let alens: CodeLens = CodeLens.create(range1, lens.s);
 							codeLenses.push(alens);
 						}
 					}
@@ -494,7 +495,7 @@ connection.onHover((params: TextDocumentPositionParams): Hover | undefined => {
 
 							// if the same line, just use the start/end characters
 
-							let range =  (lens.ec - lens.sc);
+							let range = (lens.ec - lens.sc);
 
 							// if on different lines take bol into account
 
@@ -514,7 +515,7 @@ connection.onHover((params: TextDocumentPositionParams): Hover | undefined => {
 			})
 		}
 
-	} 
+	}
 
 	if (bestmatch == undefined) {
 		return undefined;
