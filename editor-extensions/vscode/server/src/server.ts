@@ -5,80 +5,77 @@
  * Licensed under the MIT License. See License.txt in the project root for license information.
  * ------------------------------------------------------------------------------------------ */
 import {
-	createConnection,
-	TextDocuments,
-	Diagnostic,
-	DiagnosticSeverity,
-	ProposedFeatures,
-	InitializeParams,
-	DidChangeConfigurationNotification,
-	Hover,
-	CompletionItem,
-	TextDocumentPositionParams,
-	TextDocumentSyncKind,
-	InitializeResult,
-	Position,
-	Range,
-	CodeLens
-} from 'vscode-languageserver';
+  createConnection,
+  TextDocuments,
+  Diagnostic,
+  DiagnosticSeverity,
+  ProposedFeatures,
+  InitializeParams,
+  DidChangeConfigurationNotification,
+  Hover,
+  CompletionItem,
+  TextDocumentPositionParams,
+  TextDocumentSyncKind,
+  InitializeResult,
+  Position,
+  Range,
+  CodeLens,
+} from "vscode-languageserver";
 
-import {
-	TextDocument
+import { TextDocument } from "vscode-languageserver-textdocument";
 
-} from 'vscode-languageserver-textdocument';
+import * as childProcess from "child_process";
 
-import * as childProcess from 'child_process';
-
-var path = require('path');
-
+var path = require("path");
 
 const isWindows = /^win32/.test(process.platform);
 // Not sure if this can technically change between VSCode restarts. Even if it does,
 // it is likely to be swapped with PowerShell, which understands the `.cmd` executables.
-const needsCMD = isWindows && process.env.ComSpec && /cmd.exe$/.test(process.env.ComSpec);
+const needsCMD =
+  isWindows && process.env.ComSpec && /cmd.exe$/.test(process.env.ComSpec);
 
-const fileProtocol = "file://"
+const fileProtocol = "file://";
 
 function filenameFromUri(textDocumentUri: string) {
-	let filename = textDocumentUri.substring(fileProtocol.length)
+  let filename = textDocumentUri.substring(fileProtocol.length);
 
-	// Fix for VSCode creating invalid URIs on Windows
-	// Ref https://github.com/microsoft/vscode-languageserver-node/issues/105
-	if (isWindows) {
-		filename = filename.replace('%3A', ':');
+  // Fix for VSCode creating invalid URIs on Windows
+  // Ref https://github.com/microsoft/vscode-languageserver-node/issues/105
+  if (isWindows) {
+    filename = filename.replace("%3A", ":");
 
-		// `grainc` doesn't understand a Windows path starting with `/C:/` as absolute, only `C:/`
-		if (filename.startsWith("/")) {
-			filename = filename.substring(1);
-		}
-	}
+    // `grainc` doesn't understand a Windows path starting with `/C:/` as absolute, only `C:/`
+    if (filename.startsWith("/")) {
+      filename = filename.substring(1);
+    }
+  }
 
-	return filename;
+  return filename;
 }
 
 interface LSP_Error {
-	file: string;
-	line: number;
-	startchar: number,
-	endline: number,
-	endchar: number,
-	lsp_message: string
+  file: string;
+  line: number;
+  startchar: number;
+  endline: number;
+  endchar: number;
+  lsp_message: string;
 }
 
 interface LSP_Lens {
-	sl: number,
-	sc: number,
-	sb: number,
-	el: number,
-	ec: number,
-	eb: number,
-	s: string,
-	t: string
+  sl: number;
+  sc: number;
+  sb: number;
+  el: number;
+  ec: number;
+  eb: number;
+  s: string;
+  t: string;
 }
 
 interface LSP_Result {
-	errors: LSP_Error[],
-	values: LSP_Lens[]
+  errors: LSP_Error[];
+  values: LSP_Lens[];
 }
 
 // Create a connection for the server, using Node's IPC as a transport.
@@ -96,438 +93,418 @@ let hasWorkspaceFolderCapability: boolean = false;
 let hasDiagnosticRelatedInformationCapability: boolean = false;
 
 interface Dictionary<T> {
-	[Key: string]: T;
+  [Key: string]: T;
 }
 
 // store lenses per document by uri
 let documentLenses: Map<string, LSP_Lens[]> = new Map();
 
 async function processChangedDocuments(): Promise<void> {
-	changedDocuments.forEach(uri => { validateWithCompiler(uri); changedDocuments.delete(uri) });
+  changedDocuments.forEach((uri) => {
+    validateWithCompiler(uri);
+    changedDocuments.delete(uri);
+  });
 }
 
 connection.onInitialize((params: InitializeParams) => {
+  let capabilities = params.capabilities;
 
+  // Does the client support the `workspace/configuration` request?
+  // If not, we fall back using global settings.
+  hasConfigurationCapability = !!(
+    capabilities.workspace && !!capabilities.workspace.configuration
+  );
+  hasWorkspaceFolderCapability = !!(
+    capabilities.workspace && !!capabilities.workspace.workspaceFolders
+  );
+  hasDiagnosticRelatedInformationCapability = !!(
+    capabilities.textDocument &&
+    capabilities.textDocument.publishDiagnostics &&
+    capabilities.textDocument.publishDiagnostics.relatedInformation
+  );
 
-	let capabilities = params.capabilities;
+  const result: InitializeResult = {
+    capabilities: {
+      textDocumentSync: TextDocumentSyncKind.Incremental,
+      // Commented out because currently using a client side lens extension hack
+      // to get VSCode to update as needed.   The server is still providing the lenses,
+      // but we ask for them manually.  Once LSP 3.16.0 is out we'll revert to advertising
+      // being a lense provider again as below.
+      // codeLensProvider: {
+      // 	resolveProvider: true
+      // },
+      hoverProvider: true,
+      // Tell the client that this server supports code completion.
+      // Coming soon!
+      // completionProvider: {
+      // 	resolveProvider: true
+      // }
+    },
+  };
+  if (hasWorkspaceFolderCapability) {
+    result.capabilities.workspace = {
+      workspaceFolders: {
+        supported: true,
+      },
+    };
+  }
 
-	// Does the client support the `workspace/configuration` request?
-	// If not, we fall back using global settings.
-	hasConfigurationCapability = !!(
-		capabilities.workspace && !!capabilities.workspace.configuration
-	);
-	hasWorkspaceFolderCapability = !!(
-		capabilities.workspace && !!capabilities.workspace.workspaceFolders
-	);
-	hasDiagnosticRelatedInformationCapability = !!(
-		capabilities.textDocument &&
-		capabilities.textDocument.publishDiagnostics &&
-		capabilities.textDocument.publishDiagnostics.relatedInformation
-	);
-
-	const result: InitializeResult = {
-		capabilities: {
-			textDocumentSync: TextDocumentSyncKind.Incremental,
-			// Commented out because currently using a client side lens extension hack
-			// to get VSCode to update as needed.   The server is still providing the lenses,
-			// but we ask for them manually.  Once LSP 3.16.0 is out we'll revert to advertising
-			// being a lense provider again as below.
-			// codeLensProvider: {
-			// 	resolveProvider: true
-			// },
-			hoverProvider: true,
-			// Tell the client that this server supports code completion.
-			// Coming soon!
-			// completionProvider: {
-			// 	resolveProvider: true
-			// }
-		}
-	};
-	if (hasWorkspaceFolderCapability) {
-		result.capabilities.workspace = {
-			workspaceFolders: {
-				supported: true
-			}
-		};
-	}
-
-	return result;
+  return result;
 });
 
 connection.onInitialized(() => {
-	if (hasConfigurationCapability) {
-		// Register for all configuration changes.
-		connection.client.register(DidChangeConfigurationNotification.type, undefined);
-	}
-	if (hasWorkspaceFolderCapability) {
-		connection.workspace.onDidChangeWorkspaceFolders(_event => {
-			//	connection.console.log('Workspace folder change event received.');
-		});
-	}
+  if (hasConfigurationCapability) {
+    // Register for all configuration changes.
+    connection.client.register(
+      DidChangeConfigurationNotification.type,
+      undefined
+    );
+  }
+  if (hasWorkspaceFolderCapability) {
+    connection.workspace.onDidChangeWorkspaceFolders((_event) => {
+      //	connection.console.log('Workspace folder change event received.');
+    });
+  }
 
-	// start the debounce time
-	if (hasConfigurationCapability) {
-		// get the debounce rate from settings
-		connection.workspace.getConfiguration({
-			section: 'grain_language_server'
-		}).then(settings =>
-			debounceTimer = global.setInterval(processChangedDocuments, settings.debounce));
-	} else {
-		debounceTimer = global.setInterval(processChangedDocuments, globalSettings.debounce);
-	};
+  // start the debounce time
+  if (hasConfigurationCapability) {
+    // get the debounce rate from settings
+    connection.workspace
+      .getConfiguration({
+        section: "grain_language_server",
+      })
+      .then(
+        (settings) =>
+          (debounceTimer = global.setInterval(
+            processChangedDocuments,
+            settings.debounce
+          ))
+      );
+  } else {
+    debounceTimer = global.setInterval(
+      processChangedDocuments,
+      globalSettings.debounce
+    );
+  }
 });
 
 // The grain cli settings
 interface GrainSettings {
-	maxNumberOfProblems: number;
-	cliPath: string;
-	enableLSP: boolean;
-	trace: string;
-	debounce: number;
-	enableStatementLenses: boolean;
+  maxNumberOfProblems: number;
+  cliPath: string;
+  enableLSP: boolean;
+  trace: string;
+  debounce: number;
+  enableStatementLenses: boolean;
 }
 
 // The global settings, used when the `workspace/configuration` request is not supported by the client.
 // Please note that this is not the case when using this server with the client provided in this example
 // but could happen with other clients.
 const defaultSettings: GrainSettings = {
-	maxNumberOfProblems: 1000, cliPath: "grain",
-	enableLSP: true, trace: "off", debounce: 1000, enableStatementLenses: true
+  maxNumberOfProblems: 1000,
+  cliPath: "grain",
+  enableLSP: true,
+  trace: "off",
+  debounce: 1000,
+  enableStatementLenses: true,
 };
 let globalSettings: GrainSettings = defaultSettings;
 
 // Cache the settings of all open documents
 let documentSettings: Map<string, Thenable<GrainSettings>> = new Map();
 
-connection.onDidChangeConfiguration(change => {
-	if (hasConfigurationCapability) {
-		// Reset all cached document settings
-		documentSettings.clear();
-	} else {
-		globalSettings = <GrainSettings>(
-			(change.settings.grain_language_server || defaultSettings)
-		);
-	}
+connection.onDidChangeConfiguration((change) => {
+  if (hasConfigurationCapability) {
+    // Reset all cached document settings
+    documentSettings.clear();
+  } else {
+    globalSettings = <GrainSettings>(
+      (change.settings.grain_language_server || defaultSettings)
+    );
+  }
 
-	documentLenses = new Map();
+  documentLenses = new Map();
 
-
-	// clear down the list as we're going to process them all below.
-	changedDocuments = new Set();
-	// Revalidate all open text documents
-	documents.all().forEach(doc => validateWithCompiler(doc.uri));
-
-
-
+  // clear down the list as we're going to process them all below.
+  changedDocuments = new Set();
+  // Revalidate all open text documents
+  documents.all().forEach((doc) => validateWithCompiler(doc.uri));
 });
 
 function getDocumentSettings(resource: string): Thenable<GrainSettings> {
-	if (!hasConfigurationCapability) {
-		return Promise.resolve(globalSettings);
-	}
-	let result = documentSettings.get(resource);
-	if (!result) {
-		result = connection.workspace.getConfiguration({
-			scopeUri: resource,
-			section: 'grain_language_server'
-		})
-		documentSettings.set(resource, result);
-	}
-	return result;
+  if (!hasConfigurationCapability) {
+    return Promise.resolve(globalSettings);
+  }
+  let result = documentSettings.get(resource);
+  if (!result) {
+    result = connection.workspace.getConfiguration({
+      scopeUri: resource,
+      section: "grain_language_server",
+    });
+    documentSettings.set(resource, result);
+  }
+  return result;
 }
 
 // Only keep settings for open documents
 // don't process closed documents
-documents.onDidClose(e => {
-	documentSettings.delete(e.document.uri);
-	if (changedDocuments.has(e.document.uri)) changedDocuments.delete(e.document.uri);
+documents.onDidClose((e) => {
+  documentSettings.delete(e.document.uri);
+  if (changedDocuments.has(e.document.uri))
+    changedDocuments.delete(e.document.uri);
 });
 
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
-documents.onDidChangeContent(change => {
-	// Debounce the actual work as we don't want to run a compile on every keystroke
-	// So here we store the uri of the document that has changed
-	changedDocuments.add(change.document.uri);
+documents.onDidChangeContent((change) => {
+  // Debounce the actual work as we don't want to run a compile on every keystroke
+  // So here we store the uri of the document that has changed
+  changedDocuments.add(change.document.uri);
 });
 
 async function clearDiagnostics(textDocument: TextDocument): Promise<void> {
-	let diagnostics: Diagnostic[] = [];
-	connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
+  let diagnostics: Diagnostic[] = [];
+  connection.sendDiagnostics({ uri: textDocument.uri, diagnostics });
 }
-
 
 // simple approach, pass the whole text buffer as stdin to the compiler
 async function validateWithCompiler(textDocumentUri: string): Promise<void> {
+  let settings = await getDocumentSettings(textDocumentUri);
+  let diagnostics: Diagnostic[] = [];
 
-	let settings = await getDocumentSettings(textDocumentUri);
-	let diagnostics: Diagnostic[] = [];
+  if (settings.enableLSP) {
+    if (settings.trace == "verbose") {
+      connection.console.log("Validating " + textDocumentUri);
+    }
 
-	if (settings.enableLSP) {
+    if (textDocumentUri.startsWith(fileProtocol)) {
+      let filename = filenameFromUri(textDocumentUri);
+      let cliPath = settings.cliPath;
 
-		if (settings.trace == "verbose") {
-			connection.console.log("Validating " + textDocumentUri);
-		}
+      // If we are executing Grain on Windows in `cmd.exe`,
+      // the command must end in `.cmd` otherwise it fails
+      if (needsCMD && !cliPath.endsWith(".cmd")) {
+        cliPath += ".cmd";
+      }
 
-		if (textDocumentUri.startsWith(fileProtocol)) {
+      try {
+        // get the latest text from the cache
 
-			let filename = filenameFromUri(textDocumentUri);
-			let cliPath = settings.cliPath;
+        let textDocument = documents.get(textDocumentUri);
 
-			// If we are executing Grain on Windows in `cmd.exe`,
-			// the command must end in `.cmd` otherwise it fails
-			if (needsCMD && !cliPath.endsWith('.cmd')) {
-				cliPath += '.cmd';
-			}
+        if (textDocument != undefined) {
+          let text = textDocument.getText();
 
-			try {
+          let cwd = path.dirname(filename);
 
-				// get the latest text from the cache
+          let result_json_buffer = childProcess.execFileSync(
+            cliPath,
+            ["lsp", filename],
+            { input: text, cwd }
+          );
 
-				let textDocument = documents.get(textDocumentUri);
+          let json_string = result_json_buffer.toString();
 
-				if (textDocument != undefined) {
+          if (json_string.length > 0) {
+            try {
+              let result: LSP_Result = JSON.parse(json_string);
+              let errors = result.errors;
+              let lenses = result.values;
+              if (settings.enableStatementLenses) {
+                if (documentLenses.has(textDocumentUri)) {
+                  documentLenses.delete(textDocumentUri);
+                }
 
-					let text = textDocument.getText();
+                // always set it, it may just be empty
+                documentLenses.set(textDocumentUri, lenses);
 
-					let cwd = path.dirname(filename);
+                // work around LSP not having an onDidChangeCodeLenses yet
+                // If we don' call this we are always one step behind
 
+                connection.sendNotification("grainlsp/lensesLoaded", []);
+              } else {
+                // clear the lenses the first time we find any left over
+                // after a switch to no lenses
+                if (documentLenses.keys.length > 0) {
+                  documentLenses = new Map();
+                }
+              }
 
-					let result_json_buffer = childProcess.execFileSync(cliPath, ["lsp", filename], { input: text, cwd });
+              if (errors.length > 0) {
+                let error = errors[0];
 
-					let json_string = result_json_buffer.toString();
+                let schar = error.startchar < 0 ? 0 : error.startchar;
+                let echar = error.endchar < 0 ? 0 : error.endchar;
 
+                let spos = Position.create(error.line - 1, schar);
+                let epos = Position.create(error.endline - 1, echar);
 
-					if (json_string.length > 0) {
+                let diagnostic: Diagnostic = {
+                  severity: DiagnosticSeverity.Error,
+                  range: {
+                    start: spos,
+                    end: epos,
+                  },
+                  message: "Error: " + error.lsp_message,
+                  source: "grainc",
+                };
 
-						try {
-							let result: LSP_Result = JSON.parse(json_string);
-							let errors = result.errors;
-							let lenses = result.values;
-							if (settings.enableStatementLenses) {
+                diagnostics.push(diagnostic);
+              }
+            } catch (ex) {
+              if (settings.trace == "verbose") {
+                connection.console.log("Json Exception:");
+                connection.console.log(ex.message());
+                connection.console.log(ex.stack());
+              }
+            }
+          }
+        } else {
+          if (settings.trace == "verbose") {
+            connection.console.log(
+              "Warning: Text document queued but not defined"
+            );
+          }
+        }
+      } catch (e) {
+        if (settings.trace == "verbose" || settings.trace == "messages") {
+          connection.console.log("Exception:");
+          connection.console.log(e);
+        }
+      }
+    }
+  }
 
-								if (documentLenses.has(textDocumentUri)) {
-									documentLenses.delete(textDocumentUri);
-								}
-
-								// always set it, it may just be empty
-								documentLenses.set(textDocumentUri, lenses);
-
-								// work around LSP not having an onDidChangeCodeLenses yet
-								// If we don' call this we are always one step behind
-
-								connection.sendNotification("grainlsp/lensesLoaded", []);
-
-
-							} else {
-								// clear the lenses the first time we find any left over
-								// after a switch to no lenses
-								if (documentLenses.keys.length > 0) {
-									documentLenses = new Map();
-								}
-							}
-
-							if (errors.length > 0) {
-
-								let error = errors[0];
-
-								let schar = error.startchar < 0 ? 0 : error.startchar;
-								let echar = error.endchar < 0 ? 0 : error.endchar;
-
-
-								let spos = Position.create(error.line - 1, schar);
-								let epos = Position.create(error.endline - 1, echar);
-
-								let diagnostic: Diagnostic = {
-									severity: DiagnosticSeverity.Error,
-									range: {
-										start: spos,
-										end: epos,
-									},
-									message: "Error: " + error.lsp_message,
-									source: 'grainc'
-								};
-
-								diagnostics.push(diagnostic);
-							}
-						} catch (ex) {
-							if (settings.trace == "verbose") {
-								connection.console.log("Json Exception:");
-								connection.console.log(ex.message());
-								connection.console.log(ex.stack())
-							}
-
-						}
-					}
-				}
-				else {
-					if (settings.trace == "verbose") {
-						connection.console.log("Warning: Text document queued but not defined")
-					}
-				}
-			}
-			catch (e) {
-				if (settings.trace == "verbose" || settings.trace == "messages") {
-					connection.console.log("Exception:");
-					connection.console.log(e)
-				}
-			}
-
-		}
-	}
-
-	// Send the computed diagnostics to VSCode.
-	connection.sendDiagnostics({ uri: textDocumentUri, diagnostics });
-};
-
+  // Send the computed diagnostics to VSCode.
+  connection.sendDiagnostics({ uri: textDocumentUri, diagnostics });
+}
 
 // This handler provides the initial list of the completion items.
 // Leaving this commented for when work on completion is done
 connection.onCompletion(
-	(_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
-		// The pass parameter contains the position of the text document in
-		// which code complete got requested. For the example we ignore this
-		// info and always provide the same completion items.
-		return [];
-	}
+  (_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
+    // The pass parameter contains the position of the text document in
+    // which code complete got requested. For the example we ignore this
+    // info and always provide the same completion items.
+    return [];
+  }
 );
 
 // look the lenses up from the info from the last compile
 
-connection.onCodeLens(handler => {
+connection.onCodeLens((handler) => {
+  let codeLenses: CodeLens[] = [];
 
-	let codeLenses: CodeLens[] = [];
+  if (documentLenses.has(handler.textDocument.uri)) {
+    let docLenses = documentLenses.get(handler.textDocument.uri);
+    if (docLenses && docLenses.length > 0) {
+      docLenses.forEach((lens, index, lenses) => {
+        // check the previous lens to see if it was a statement
+        // if so, we use this value for it if the line numbers
+        // are the same
 
-	if (documentLenses.has(handler.textDocument.uri)) {
+        if (index > 0) {
+          let previous = lenses[index - 1];
+          if (previous.t == "S") {
+            if (previous.sl == lens.sl) {
+              const sposition1 = Position.create(lens.sl - 1, 1);
+              const eposition1 = Position.create(lens.sl - 1, 1);
+              const range1 = Range.create(sposition1, eposition1);
+              let alens: CodeLens = CodeLens.create(range1, lens.s);
+              codeLenses.push(alens);
+            }
+          }
+        }
+      });
+    }
+  }
 
-		let docLenses = documentLenses.get(handler.textDocument.uri);
-		if (docLenses && docLenses.length > 0) {
-
-			docLenses.forEach((lens, index, lenses) => {
-
-				// check the previous lens to see if it was a statement
-				// if so, we use this value for it if the line numbers
-				// are the same
-
-				if (index > 0) {
-					let previous = lenses[index - 1];
-					if (previous.t == "S") {
-						if (previous.sl == lens.sl) {
-							const sposition1 = Position.create(lens.sl - 1, 1);
-							const eposition1 = Position.create(lens.sl - 1, 1);
-							const range1 = Range.create(sposition1, eposition1);
-							let alens: CodeLens = CodeLens.create(range1, lens.s);
-							codeLenses.push(alens);
-						}
-					}
-				}
-
-
-
-			});
-
-
-		}
-
-	}
-
-	return codeLenses;
-
+  return codeLenses;
 });
 
 // we already know the info to return so this is a simple function
-connection.onCodeLensResolve(codeLens => {
+connection.onCodeLensResolve((codeLens) => {
+  let data = codeLens.data;
 
-	let data = codeLens.data;
-
-	codeLens.command = {
-		title: data,
-		command: "",
-		arguments: []
-	};
-	return codeLens;
+  codeLens.command = {
+    title: data,
+    command: "",
+    arguments: [],
+  };
+  return codeLens;
 });
 
 connection.onHover((params: TextDocumentPositionParams): Hover | undefined => {
+  let bestmatch: LSP_Lens | undefined = undefined;
+  let bestrange = 0;
 
-	let bestmatch: LSP_Lens | undefined = undefined;
-	let bestrange = 0;
+  let line = params.position.line + 1; // editor is offset 0
+  let pos = params.position.character + 1;
 
-	let line = params.position.line + 1;  // editor is offset 0
-	let pos = params.position.character + 1;
+  if (documentLenses.has(params.textDocument.uri)) {
+    let docLenses = documentLenses.get(params.textDocument.uri);
 
+    if (docLenses && docLenses.length > 0) {
+      docLenses.forEach((lens) => {
+        if (line >= lens.sl && line <= lens.el) {
+          // need to take account which line we are on
+          // when looking at position
 
-	if (documentLenses.has(params.textDocument.uri)) {
+          let match = false;
 
-		let docLenses = documentLenses.get(params.textDocument.uri);
+          // easy case when all on one line
+          if (lens.sl == lens.el) {
+            if (pos >= lens.sc && pos <= lens.ec) {
+              match = true;
+            }
+          } else {
+            if (line > lens.sl && line < lens.el) {
+              match = true;
+            } else {
+              if (line == lens.sl && pos >= lens.sc) {
+                match = true;
+              }
+              if (line == lens.el && pos <= lens.ec) {
+                match = true;
+              }
+            }
+          }
 
-		if (docLenses && docLenses.length > 0) {
+          if (match) {
+            if (lens.t != "S") {
+              // don't hover for top level statements
 
-			docLenses.forEach(lens => {
-				if (line >= lens.sl && line <= lens.el) {
+              // if the same line, just use the start/end characters
 
-					// need to take account which line we are on
-					// when looking at position
+              let range = lens.ec - lens.sc;
 
-					let match = false;
+              // if on different lines take bol into account
 
-					// easy case when all on one line
-					if (lens.sl == lens.el) {
-						if (pos >= lens.sc && pos <= lens.ec) {
-							match = true;
-						}
-					} else {
+              if (lens.sl != lens.el) {
+                range = lens.eb - lens.sb + range;
+              }
 
-						if (line > lens.sl && line < lens.el) {
-							match = true;
-						} else {
-							if (line == lens.sl && pos >= lens.sc) {
-								match = true;
-							}
-							if (line == lens.el && pos <= lens.ec) {
-								match = true;
-							}
-						}
-					}
+              if (bestrange == 0 || range <= bestrange) {
+                bestmatch = lens;
+                bestrange = range;
+              }
+            }
+          }
+        }
+      });
+    }
+  }
 
-					if (match) {
-
-						if (lens.t != "S") {  // don't hover for top level statements
-
-							// if the same line, just use the start/end characters
-
-							let range = (lens.ec - lens.sc);
-
-							// if on different lines take bol into account
-
-							if (lens.sl != lens.el) {
-								range = (lens.eb - lens.sb) + range;
-							}
-
-							if (bestrange == 0 || range <= bestrange) {
-								bestmatch = lens;
-								bestrange = range;
-							}
-						}
-
-					}
-				}
-
-			})
-		}
-
-	}
-
-	if (bestmatch == undefined) {
-		return undefined;
-	} else {
-		let doc = [{ language: "grain", value: bestmatch!.s }];
-		return {
-			contents: doc
-		}
-	}
+  if (bestmatch == undefined) {
+    return undefined;
+  } else {
+    let doc = [{ language: "grain", value: bestmatch!.s }];
+    return {
+      contents: doc,
+    };
+  }
 });
-
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events
@@ -535,7 +512,3 @@ documents.listen(connection);
 
 // Listen on the connection
 connection.listen();
-
-
-
-

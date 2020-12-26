@@ -1,19 +1,19 @@
 {
-	"name": "grain-language-server",
-	"description": "Grain Language Server",
-	"version": "0.7.0",
-	"publisher": "grain-lang",
-	"license": "MIT",
-	"engines": {
-		"node": "*"
-	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/grain-lang/grain-language-server"
-	},
-	"dependencies": {
-		"vscode-languageserver": "^6.1.1",
-		"vscode-languageserver-textdocument": "^1.0.1"
-	},
-	"scripts": {}
+  "name": "grain-language-server",
+  "description": "Grain Language Server",
+  "version": "0.7.0",
+  "publisher": "grain-lang",
+  "license": "MIT",
+  "engines": {
+    "node": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/grain-lang/grain-language-server"
+  },
+  "dependencies": {
+    "vscode-languageserver": "^6.1.1",
+    "vscode-languageserver-textdocument": "^1.0.1"
+  },
+  "scripts": {}
 }
