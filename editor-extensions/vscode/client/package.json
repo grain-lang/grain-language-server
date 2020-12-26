@@ -1,21 +1,21 @@
 {
-	"name": "lsp-grain-client",
-	"description": "Grain vscode language server",
-	"publisher": "grain-lang",
-	"license": "MIT",
-	"version": "0.7.0",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/grain-lang/grain-language-server"
-	},
-	"engines": {
-		"vscode": "^1.43.0"
-	},
-	"dependencies": {
-		"vscode-languageclient": "^6.1.3"
-	},
-	"devDependencies": {
-		"@types/vscode": "1.43.0",
-		"vscode-test": "^1.3.0"
-	}
+  "name": "lsp-grain-client",
+  "description": "Grain vscode language server",
+  "publisher": "grain-lang",
+  "license": "MIT",
+  "version": "0.7.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/grain-lang/grain-language-server"
+  },
+  "engines": {
+    "vscode": "^1.43.0"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^6.1.3"
+  },
+  "devDependencies": {
+    "@types/vscode": "1.43.0",
+    "vscode-test": "^1.3.0"
+  }
 }
