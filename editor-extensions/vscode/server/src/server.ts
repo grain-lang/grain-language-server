@@ -128,6 +128,10 @@ connection.onInitialize((params: InitializeParams) => {
 	const result: InitializeResult = {
 		capabilities: {
 			textDocumentSync: TextDocumentSyncKind.Incremental,
+			// Commented out because currently using a client side lens extension hack
+			// to get VSCode to update as needed.   The server is still providing the lenses,
+			// but we ask for them manually.  Once LSP 3.16.0 is out we'll revert to advertising
+			// being a lense provider again as below.
 			// codeLensProvider: {
 			// 	resolveProvider: true
 			// },
@@ -345,8 +349,6 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
 								};
 
 								diagnostics.push(diagnostic);
-							} else {
-								//connection.console.log("No errors");
 							}
 						} catch (ex) {
 							if (settings.trace == "verbose") {
@@ -393,7 +395,6 @@ connection.onCompletion(
 // look the lenses up from the info from the last compile
 
 connection.onCodeLens(handler => {
-
 
 	let codeLenses: CodeLens[] = [];
 

@@ -28,7 +28,6 @@ export class CodelensProvider implements vscode.CodeLensProvider {
 
 	public async provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken): Promise<vscode.CodeLens[]> {
 
-
 		const args = { textDocument: { uri: document.uri.toString() } };
 
 		const lenses = await this.client.sendRequest(CodeLensRequest.type, args);
