@@ -317,6 +317,13 @@
             "2": { "name": "entity.name.type.grain" },
             "3": { "patterns": [{ "include": "#type-vector" }] }
           }
+        },
+        {
+          "match": "(type)\\s+(.*)",
+          "captures": {
+            "1": { "name": "storage.type.grain" },
+            "2": { "patterns": [{ "include": "#type" }] }
+          }
         }
       ]
     },
@@ -786,7 +793,7 @@
     "keywords": {
       "patterns": [
         {
-          "match": "\\b(throw|let|rec|mut|and|record|enum|while|match|when|pattern|assert|fail|import|export|foreign|primitive|from|except|as)\\b",
+          "match": "\\b(throw|let|rec|mut|and|type|record|enum|while|match|when|pattern|assert|fail|import|export|foreign|primitive|from|except|as)\\b",
           "name": "keyword.control.grain"
         }
       ]
