@@ -39,6 +39,13 @@
           ".gr"
         ],
         "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "grain-type",
+        "aliases": [
+          "Grain Type"
+        ],
+        "configuration": "./language-configuration.json"
       }
     ],
     "grammars": [
@@ -46,6 +53,11 @@
         "language": "grain",
         "scopeName": "source.grain",
         "path": "./syntaxes/grain.json"
+      },
+      {
+        "language": "grain-type",
+        "scopeName": "source.grain-type",
+        "path": "./syntaxes/grain-type.json"
       }
     ],
     "configuration": {
@@ -97,7 +109,7 @@
     }
   },
   "scripts": {
-    "compile": "tsc -b",
+    "compile": "tsc -b && node syntaxes/generate-grain-type.js",
     "watch": "tsc -b -w",
     "postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
     "test": "sh ./scripts/e2e.sh",

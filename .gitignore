@@ -7,3 +7,4 @@ dist/
 *.vsix
 editor-extensions/vscode/client/out
 editor-extensions/vscode/server/out
+editor-extensions/vscode/syntaxes/grain-type.json
