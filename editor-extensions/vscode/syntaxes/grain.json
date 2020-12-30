@@ -74,7 +74,11 @@
               "name": "storage.type.grain"
             },
             "2": {
-              "name": "variable.name.grain"
+              "patterns": [
+                {
+                  "include": "#identifier"
+                }
+              ]
             },
             "3": {
               "patterns": [
@@ -95,7 +99,11 @@
               "name": "storage.type.grain"
             },
             "2": {
-              "name": "variable.name.grain"
+              "patterns": [
+                {
+                  "include": "#identifier"
+                }
+              ]
             },
             "3": {
               "patterns": [{ "include": "#type-annotations" }]
@@ -534,6 +542,10 @@
           }
         },
         {
+          "match": "\\b_[A-Z0-9_]+\\b",
+          "name": "variable.other.constant.grain"
+        },
+        {
           "match": "\\b[a-z]\\w*\\b",
           "name": "variable.name.grain"
         }
@@ -559,7 +571,13 @@
         {
           "match": "\\b([a-z]\\w*)\\b\\s*(:.*)(?=,)",
           "captures": {
-            "1": { "name": "variable.name.grain" },
+            "1": {
+              "patterns": [
+                {
+                  "include": "#identifier"
+                }
+              ]
+            },
             "2": {
               "patterns": [{ "include": "#type-annotations" }]
             }
@@ -568,7 +586,13 @@
         {
           "match": "\\b([a-z]\\w*)\\b\\s*(:.*)(?=\\))",
           "captures": {
-            "1": { "name": "variable.name.grain" },
+            "1": {
+              "patterns": [
+                {
+                  "include": "#identifier"
+                }
+              ]
+            },
             "2": {
               "patterns": [{ "include": "#type-annotations" }]
             }
@@ -1035,7 +1059,15 @@
         },
         {
           "match": "\\b([a-z]\\w*)\\b",
-          "name": "variable.name.grain"
+          "captures": {
+            "1": {
+              "patterns": [
+                {
+                  "include": "#identifier"
+                }
+              ]
+            }
+          }
         },
         {
           "match": "\\b([A-Z]\\w*)\\b",
