@@ -499,7 +499,7 @@ connection.onHover((params: TextDocumentPositionParams): Hover | undefined => {
   if (bestmatch == undefined) {
     return undefined;
   } else {
-    let doc = [{ language: "grain", value: bestmatch!.s }];
+    let doc = [{ language: "grain-type", value: bestmatch!.s }];
     return {
       contents: doc,
     };
