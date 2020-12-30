@@ -153,6 +153,20 @@
     "type-constructor": {
       "patterns": [
         {
+          "begin": "(\\()",
+          "end": "(\\))",
+          "captures": {
+            "1": { "name": "punctuation.definition.parameters.grain" }
+          },
+          "patterns": [
+            {
+              "match": ",",
+              "name": "punctuation.definition.parameters.grain"
+            },
+            { "include": "#type-constructor" }
+          ]
+        },
+        {
           "begin": "(\\b[A-Z]\\w*\\b)\\s*(<)",
           "end": "(>)",
           "beginCaptures": {
