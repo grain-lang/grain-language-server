@@ -789,8 +789,7 @@
           "end": "\"",
           "patterns": [
             {
-              "name": "constant.character.escape.grain",
-              "match": "\\\\."
+              "include": "#string-escape"
             }
           ]
         },
@@ -800,10 +799,17 @@
           "end": "'",
           "patterns": [
             {
-              "name": "constant.character.escape.grain",
-              "match": "\\\\."
+              "include": "#string-escape"
             }
           ]
+        }
+      ]
+    },
+    "string-escape": {
+      "patterns": [
+        {
+          "name": "constant.character.escape.grain",
+          "match": "(\\\\\\d{1,3}|\\\\x[A-Fa-f0-9]{1,2}|\\\\u[A-Fa-f0-9]{4}|\\\\u\\{[A-Fa-f0-9]{1,6}\\}|\\\\.)"
         }
       ]
     },
