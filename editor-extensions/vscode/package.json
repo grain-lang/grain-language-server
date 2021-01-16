@@ -117,7 +117,7 @@
 		"test-compile": "tsc -p ./",
 		"format": "prettier --write .",
 		"check-format": "prettier --check .",
-		"deploy": "vsce publish; ovsx publish"
+		"deploy": "vsce publish && ovsx publish"
 	},
 	"devDependencies": {
 		"@types/mocha": "^8.0.3",
