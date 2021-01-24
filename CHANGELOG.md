@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
+## v0.8.0
+- Adds syntax highlighting support for unicode string escapes, and fixes a number of other syntax highlighting issues.
+
+## v0.7.0
+- Adds support for hover types.
+
 ## v0.6.3
 - Adds syntax highlighting support for bitwise operators and `and` bindings.
 
