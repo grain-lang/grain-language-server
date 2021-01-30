@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
+## v0.8.1
+- Fixes an issue with using `and` as an identifier.
+
 ## v0.8.0
 - Adds syntax highlighting support for unicode string escapes, and fixes a number of other syntax highlighting issues.
 
