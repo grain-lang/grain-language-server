@@ -642,11 +642,11 @@
     "number": {
       "patterns": [
         {
-          "match": "\\b(\\d[\\d_]*)\\.([\\d_]*)?[fd]?\\b",
+          "match": "\\b(\\d[\\d_]*)\\.([\\d_]*)?[fdwW]?\\b",
           "name": "constant.numeric.grain"
         },
         {
-          "match": "\\b\\.(\\d[\\d_]*)?[fd]?\\b",
+          "match": "\\b\\.(\\d[\\d_]*)?[fdwW]?\\b",
           "name": "constant.numeric.grain"
         },
         {
@@ -654,19 +654,19 @@
           "name": "constant.numeric.grain"
         },
         {
-          "match": "\\b(\\d[\\d_]*)([lL]?)\\b",
+          "match": "\\b(\\d[\\d_]*)([lLnN]?)\\b",
           "name": "constant.numeric.grain"
         },
         {
-          "match": "\\b(0[xX][\\da-fA-F][\\da-fA-F_]*)([lL]?)\\b",
+          "match": "\\b(0[xX][\\da-fA-F][\\da-fA-F_]*)([lLnN]?)\\b",
           "name": "constant.numeric.grain"
         },
         {
-          "match": "\\b(0[oO][0-7][0-7_]*)([lL]?)\\b",
+          "match": "\\b(0[oO][0-7][0-7_]*)([lLnN]?)\\b",
           "name": "constant.numeric.grain"
         },
         {
-          "match": "\\b(0[bB][01][01_]*)([lL]?)\\b",
+          "match": "\\b(0[bB][01][01_]*)([lLnN]?)\\b",
           "name": "constant.numeric.grain"
         }
       ]
