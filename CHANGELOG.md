@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
+## v0.9.0
+- Adds syntax support for more number literals.
+
 ## v0.8.1
 - Fixes an issue with using `and` as an identifier.
 
