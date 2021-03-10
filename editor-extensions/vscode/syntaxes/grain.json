@@ -345,7 +345,7 @@
     "statement": {
       "patterns": [
         {
-          "begin": "\\b(if|while)\\b\\s*(\\()",
+          "begin": "\\b(if|while|for)\\b\\s*(\\()",
           "end": "(\\))",
           "beginCaptures": {
             "1": { "name": "keyword.control.grain" },
@@ -356,14 +356,14 @@
           },
           "patterns": [
             {
-              "match": ",",
+              "match": "(,|;)",
               "name": "punctuation.support.grain"
             },
             { "include": "#expressions" }
           ]
         },
         {
-          "match": "\\b(if|else|while)\\b",
+          "match": "\\b(if|else|while|for)\\b",
           "name": "keyword.control.grain"
         }
       ]
@@ -830,7 +830,7 @@
     "keywords": {
       "patterns": [
         {
-          "match": "\\b(throw|let|rec|mut|record|enum|while|match|when|pattern|assert|fail|import|export|foreign|primitive|from|except|as)\\b",
+          "match": "\\b(throw|let|rec|mut|record|enum|while|for|continue|break|match|when|pattern|assert|fail|import|export|foreign|primitive|from|except|as)\\b",
           "name": "keyword.control.grain"
         }
       ]
