@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
+## v0.10.0
+- Adds syntax support for `for` loops.
+
 ## v0.9.0
 - Adds syntax support for more number literals.
 
