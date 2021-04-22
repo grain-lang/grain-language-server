@@ -48,6 +48,9 @@ function filenameFromUri(textDocumentUri: string) {
     if (filename.startsWith("/")) {
       filename = filename.substring(1);
     }
+
+    // Packaged Grain doesn't understand lowercase drive letters
+    filename = filename[0].toUpperCase() + filename.substring(1);
   }
 
   return filename;
@@ -284,7 +287,9 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
 
       // If we are executing Grain on Windows in `cmd.exe`,
       // the command must end in `.cmd` otherwise it fails
-      if (needsCMD && !cliPath.endsWith(".cmd")) {
+      // However, if we are running grain-win-x64.exe we don't
+      // want to append it because otherwise it breaks
+      if (needsCMD && !cliPath.endsWith(".cmd") && !cliPath.endsWith(".exe")) {
         cliPath += ".cmd";
       }
 
@@ -296,15 +301,33 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
         if (textDocument != undefined) {
           let text = textDocument.getText();
 
-          let cwd = path.dirname(filename);
+          let json_string = "";
 
-          let result_json_buffer = childProcess.execFileSync(
-            cliPath,
-            ["lsp", filename],
-            { input: text, cwd }
-          );
+          // If a file has a CRLF line-feed, generate a warning
+          // TODO: Remove this once we support CRLF in the LSP
+          if (text.includes("\r\n")) {
+            json_string = JSON.stringify({
+              values: [],
+              errors: [{
+                file: filename,
+                line: 1,
+                startchar: 0,
+                endline: 1,
+                endchar: 0,
+                lsp_message: "Grain LSP doesn't support CRLF line-feeds yet. Try switching to LF."
+              }]
+            })
+          } else {
+            let cwd = path.dirname(filename);
 
-          let json_string = result_json_buffer.toString();
+            let result_json_buffer = childProcess.execFileSync(
+              cliPath,
+              ["lsp", filename],
+              { input: text, cwd }
+            );
+
+            json_string = result_json_buffer.toString();
+          }
 
           if (json_string.length > 0) {
             try {
