@@ -60,6 +60,12 @@
 				"path": "./syntaxes/grain-type.json"
 			}
 		],
+		"configurationDefaults": {
+			"[grain]": {
+				"files.eol": "\n",
+				"files.insertFinalNewline": true
+			}
+		},
 		"configuration": {
 			"type": "object",
 			"title": "Grain Language Server configuration",
