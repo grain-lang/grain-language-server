@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
+## v0.10.1
+- Fixes an issue running the language server on Windows.
+
 ## v0.10.0
 - Adds syntax support for `for` loops.
 

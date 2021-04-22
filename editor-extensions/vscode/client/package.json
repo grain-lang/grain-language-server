@@ -3,7 +3,7 @@
   "description": "Grain vscode language server",
   "publisher": "grain-lang",
   "license": "MIT",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/grain-lang/grain-language-server"
