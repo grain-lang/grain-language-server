@@ -1,0 +1,14 @@
+{
+  "bump-minor-pre-major": true,
+  "packages": {
+    ".": {
+      "release-type": "node"
+    },
+    "editor-extensions/vscode/client": {
+      "release-type": "node"
+    },
+    "editor-extensions/vscode/server": {
+      "release-type": "node"
+    }
+  }
+}

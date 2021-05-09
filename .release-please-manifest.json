@@ -1,0 +1,5 @@
+{
+  ".": "0.10.1",
+  "editor-extensions/vscode/client": "0.10.1",
+  "editor-extensions/vscode/server": "0.10.1"
+}

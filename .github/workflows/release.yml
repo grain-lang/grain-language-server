@@ -1,12 +1,26 @@
-name: Publish to marketplaces
+name: Release & publish to marketplaces
 on:
-  release:
-    types:
-      - created
+  push:
+    branches:
+      - master
 
 jobs:
-  microsoft-publish:
-    name: Publish to Microsoft marketplace
+  release-please:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+    steps:
+      - uses: GoogleCloudPlatform/release-please-action@v2
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          command: manifest
+  
+  publish:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    name: Publish to Microsoft and OVSX marketplaces
     runs-on: ${{ matrix.os }}
 
     strategy:
