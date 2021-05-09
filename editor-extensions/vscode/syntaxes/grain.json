@@ -642,11 +642,11 @@
     "number": {
       "patterns": [
         {
-          "match": "\\b(\\d[\\d_]*)(\\.[\\d_]*)?([eE][+-]?\\d[\\d_]*)?[fdwW]?\\b",
+          "match": "\\b(\\d[\\d_]*)\\s*/\\s*(\\d[\\d_]*)\\b",
           "name": "constant.numeric.grain"
         },
         {
-          "match": "\\b(\\d[\\d_]*)\\s*/\\s*(\\d[\\d_]*)\\b",
+          "match": "\\b(\\d[\\d_]*)(\\.[\\d_]*)?([eE][+-]?\\d[\\d_]*)?[fdwW]?\\b",
           "name": "constant.numeric.grain"
         },
         {
