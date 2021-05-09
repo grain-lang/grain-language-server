@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
+## v0.10.3
+- Fixes syntax highlighting for rational literals.
+
 ## v0.10.2
 - Fixes syntax highlighting for floats in scientific notation.
 
