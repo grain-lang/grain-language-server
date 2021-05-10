@@ -23,6 +23,7 @@ import {
 } from "vscode-languageserver";
 
 import { TextDocument } from "vscode-languageserver-textdocument";
+import { URI } from 'vscode-uri';
 
 import * as childProcess from "child_process";
 
@@ -34,10 +35,10 @@ const isWindows = /^win32/.test(process.platform);
 const needsCMD =
   isWindows && process.env.ComSpec && /cmd.exe$/.test(process.env.ComSpec);
 
-const fileProtocol = "file://";
+const fileScheme = "file";
 
-function filenameFromUri(textDocumentUri: string) {
-  let filename = textDocumentUri.substring(fileProtocol.length);
+function filenameFromUri(uri: URI) {
+  let filename = uri.fsPath;
 
   // Fix for VSCode creating invalid URIs on Windows
   // Ref https://github.com/microsoft/vscode-languageserver-node/issues/105
@@ -48,9 +49,6 @@ function filenameFromUri(textDocumentUri: string) {
     if (filename.startsWith("/")) {
       filename = filename.substring(1);
     }
-
-    // Packaged Grain doesn't understand lowercase drive letters
-    filename = filename[0].toUpperCase() + filename.substring(1);
   }
 
   return filename;
@@ -281,8 +279,9 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
       connection.console.log("Validating " + textDocumentUri);
     }
 
-    if (textDocumentUri.startsWith(fileProtocol)) {
-      let filename = filenameFromUri(textDocumentUri);
+    let uri = URI.parse(textDocumentUri);
+    if (uri.scheme == fileScheme) {
+      let filename = filenameFromUri(uri);
       let cliPath = settings.cliPath;
 
       // If we are executing Grain on Windows in `cmd.exe`,
