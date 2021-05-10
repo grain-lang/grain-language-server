@@ -1,0 +1,9 @@
+{
+  "bump-minor-pre-major": true,
+  "bootstrap-sha": "65112046a7d9742bb2d1f49653bf7a77d62387d8",
+  "packages": {
+    "editor-extensions/vscode": {
+      "release-type": "node"
+    }
+  }
+}
