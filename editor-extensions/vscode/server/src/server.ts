@@ -36,24 +36,6 @@ const needsCMD =
   isWindows && process.env.ComSpec && /cmd.exe$/.test(process.env.ComSpec);
 
 const fileScheme = "file";
-
-function filenameFromUri(uri: URI) {
-  let filename = uri.fsPath;
-
-  // Fix for VSCode creating invalid URIs on Windows
-  // Ref https://github.com/microsoft/vscode-languageserver-node/issues/105
-  if (isWindows) {
-    filename = filename.replace("%3A", ":");
-
-    // `grainc` doesn't understand a Windows path starting with `/C:/` as absolute, only `C:/`
-    if (filename.startsWith("/")) {
-      filename = filename.substring(1);
-    }
-  }
-
-  return filename;
-}
-
 interface LSP_Error {
   file: string;
   line: number;
@@ -281,7 +263,7 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
 
     let uri = URI.parse(textDocumentUri);
     if (uri.scheme == fileScheme) {
-      let filename = filenameFromUri(uri);
+      let filename = uri.fsPath;
       let cliPath = settings.cliPath;
 
       // If we are executing Grain on Windows in `cmd.exe`,
