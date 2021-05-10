@@ -40,8 +40,10 @@ const fileScheme = "file";
 function filenameFromUri(uri: URI) {
   let filename = uri.fsPath;
 
-  // Packaged Grain doesn't understand lowercase drive letters
-  if (isWindows) {
+  // Packaged Grain doesn't understand lowercase drive letters.
+  // If authority is not empty, then we can skip since this is
+  // a UNC path.
+  if (isWindows && uri.authority === '') {
     filename = filename[0].toUpperCase() + filename.substring(1);
   }
 
