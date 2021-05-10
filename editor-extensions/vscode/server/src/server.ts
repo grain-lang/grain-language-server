@@ -36,6 +36,18 @@ const needsCMD =
   isWindows && process.env.ComSpec && /cmd.exe$/.test(process.env.ComSpec);
 
 const fileScheme = "file";
+
+function filenameFromUri(uri: URI) {
+  let filename = uri.fsPath;
+
+  // Packaged Grain doesn't understand lowercase drive letters
+  if (isWindows) {
+    filename = filename[0].toUpperCase() + filename.substring(1);
+  }
+
+  return filename;
+}
+
 interface LSP_Error {
   file: string;
   line: number;
@@ -263,7 +275,7 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
 
     let uri = URI.parse(textDocumentUri);
     if (uri.scheme == fileScheme) {
-      let filename = uri.fsPath;
+      let filename = filenameFromUri(uri);
       let cliPath = settings.cliPath;
 
       // If we are executing Grain on Windows in `cmd.exe`,
