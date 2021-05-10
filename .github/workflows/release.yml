@@ -1,0 +1,52 @@
+name: Release & publish to marketplaces
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  release-please:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      # Remap this name because it is quite confusing
+      release_created: ${{ steps.release.outputs.releases_created }}
+    steps:
+      - uses: GoogleCloudPlatform/release-please-action@v2
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          command: manifest
+  
+  publish:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    name: Publish to Microsoft and OVSX marketplaces
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+
+    defaults:
+      run:
+        working-directory: editor-extensions/vscode/
+
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v2.1.2
+        with:
+          node-version: '14'
+          check-latest: true
+
+      - name: Checkout project
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Publish it
+        run: npm run deploy
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
