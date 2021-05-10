@@ -260,7 +260,7 @@
           }
         },
         {
-          "match": "(:)\\s*(\\w+(<.*>)?)",
+          "match": "(:)\\s*(\\w+(<.*?>)?)",
           "captures": {
             "1": { "name": "keyword.operator.grain" },
             "2": { "patterns": [{ "include": "#type" }] }
@@ -1053,6 +1053,9 @@
     },
     "type-destructor": {
       "patterns": [
+        {
+          "include": "#type-annotations"
+        },
         {
           "begin": "\\b([A-Z]\\w*)\\b(?=\\s*\\()",
           "end": "(?<=\\))",
