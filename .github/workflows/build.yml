@@ -1,0 +1,25 @@
+name: Language Server CI Workflow
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Check format
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v2.1.2
+        with:
+          node-version: '14'
+          check-latest: true
+
+      - name: Checkout project
+        uses: actions/checkout@v2
+
+      - name: Run npm install
+        working-directory: editor-extensions/vscode
+        run: npm ci
+
+      - name: Check formatting
+        run: npm run check-format
+        working-directory: editor-extensions/vscode
