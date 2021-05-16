@@ -896,7 +896,7 @@
           "begin": "\\b([A-Z]\\w*)\\b\\s*(\\()",
           "end": "(\\))",
           "beginCaptures": {
-            "1": { "patterns": [{"include": "#type-variant-name"}] },
+            "1": { "patterns": [{ "include": "#type-variant-name" }] },
             "2": { "name": "punctuation.definition.parameters.begin.grain" }
           },
           "endCaptures": {
@@ -915,7 +915,7 @@
         {
           "match": "\\b([A-Z]\\w*)\\b",
           "captures": {
-            "1": { "patterns": [{"include": "#type-variant-name"}] }
+            "1": { "patterns": [{ "include": "#type-variant-name" }] }
           }
         },
         {
@@ -953,7 +953,7 @@
           "begin": "\\b([A-Z]\\w*)\\b\\s*(\\()",
           "end": "(\\))",
           "beginCaptures": {
-            "1": { "patterns": [{"include": "#type-variant-name"}] },
+            "1": { "patterns": [{ "include": "#type-variant-name" }] },
             "2": { "name": "punctuation.definition.parameters.begin.grain" }
           },
           "endCaptures": {
@@ -972,7 +972,7 @@
         {
           "match": "\\b([A-Z]\\w*)\\b",
           "captures": {
-            "1": { "patterns": [{"include": "#type-variant-name"}] }
+            "1": { "patterns": [{ "include": "#type-variant-name" }] }
           }
         },
         {
@@ -1060,7 +1060,7 @@
           "begin": "\\b([A-Z]\\w*)\\b(?=\\s*\\()",
           "end": "(?<=\\))",
           "beginCaptures": {
-            "1": { "patterns": [{"include": "#type-variant-name"}] }
+            "1": { "patterns": [{ "include": "#type-variant-name" }] }
           },
           "patterns": [
             {
@@ -1110,7 +1110,7 @@
         {
           "match": "\\b([A-Z]\\w*)\\b",
           "captures": {
-            "1": { "patterns": [{"include": "#type-variant-name"}] }
+            "1": { "patterns": [{ "include": "#type-variant-name" }] }
           }
         },
         {
