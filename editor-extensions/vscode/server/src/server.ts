@@ -23,7 +23,7 @@ import {
 } from "vscode-languageserver";
 
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { URI } from 'vscode-uri';
+import { URI } from "vscode-uri";
 
 import * as childProcess from "child_process";
 
@@ -43,7 +43,7 @@ function filenameFromUri(uri: URI) {
   // Packaged Grain doesn't understand lowercase drive letters.
   // If authority is not empty, then we can skip since this is
   // a UNC path.
-  if (isWindows && uri.authority === '') {
+  if (isWindows && uri.authority === "") {
     filename = filename[0].toUpperCase() + filename.substring(1);
   }
 
@@ -303,15 +303,18 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
           if (text.includes("\r\n")) {
             json_string = JSON.stringify({
               values: [],
-              errors: [{
-                file: filename,
-                line: 1,
-                startchar: 0,
-                endline: 1,
-                endchar: 0,
-                lsp_message: "Grain LSP doesn't support CRLF line-feeds yet. Try switching to LF."
-              }]
-            })
+              errors: [
+                {
+                  file: filename,
+                  line: 1,
+                  startchar: 0,
+                  endline: 1,
+                  endchar: 0,
+                  lsp_message:
+                    "Grain LSP doesn't support CRLF line-feeds yet. Try switching to LF.",
+                },
+              ],
+            });
           } else {
             let cwd = path.dirname(filename);
 
