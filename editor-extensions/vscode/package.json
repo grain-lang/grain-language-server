@@ -1,145 +1,145 @@
 {
-	"name": "vscode-grain",
-	"displayName": "Grain",
-	"description": "Grain support for Visual Studio Code.",
-	"version": "0.10.3",
-	"publisher": "grain-lang",
-	"keywords": [
-		"grain",
-		"grain-lang"
-	],
-	"icon": "grain_shorthand_white.png",
-	"engines": {
-		"vscode": "^1.43.0"
-	},
-	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/grain-lang/grain-language-server"
-	},
-	"bugs": {
-		"url": "https://github.com/grain-lang/grain-language-server/issues"
-	},
-	"categories": [
-		"Programming Languages"
-	],
-	"activationEvents": [
-		"onLanguage:grain"
-	],
-	"main": "./client/out/extension",
-	"contributes": {
-		"languages": [
-			{
-				"id": "grain",
-				"aliases": [
-					"Grain",
-					"grain"
-				],
-				"extensions": [
-					".gr"
-				],
-				"configuration": "./language-configuration.json"
-			},
-			{
-				"id": "grain-type",
-				"aliases": [
-					"Grain Type"
-				],
-				"configuration": "./language-configuration.json"
-			}
-		],
-		"grammars": [
-			{
-				"language": "grain",
-				"scopeName": "source.grain",
-				"path": "./syntaxes/grain.json"
-			},
-			{
-				"language": "grain-type",
-				"scopeName": "source.grain-type",
-				"path": "./syntaxes/grain-type.json"
-			}
-		],
-		"configurationDefaults": {
-			"[grain]": {
-				"files.eol": "\n",
-				"files.insertFinalNewline": true
-			}
-		},
-		"configuration": {
-			"type": "object",
-			"title": "Grain Language Server configuration",
-			"properties": {
-				"grain_language_server.enableLSP": {
-					"scope": "window",
-					"type": "boolean",
-					"default": true,
-					"description": "Enable the language server"
-				},
-				"grain_language_server.enableStatementLenses": {
-					"scope": "window",
-					"type": "boolean",
-					"default": true,
-					"description": "Enable per-statement lenses"
-				},
-				"grain_language_server.maxNumberOfProblems": {
-					"scope": "resource",
-					"type": "number",
-					"default": 100,
-					"description": "Controls the maximum number of problems produced by the server."
-				},
-				"grain_language_server.trace": {
-					"scope": "window",
-					"type": "string",
-					"enum": [
-						"off",
-						"messages",
-						"verbose"
-					],
-					"default": "off",
-					"description": "Traces the communication between VS Code and the language server."
-				},
-				"grain_language_server.cliPath": {
-					"scope": "window",
-					"type": "string",
-					"default": "grain",
-					"description": "Path to the grain cli"
-				},
-				"grain_language_server.debounce": {
-					"scope": "window",
-					"type": "number",
-					"default": 1000,
-					"description": "Interval in milliseconds to debounce compiler call"
-				}
-			}
-		}
-	},
-	"scripts": {
-		"compile": "tsc -b && node syntaxes/generate-grain-type.js",
-		"watch": "tsc -b -w",
-		"postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
-		"test": "sh ./scripts/e2e.sh",
-		"vscode:prepublish": "npm run compile",
-		"test-compile": "tsc -p ./",
-		"format": "prettier --write .",
-		"check-format": "prettier --check .",
-		"deploy": "vsce publish && ovsx publish"
-	},
-	"devDependencies": {
-		"@types/mocha": "^8.0.3",
-		"@types/node": "^12.12.0",
-		"@typescript-eslint/parser": "^2.3.0",
-		"eslint": "^6.4.0",
-		"mocha": "^8.1.1",
-		"ovsx": "0.1.0-next.ae88c6d",
-		"prettier": "^2.2.1",
-		"ts-loader": "^8.0.5",
-		"typescript": "^4.0.2",
-		"vsce": "^1.83.0"
-	},
-	"__metadata": {
-		"id": "b95eb54f-dbaf-4bb5-a18c-8b56da8a0829",
-		"publisherDisplayName": "The Grain Programming Language",
-		"publisherId": "28fcb3bd-39d4-48a2-9e5b-115ceb2c067b"
-	}
+  "name": "vscode-grain",
+  "displayName": "Grain",
+  "description": "Grain support for Visual Studio Code.",
+  "version": "0.10.3",
+  "publisher": "grain-lang",
+  "keywords": [
+    "grain",
+    "grain-lang"
+  ],
+  "icon": "grain_shorthand_white.png",
+  "engines": {
+    "vscode": "^1.43.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/grain-lang/grain-language-server"
+  },
+  "bugs": {
+    "url": "https://github.com/grain-lang/grain-language-server/issues"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onLanguage:grain"
+  ],
+  "main": "./client/out/extension",
+  "contributes": {
+    "languages": [
+      {
+        "id": "grain",
+        "aliases": [
+          "Grain",
+          "grain"
+        ],
+        "extensions": [
+          ".gr"
+        ],
+        "configuration": "./language-configuration.json"
+      },
+      {
+        "id": "grain-type",
+        "aliases": [
+          "Grain Type"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "grain",
+        "scopeName": "source.grain",
+        "path": "./syntaxes/grain.json"
+      },
+      {
+        "language": "grain-type",
+        "scopeName": "source.grain-type",
+        "path": "./syntaxes/grain-type.json"
+      }
+    ],
+    "configurationDefaults": {
+      "[grain]": {
+        "files.eol": "\n",
+        "files.insertFinalNewline": true
+      }
+    },
+    "configuration": {
+      "type": "object",
+      "title": "Grain Language Server configuration",
+      "properties": {
+        "grain_language_server.enableLSP": {
+          "scope": "window",
+          "type": "boolean",
+          "default": true,
+          "description": "Enable the language server"
+        },
+        "grain_language_server.enableStatementLenses": {
+          "scope": "window",
+          "type": "boolean",
+          "default": true,
+          "description": "Enable per-statement lenses"
+        },
+        "grain_language_server.maxNumberOfProblems": {
+          "scope": "resource",
+          "type": "number",
+          "default": 100,
+          "description": "Controls the maximum number of problems produced by the server."
+        },
+        "grain_language_server.trace": {
+          "scope": "window",
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "Traces the communication between VS Code and the language server."
+        },
+        "grain_language_server.cliPath": {
+          "scope": "window",
+          "type": "string",
+          "default": "grain",
+          "description": "Path to the grain cli"
+        },
+        "grain_language_server.debounce": {
+          "scope": "window",
+          "type": "number",
+          "default": 1000,
+          "description": "Interval in milliseconds to debounce compiler call"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -b && node syntaxes/generate-grain-type.js",
+    "watch": "tsc -b -w",
+    "postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
+    "test": "sh ./scripts/e2e.sh",
+    "vscode:prepublish": "npm run compile",
+    "test-compile": "tsc -p ./",
+    "format": "prettier --write .",
+    "check-format": "prettier --check .",
+    "deploy": "vsce publish && ovsx publish"
+  },
+  "devDependencies": {
+    "@types/mocha": "^8.0.3",
+    "@types/node": "^12.12.0",
+    "@typescript-eslint/parser": "^2.3.0",
+    "eslint": "^6.4.0",
+    "mocha": "^8.1.1",
+    "ovsx": "0.1.0-next.ae88c6d",
+    "prettier": "^2.2.1",
+    "ts-loader": "^8.0.5",
+    "typescript": "^4.0.2",
+    "vsce": "^1.88.0"
+  },
+  "__metadata": {
+    "id": "b95eb54f-dbaf-4bb5-a18c-8b56da8a0829",
+    "publisherDisplayName": "The Grain Programming Language",
+    "publisherId": "28fcb3bd-39d4-48a2-9e5b-115ceb2c067b"
+  }
 }

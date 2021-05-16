@@ -23,7 +23,7 @@ import {
 } from "vscode-languageserver";
 
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { URI } from 'vscode-uri';
+import { URI } from "vscode-uri";
 
 import * as childProcess from "child_process";
 
@@ -43,7 +43,7 @@ function filenameFromUri(uri: URI) {
   // Packaged Grain doesn't understand lowercase drive letters.
   // If authority is not empty, then we can skip since this is
   // a UNC path.
-  if (isWindows && uri.authority === '') {
+  if (isWindows && uri.authority === "") {
     filename = filename[0].toUpperCase() + filename.substring(1);
   }
 
@@ -56,6 +56,16 @@ interface LSP_Error {
   startchar: number;
   endline: number;
   endchar: number;
+  lsp_message: string;
+}
+
+interface LSP_Warning {
+  file: string;
+  line: number;
+  startchar: number;
+  endline: number;
+  endchar: number;
+  number: number;
   lsp_message: string;
 }
 
@@ -72,6 +82,7 @@ interface LSP_Lens {
 
 interface LSP_Result {
   errors: LSP_Error[];
+  warnings: LSP_Warning[];
   values: LSP_Lens[];
 }
 
@@ -303,15 +314,18 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
           if (text.includes("\r\n")) {
             json_string = JSON.stringify({
               values: [],
-              errors: [{
-                file: filename,
-                line: 1,
-                startchar: 0,
-                endline: 1,
-                endchar: 0,
-                lsp_message: "Grain LSP doesn't support CRLF line-feeds yet. Try switching to LF."
-              }]
-            })
+              errors: [
+                {
+                  file: filename,
+                  line: 1,
+                  startchar: 0,
+                  endline: 1,
+                  endchar: 0,
+                  lsp_message:
+                    "Grain LSP doesn't support CRLF line-feeds yet. Try switching to LF.",
+                },
+              ],
+            });
           } else {
             let cwd = path.dirname(filename);
 
@@ -369,6 +383,28 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
                 };
 
                 diagnostics.push(diagnostic);
+              }
+              if (warnings.length > 0) {
+                warnings.forEach((warning) => {
+                  let schar = warning.startchar < 0 ? 0 : warning.startchar;
+                  let echar = warning.endchar < 0 ? 0 : warning.endchar;
+
+                  let spos = Position.create(warning.line - 1, schar);
+                  let epos = Position.create(warning.endline - 1, echar);
+
+                  let diagnostic: Diagnostic = {
+                    severity: DiagnosticSeverity.Warning,
+                    range: {
+                      start: spos,
+                      end: epos,
+                    },
+                    message:
+                      "Warning " + warning.number + ": " + warning.lsp_message,
+                    source: "grainc",
+                  };
+
+                  diagnostics.push(diagnostic);
+                });
               }
             } catch (ex) {
               if (settings.trace == "verbose") {
