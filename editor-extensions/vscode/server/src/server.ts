@@ -40,12 +40,21 @@ const fileScheme = "file";
 function filenameFromUri(uri: URI) {
 	let filename = uri.fsPath;
 
+<<<<<<< HEAD
 	// Packaged Grain doesn't understand lowercase drive letters.
 	// If authority is not empty, then we can skip since this is
 	// a UNC path.
 	if (isWindows && uri.authority === "") {
 		filename = filename[0].toUpperCase() + filename.substring(1);
 	}
+=======
+  // Packaged Grain doesn't understand lowercase drive letters.
+  // If authority is not empty, then we can skip since this is
+  // a UNC path.
+  if (isWindows && uri.authority === "") {
+    filename = filename[0].toUpperCase() + filename.substring(1);
+  }
+>>>>>>> format_with_prettier
 
 	return filename;
 }
@@ -278,6 +287,7 @@ async function clearDiagnostics(textDocument: TextDocument): Promise<void> {
 
 // simple approach, pass the whole text buffer as stdin to the compiler
 async function validateWithCompiler(textDocumentUri: string): Promise<void> {
+<<<<<<< HEAD
 	let settings = await getDocumentSettings(textDocumentUri);
 	let diagnostics: Diagnostic[] = [];
 
@@ -433,6 +443,140 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
 
 	// Send the computed diagnostics to VSCode.
 	connection.sendDiagnostics({ uri: textDocumentUri, diagnostics });
+=======
+  let settings = await getDocumentSettings(textDocumentUri);
+  let diagnostics: Diagnostic[] = [];
+
+  if (settings.enableLSP) {
+    if (settings.trace == "verbose") {
+      connection.console.log("Validating " + textDocumentUri);
+    }
+
+    let uri = URI.parse(textDocumentUri);
+    if (uri.scheme == fileScheme) {
+      let filename = filenameFromUri(uri);
+      let cliPath = settings.cliPath;
+
+      // If we are executing Grain on Windows in `cmd.exe`,
+      // the command must end in `.cmd` otherwise it fails
+      // However, if we are running grain-win-x64.exe we don't
+      // want to append it because otherwise it breaks
+      if (needsCMD && !cliPath.endsWith(".cmd") && !cliPath.endsWith(".exe")) {
+        cliPath += ".cmd";
+      }
+
+      try {
+        // get the latest text from the cache
+
+        let textDocument = documents.get(textDocumentUri);
+
+        if (textDocument != undefined) {
+          let text = textDocument.getText();
+
+          let json_string = "";
+
+          // If a file has a CRLF line-feed, generate a warning
+          // TODO: Remove this once we support CRLF in the LSP
+          if (text.includes("\r\n")) {
+            json_string = JSON.stringify({
+              values: [],
+              errors: [
+                {
+                  file: filename,
+                  line: 1,
+                  startchar: 0,
+                  endline: 1,
+                  endchar: 0,
+                  lsp_message:
+                    "Grain LSP doesn't support CRLF line-feeds yet. Try switching to LF.",
+                },
+              ],
+            });
+          } else {
+            let cwd = path.dirname(filename);
+
+            let result_json_buffer = childProcess.execFileSync(
+              cliPath,
+              ["lsp", filename],
+              { input: text, cwd }
+            );
+
+            json_string = result_json_buffer.toString();
+          }
+
+          if (json_string.length > 0) {
+            try {
+              let result: LSP_Result = JSON.parse(json_string);
+              let errors = result.errors;
+              let lenses = result.values;
+              if (settings.enableStatementLenses) {
+                if (documentLenses.has(textDocumentUri)) {
+                  documentLenses.delete(textDocumentUri);
+                }
+
+                // always set it, it may just be empty
+                documentLenses.set(textDocumentUri, lenses);
+
+                // work around LSP not having an onDidChangeCodeLenses yet
+                // If we don' call this we are always one step behind
+
+                connection.sendNotification("grainlsp/lensesLoaded", []);
+              } else {
+                // clear the lenses the first time we find any left over
+                // after a switch to no lenses
+                if (documentLenses.keys.length > 0) {
+                  documentLenses = new Map();
+                }
+              }
+
+              if (errors.length > 0) {
+                let error = errors[0];
+
+                let schar = error.startchar < 0 ? 0 : error.startchar;
+                let echar = error.endchar < 0 ? 0 : error.endchar;
+
+                let spos = Position.create(error.line - 1, schar);
+                let epos = Position.create(error.endline - 1, echar);
+
+                let diagnostic: Diagnostic = {
+                  severity: DiagnosticSeverity.Error,
+                  range: {
+                    start: spos,
+                    end: epos,
+                  },
+                  message: "Error: " + error.lsp_message,
+                  source: "grainc",
+                };
+
+                diagnostics.push(diagnostic);
+              }
+            } catch (ex) {
+              if (settings.trace == "verbose") {
+                connection.console.log("Json Exception:");
+                connection.console.log(ex.message());
+                connection.console.log(ex.stack());
+              }
+            }
+          }
+        } else {
+          if (settings.trace == "verbose") {
+            connection.console.log(
+              "Warning: Text document queued but not defined"
+            );
+          }
+        }
+      } catch (e) {
+        if (settings.trace == "verbose" || settings.trace == "messages") {
+          connection.console.log("Exception:");
+          connection.console.log(e);
+        }
+      }
+    }
+  }
+
+  // Send the computed diagnostics to VSCode.
+  connection.sendDiagnostics({ uri: textDocumentUri, diagnostics });
+>>>>>>> format_with_prettier
 }
 
 // This handler provides the initial list of the completion items.

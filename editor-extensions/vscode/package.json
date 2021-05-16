@@ -135,7 +135,11 @@
     "prettier": "^2.2.1",
     "ts-loader": "^8.0.5",
     "typescript": "^4.0.2",
+<<<<<<< HEAD
     "vsce": "^1.88.0"
+=======
+    "vsce": "^1.83.0"
+>>>>>>> format_with_prettier
   },
   "__metadata": {
     "id": "b95eb54f-dbaf-4bb5-a18c-8b56da8a0829",
