@@ -59,6 +59,16 @@ interface LSP_Error {
   lsp_message: string;
 }
 
+interface LSP_Warning {
+  file: string;
+  line: number;
+  startchar: number;
+  endline: number;
+  endchar: number;
+  number: number;
+  lsp_message: string;
+}
+
 interface LSP_Lens {
   sl: number;
   sc: number;
@@ -72,6 +82,7 @@ interface LSP_Lens {
 
 interface LSP_Result {
   errors: LSP_Error[];
+  warnings: LSP_Warning[];
   values: LSP_Lens[];
 }
 
@@ -331,6 +342,12 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
             try {
               let result: LSP_Result = JSON.parse(json_string);
               let errors = result.errors;
+              let warnings = result.warnings;
+              // backwards compatibility
+              if (warnings == null) {
+                warnings = [];
+              }
+
               let lenses = result.values;
               if (settings.enableStatementLenses) {
                 if (documentLenses.has(textDocumentUri)) {
@@ -372,6 +389,28 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
                 };
 
                 diagnostics.push(diagnostic);
+              }
+              if (warnings.length > 0) {
+                warnings.forEach((warning) => {
+                  let schar = warning.startchar < 0 ? 0 : warning.startchar;
+                  let echar = warning.endchar < 0 ? 0 : warning.endchar;
+
+                  let spos = Position.create(warning.line - 1, schar);
+                  let epos = Position.create(warning.endline - 1, echar);
+
+                  let diagnostic: Diagnostic = {
+                    severity: DiagnosticSeverity.Warning,
+                    range: {
+                      start: spos,
+                      end: epos,
+                    },
+                    message:
+                      "Warning " + warning.number + ": " + warning.lsp_message,
+                    source: "grainc",
+                  };
+
+                  diagnostics.push(diagnostic);
+                });
               }
             } catch (ex) {
               if (settings.trace == "verbose") {
