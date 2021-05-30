@@ -309,34 +309,15 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
 
           let json_string = "";
 
-          // If a file has a CRLF line-feed, generate a warning
-          // TODO: Remove this once we support CRLF in the LSP
-          if (text.includes("\r\n")) {
-            json_string = JSON.stringify({
-              values: [],
-              errors: [
-                {
-                  file: filename,
-                  line: 1,
-                  startchar: 0,
-                  endline: 1,
-                  endchar: 0,
-                  lsp_message:
-                    "Grain LSP doesn't support CRLF line-feeds yet. Try switching to LF.",
-                },
-              ],
-            });
-          } else {
-            let cwd = path.dirname(filename);
+          let cwd = path.dirname(filename);
 
-            let result_json_buffer = childProcess.execFileSync(
-              cliPath,
-              ["lsp", filename],
-              { input: text, cwd }
-            );
+          let result_json_buffer = childProcess.execFileSync(
+            cliPath,
+            ["lsp", filename],
+            { input: text, cwd }
+          );
 
-            json_string = result_json_buffer.toString();
-          }
+          json_string = result_json_buffer.toString();
 
           if (json_string.length > 0) {
             try {
