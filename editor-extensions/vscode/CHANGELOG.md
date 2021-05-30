@@ -1,6 +1,16 @@
 # Changelog
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
+## [0.11.0](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.10.3...vscode-grain-v0.11.0) (2021-05-30)
+
+
+### Features
+
+* Add syntax highlighting for pattern constraints ([#61](https://www.github.com/grain-lang/grain-language-server/issues/61)) ([ecbb40d](https://www.github.com/grain-lang/grain-language-server/commit/ecbb40d4aa7835d418eea173393cea0e615341a1))
+* parse warnings from code returned from LSP ([#70](https://www.github.com/grain-lang/grain-language-server/issues/70)) ([78a69cb](https://www.github.com/grain-lang/grain-language-server/commit/78a69cb3625b910cd403ddc436ffcb4ff71913f5))
+* Remove the block on CRLF format ([#72](https://www.github.com/grain-lang/grain-language-server/issues/72)) ([905e18e](https://www.github.com/grain-lang/grain-language-server/commit/905e18ea171ec553c45a43d043881bca2ae41423))
+* Switch to vscode-url library to better support Windows paths ([#62](https://www.github.com/grain-lang/grain-language-server/issues/62)) ([66cfa08](https://www.github.com/grain-lang/grain-language-server/commit/66cfa08c7cd5da538d19e3dd63cb490490fa3d08))
+
 ## v0.10.3
 - Fixes syntax highlighting for rational literals.
 
