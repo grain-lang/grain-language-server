@@ -62,7 +62,6 @@
     ],
     "configurationDefaults": {
       "[grain]": {
-        "files.eol": "\n",
         "files.insertFinalNewline": true
       }
     },
