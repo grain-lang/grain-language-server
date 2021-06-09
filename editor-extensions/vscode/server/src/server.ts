@@ -181,6 +181,7 @@ connection.onInitialized(() => {
       .getConfiguration({
         section: "grain_language_server",
       })
+      .then(settings => settings ?? globalSettings)
       .then(
         (settings) =>
           (debounceTimer = global.setInterval(
