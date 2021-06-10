@@ -1,6 +1,14 @@
 # Changelog
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
+### [0.11.1](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.11.0...vscode-grain-v0.11.1) (2021-06-10)
+
+
+### Bug Fixes
+
+* enable neovim ([#76](https://www.github.com/grain-lang/grain-language-server/issues/76)) ([7257f21](https://www.github.com/grain-lang/grain-language-server/commit/7257f21526bbfbbedc1bf8aeadb07c0025fbe393))
+* No longer recommend \n for grain files ([#74](https://www.github.com/grain-lang/grain-language-server/issues/74)) ([e5ae4a5](https://www.github.com/grain-lang/grain-language-server/commit/e5ae4a50d15a5afe5d3a2d40bc6570b55994aecb))
+
 ## [0.11.0](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.10.3...vscode-grain-v0.11.0) (2021-05-30)
 
 
