@@ -181,6 +181,7 @@ connection.onInitialized(() => {
       .getConfiguration({
         section: "grain_language_server",
       })
+      .then(settings => settings ?? globalSettings)
       .then(
         (settings) =>
           (debounceTimer = global.setInterval(
@@ -249,7 +250,8 @@ function getDocumentSettings(resource: string): Thenable<GrainSettings> {
     result = connection.workspace.getConfiguration({
       scopeUri: resource,
       section: "grain_language_server",
-    });
+    })
+    .then(settings => settings ?? globalSettings);
     documentSettings.set(resource, result);
   }
   return result;
