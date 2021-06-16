@@ -16,12 +16,14 @@ import {
 } from "vscode-languageclient";
 
 import { CodelensProvider } from "./CodelensProvider";
+import { GrainDocCompletionProvider } from "./GrainDocCompletionProvider";
 
 let client: LanguageClient;
 
 let disposables: Disposable[] = [];
 
 let codelensProvider: CodelensProvider;
+let grainDocCompletionProvider: GrainDocCompletionProvider;
 
 export function activate(context: ExtensionContext) {
   // The server is implemented in node
@@ -67,6 +69,9 @@ export function activate(context: ExtensionContext) {
     // until LSP 3.16.0 arrives
     codelensProvider = new CodelensProvider(client);
     languages.registerCodeLensProvider("grain", codelensProvider);
+
+    grainDocCompletionProvider = new GrainDocCompletionProvider();
+    languages.registerCompletionItemProvider("grain", grainDocCompletionProvider, "*")
 
     codelensProvider.triggerRefresh();
     client.onNotification("grainlsp/lensesLoaded", (files: Array<String>) => {
