@@ -71,7 +71,11 @@ export function activate(context: ExtensionContext) {
     languages.registerCodeLensProvider("grain", codelensProvider);
 
     grainDocCompletionProvider = new GrainDocCompletionProvider();
-    languages.registerCompletionItemProvider("grain", grainDocCompletionProvider, "*")
+    languages.registerCompletionItemProvider(
+      "grain",
+      grainDocCompletionProvider,
+      "*"
+    );
 
     codelensProvider.triggerRefresh();
     client.onNotification("grainlsp/lensesLoaded", (files: Array<String>) => {
