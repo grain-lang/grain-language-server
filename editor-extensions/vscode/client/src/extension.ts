@@ -70,7 +70,7 @@ export function activate(context: ExtensionContext) {
     codelensProvider = new CodelensProvider(client);
     languages.registerCodeLensProvider("grain", codelensProvider);
 
-    grainDocCompletionProvider = new GrainDocCompletionProvider();
+    grainDocCompletionProvider = new GrainDocCompletionProvider(client);
     languages.registerCompletionItemProvider(
       "grain",
       grainDocCompletionProvider,
