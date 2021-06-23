@@ -826,8 +826,12 @@
     "keywords": {
       "patterns": [
         {
-          "match": "\\b(throw|let|rec|mut|record|enum|while|for|continue|break|match|when|pattern|assert|fail|import|export|foreign|primitive|from|except|as)\\b",
+          "match": "\\b(throw|while|for|continue|break|match|when|pattern|assert|fail|import|export|from|except|as)\\b",
           "name": "keyword.control.grain"
+        },
+        {
+          "match": "\\b(let|rec|mut|record|enum|foreign|primitive)\\b",
+          "name": "storage.type.grain"
         }
       ]
     },
