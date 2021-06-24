@@ -37,14 +37,16 @@
       // e.g. /** ...|
       "beforeText": "^\\s*\\/\\*\\*(?!\\/)([^\\*]|\\*(?!\\/))*$",
       "action": { "indent": "none", "appendText": " * " }
-    }, {
+    },
+    {
       // e.g.  * ...|
       "beforeText": "^(\\t|(\\ ))*\\ \\*(\\ ([^\\*]|\\*(?!\\/))*)?$",
       "action": { "indent": "none", "appendText": "* " }
-    }, {
+    },
+    {
       // e.g.  */|
       "beforeText": "^(\\t|(\\ ))*\\ \\*\\/\\s*$",
       "action": { "indent": "none", "removeText": 1 }
-    },
+    }
   ]
 }
