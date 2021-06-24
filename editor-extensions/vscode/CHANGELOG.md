@@ -1,6 +1,19 @@
 # Changelog
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
+## [0.12.0](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.11.1...vscode-grain-v0.12.0) (2021-06-24)
+
+
+### Features
+
+* **docblock:** Continue to add * inside doc comments after return ([#83](https://www.github.com/grain-lang/grain-language-server/issues/83)) ([3f96f20](https://www.github.com/grain-lang/grain-language-server/commit/3f96f20cbe258e4a8b02cede9d421e1fffc8ee13))
+* **vscode:** Add completions for Grain Doc comments ([#80](https://www.github.com/grain-lang/grain-language-server/issues/80)) ([d34b4ec](https://www.github.com/grain-lang/grain-language-server/commit/d34b4ec89a4dd20a393c09b4d783c8704345c04f))
+
+
+### Bug Fixes
+
+* proper token types for storage keywords ([#82](https://www.github.com/grain-lang/grain-language-server/issues/82)) ([bfde3af](https://www.github.com/grain-lang/grain-language-server/commit/bfde3af7d62652ee82bb0b0cc39b26ddb2ebf118))
+
 ### [0.11.1](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.11.0...vscode-grain-v0.11.1) (2021-06-10)
 
 
