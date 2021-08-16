@@ -26,8 +26,7 @@ class GrainDocCompletionItem extends vscode.CompletionItem {
 }
 
 export class GrainDocCompletionProvider
-  implements vscode.CompletionItemProvider
-{
+  implements vscode.CompletionItemProvider {
   constructor(readonly client: LanguageClient) {}
 
   public async provideCompletionItems(
