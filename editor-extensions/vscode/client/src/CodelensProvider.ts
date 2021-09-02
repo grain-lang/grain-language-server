@@ -19,9 +19,10 @@ import {
 export class CodelensProvider implements vscode.CodeLensProvider {
   private codeLenses: vscode.CodeLens[] = [];
   private regex: RegExp;
-  public onDidChangeCodeLensesEmitter: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
-  public readonly onDidChangeCodeLenses: vscode.Event<void> = this
-    .onDidChangeCodeLensesEmitter.event;
+  public onDidChangeCodeLensesEmitter: vscode.EventEmitter<void> =
+    new vscode.EventEmitter<void>();
+  public readonly onDidChangeCodeLenses: vscode.Event<void> =
+    this.onDidChangeCodeLensesEmitter.event;
 
   constructor(readonly client: LanguageClient) {
     this.regex = /(.+)/g;
