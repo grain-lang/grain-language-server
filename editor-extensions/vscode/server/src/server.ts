@@ -142,6 +142,7 @@ connection.onInitialize((params: InitializeParams) => {
       // 	resolveProvider: true
       // },
       hoverProvider: true,
+      documentFormattingProvider: true,
       // Tell the client that this server supports code completion.
       // Coming soon!
       // completionProvider: {
@@ -435,6 +436,49 @@ connection.onCompletion(
   }
 );
 
+connection.onDocumentFormatting((handler) => {
+  connection.console.log("onDocumentFormatting called");
+  let uri = URI.parse(handler.textDocument.uri);
+  if (uri.scheme == fileScheme) {
+    let filename = filenameFromUri(uri);
+
+    try {
+      // get the latest text from the cache
+
+      let textDocument = documents.get(handler.textDocument.uri);
+      let cwd = path.dirname(filename);
+
+      if (textDocument != undefined) {
+        let text = textDocument.getText();
+
+        let result_buffer = childProcess.execFileSync("grain", ["format"], {
+          input: text,
+          cwd,
+        });
+
+        let res = result_buffer.toString();
+
+        return Promise.resolve([
+          {
+            range: {
+              start: Position.create(0, 0),
+              end: Position.create(
+                Number.MAX_SAFE_INTEGER,
+                Number.MAX_SAFE_INTEGER
+              ),
+            },
+            newText: res,
+          },
+        ]);
+      }
+    } catch (e) {
+      connection.console.log("Exception:");
+      connection.console.log(e);
+    }
+  }
+  return null;
+});
+
 // look the lenses up from the info from the last compile
 
 connection.onCodeLens((handler) => {
@@ -480,7 +524,8 @@ connection.onCodeLensResolve((codeLens) => {
 });
 
 connection.onHover((params: TextDocumentPositionParams): Hover | undefined => {
-  let bestmatch: LSP_Lens | undefined = undefined;
+  //let bestmatch: LSP_Lens | undefined = undefined;
+  let bestmatch: any = undefined;
   let bestrange = 0;
 
   let line = params.position.line + 1; // editor is offset 0
