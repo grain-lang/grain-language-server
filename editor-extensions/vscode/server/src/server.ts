@@ -1,5 +1,5 @@
 /* This file is largely copied from vscode's sample library.
-	 The original copyright notice is reproduced below. */
+   The original copyright notice is reproduced below. */
 /* --------------------------------------------------------------------------------------------
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the MIT License. See License.txt in the project root for license information.
@@ -436,11 +436,22 @@ connection.onCompletion(
   }
 );
 
-connection.onDocumentFormatting((handler) => {
+connection.onDocumentFormatting(async (handler) => {
   connection.console.log("onDocumentFormatting called");
+
   let uri = URI.parse(handler.textDocument.uri);
+  let settings = await getDocumentSettings(handler.textDocument.uri);
   if (uri.scheme == fileScheme) {
     let filename = filenameFromUri(uri);
+    let cliPath = settings.cliPath;
+
+    // If we are executing Grain on Windows in `cmd.exe`,
+    // the command must end in `.cmd` otherwise it fails
+    // However, if we are running grain-win-x64.exe we don't
+    // want to append it because otherwise it breaks
+    if (needsCMD && !cliPath.endsWith(".cmd") && !cliPath.endsWith(".exe")) {
+      cliPath += ".cmd";
+    }
 
     try {
       // get the latest text from the cache
@@ -451,7 +462,7 @@ connection.onDocumentFormatting((handler) => {
       if (textDocument != undefined) {
         let text = textDocument.getText();
 
-        let result_buffer = childProcess.execFileSync("grain", ["format"], {
+        let result_buffer = childProcess.execFileSync(cliPath, ["format"], {
           input: text,
           cwd,
         });
