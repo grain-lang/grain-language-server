@@ -1,6 +1,17 @@
 # Changelog
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
+## [0.13.0](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.12.0...vscode-grain-v0.13.0) (2021-09-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* Add formatter support (#85)
+
+### Features
+
+* Add formatter support ([#85](https://www.github.com/grain-lang/grain-language-server/issues/85)) ([c1a85e4](https://www.github.com/grain-lang/grain-language-server/commit/c1a85e457e3ec5dee3c1ed6d113bbd2c0ade17e4))
+
 ## [0.12.0](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.11.1...vscode-grain-v0.12.0) (2021-06-24)
 
 
