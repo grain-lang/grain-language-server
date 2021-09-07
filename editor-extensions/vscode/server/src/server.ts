@@ -185,10 +185,10 @@ connection.onInitialized(() => {
       .then((settings) => settings ?? globalSettings)
       .then(
         (settings) =>
-        (debounceTimer = global.setInterval(
-          processChangedDocuments,
-          settings.debounce
-        ))
+          (debounceTimer = global.setInterval(
+            processChangedDocuments,
+            settings.debounce
+          ))
       );
   } else {
     debounceTimer = global.setInterval(
@@ -425,8 +425,6 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
   connection.sendDiagnostics({ uri: textDocumentUri, diagnostics });
 }
 
-
-
 // This handler provides the initial list of the completion items.
 // Leaving this commented for when work on completion is done
 connection.onCompletion(
@@ -437,8 +435,6 @@ connection.onCompletion(
     return [];
   }
 );
-
-
 
 connection.onDocumentFormatting(async (handler) => {
   connection.console.log("onDocumentFormatting called");
