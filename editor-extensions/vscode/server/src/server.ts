@@ -30,6 +30,8 @@ import * as childProcess from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 
+const buildScriptPath = "script/grainfind.js";
+
 const isWindows = /^win32/.test(process.platform);
 // Not sure if this can technically change between VSCode restarts. Even if it does,
 // it is likely to be swapped with PowerShell, which understands the `.cmd` executables.
@@ -107,7 +109,7 @@ interface Dictionary<T> {
 
 // The workspace folder this server is operating on
 let workspaceFolder: string | null;
-let buildScriptPath = "script/grainfind.js";
+
 
 // store lenses per document by uri
 let documentLenses: Map<string, LSP_Lens[]> = new Map();
