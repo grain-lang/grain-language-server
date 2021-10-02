@@ -110,7 +110,6 @@ interface Dictionary<T> {
 // The workspace folder this server is operating on
 let workspaceFolder: string | null;
 
-
 // store lenses per document by uri
 let documentLenses: Map<string, LSP_Lens[]> = new Map();
 
