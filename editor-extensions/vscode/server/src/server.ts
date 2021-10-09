@@ -397,7 +397,7 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
                   diagnostics.push(diagnostic);
                 });
               }
-            } catch (ex:any) {
+            } catch (ex: any) {
               if (settings.trace == "verbose") {
                 connection.console.log("Json Exception:");
                 connection.console.log(ex.message());
@@ -412,7 +412,7 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
             );
           }
         }
-      } catch (e:any) {
+      } catch (e: any) {
         if (settings.trace == "verbose" || settings.trace == "messages") {
           connection.console.log("Exception:");
           connection.console.log(e);
@@ -482,7 +482,7 @@ connection.onDocumentFormatting(async (handler) => {
           },
         ]);
       }
-    } catch (e:any) {
+    } catch (e: any) {
       connection.console.log("Exception:");
       connection.console.log(e);
     }
