@@ -20,7 +20,7 @@ import {
   Position,
   Range,
   CodeLens,
-} from "vscode-languageserver";
+} from "vscode-languageserver/node";
 
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { URI } from "vscode-uri";
