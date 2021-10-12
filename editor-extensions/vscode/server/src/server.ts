@@ -30,7 +30,7 @@ import * as childProcess from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 
-const buildScriptPath = "script/grainfind.js";
+let buildScriptPath = "script/grainfind.js";
 
 const isWindows = /^win32/.test(process.platform);
 // Not sure if this can technically change between VSCode restarts. Even if it does,
