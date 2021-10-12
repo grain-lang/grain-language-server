@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
+### [0.14.1](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.14.0...vscode-grain-v0.14.1) (2021-10-12)
+
+
+### Bug Fixes
+
+* Fix the build issue ([#95](https://www.github.com/grain-lang/grain-language-server/issues/95)) ([4a30b83](https://www.github.com/grain-lang/grain-language-server/commit/4a30b831ec5e7e678886154f36c42169abe1e8d3))
+
 ## [0.14.0](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.13.1...vscode-grain-v0.14.0) (2021-10-12)
 
 
