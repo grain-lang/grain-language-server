@@ -1,5 +1,5 @@
 /* This file is largely copied from vscode's sample library.
-   The original copyright notice is reproduced below. */
+	 The original copyright notice is reproduced below. */
 /* --------------------------------------------------------------------------------------------
  * Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the MIT License. See License.txt in the project root for license information.
@@ -27,7 +27,10 @@ import { URI } from "vscode-uri";
 
 import * as childProcess from "child_process";
 
-var path = require("path");
+import * as fs from "fs";
+import * as path from "path";
+
+const buildScriptPath = "script/grainfind.js";
 
 const isWindows = /^win32/.test(process.platform);
 // Not sure if this can technically change between VSCode restarts. Even if it does,
@@ -104,6 +107,9 @@ interface Dictionary<T> {
   [Key: string]: T;
 }
 
+// The workspace folder this server is operating on
+let workspaceFolder: string | null;
+
 // store lenses per document by uri
 let documentLenses: Map<string, LSP_Lens[]> = new Map();
 
@@ -115,6 +121,25 @@ async function processChangedDocuments(): Promise<void> {
 }
 
 connection.onInitialize((params: InitializeParams) => {
+  let pathUri: any;
+  if (!params.workspaceFolders) {
+    pathUri = params.rootUri;
+  } else {
+    let root: any;
+    if (params.workspaceFolders.length === 1) {
+      root = params.workspaceFolders[0];
+      pathUri = root.uri;
+    } else {
+      pathUri = params.rootPath;
+    }
+  }
+
+  let uri = URI.parse(pathUri);
+  if (uri.scheme == fileScheme) {
+    let workspaceFolder = filenameFromUri(uri);
+    buildScriptPath = path.join(workspaceFolder + "/" + buildScriptPath);
+  }
+
   let capabilities = params.capabilities;
 
   // Does the client support the `workspace/configuration` request?
@@ -315,11 +340,21 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
 
           let cwd = path.dirname(filename);
 
-          let result_json_buffer = childProcess.execFileSync(
-            cliPath,
-            ["lsp", filename],
-            { input: text, cwd }
-          );
+          let run_path = cliPath;
+          let args = [];
+
+          // check every run in case it's added or removed
+          if (fs.existsSync(buildScriptPath)) {
+            run_path = "node";
+            args = [buildScriptPath, "lsp", filename];
+          } else {
+            args = ["lsp", filename];
+          }
+
+          let result_json_buffer = childProcess.execFileSync(run_path, args, {
+            input: text,
+            cwd,
+          });
 
           json_string = result_json_buffer.toString();
 
@@ -397,7 +432,7 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
                   diagnostics.push(diagnostic);
                 });
               }
-            } catch (ex) {
+            } catch (ex: any) {
               if (settings.trace == "verbose") {
                 connection.console.log("Json Exception:");
                 connection.console.log(ex.message());
@@ -412,7 +447,7 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
             );
           }
         }
-      } catch (e) {
+      } catch (e: any) {
         if (settings.trace == "verbose" || settings.trace == "messages") {
           connection.console.log("Exception:");
           connection.console.log(e);
@@ -437,8 +472,6 @@ connection.onCompletion(
 );
 
 connection.onDocumentFormatting(async (handler) => {
-  connection.console.log("onDocumentFormatting called");
-
   let uri = URI.parse(handler.textDocument.uri);
   let settings = await getDocumentSettings(handler.textDocument.uri);
   if (uri.scheme == fileScheme) {
@@ -462,7 +495,17 @@ connection.onDocumentFormatting(async (handler) => {
       if (textDocument != undefined) {
         let text = textDocument.getText();
 
-        let result_buffer = childProcess.execFileSync(cliPath, ["format"], {
+        let run_path = cliPath;
+        let args = [];
+
+        if (fs.existsSync(buildScriptPath)) {
+          run_path = "node";
+          args = [buildScriptPath, "format"];
+        } else {
+          args = ["format"];
+        }
+
+        let result_buffer = childProcess.execFileSync(run_path, args, {
           input: text,
           cwd,
         });
@@ -482,7 +525,7 @@ connection.onDocumentFormatting(async (handler) => {
           },
         ]);
       }
-    } catch (e) {
+    } catch (e: any) {
       connection.console.log("Exception:");
       connection.console.log(e);
     }
