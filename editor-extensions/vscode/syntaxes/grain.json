@@ -277,6 +277,16 @@
     "data-declarations": {
       "patterns": [
         {
+          "match": "\\b(type)\\b\\s+([A-Z]\\w*\\s*(<.*>\\s*)?)\\s*(=)\\s*(.*)",
+          "captures": {
+            "1": { "name": "storage.type.grain" },
+            "2": { "name": "entity.name.type.grain" },
+            "3": { "patterns": [{ "include": "#type-vector" }] },
+            "4": { "name": "keyword.operator.grain" },
+            "5": { "patterns": [{ "include": "#type" }] }
+          }
+        },
+        {
           "begin": "\\b(enum)\\b\\s+([A-Z]\\w*\\s*(<.*>\\s*)?)\\s*(\\{)",
           "end": "(\\})",
           "beginCaptures": {
@@ -333,7 +343,7 @@
           ]
         },
         {
-          "match": "(record|enum)\\s+([A-Z]\\w*)(<.*>)?",
+          "match": "(type|record|enum)\\s+([A-Z]\\w*)(<.*>)?",
           "captures": {
             "1": { "name": "storage.type.grain" },
             "2": { "name": "entity.name.type.grain" },
@@ -830,7 +840,7 @@
           "name": "keyword.control.grain"
         },
         {
-          "match": "\\b(let|rec|mut|record|enum|foreign|primitive)\\b",
+          "match": "\\b(let|rec|mut|record|type|enum|foreign|primitive)\\b",
           "name": "storage.type.grain"
         }
       ]
