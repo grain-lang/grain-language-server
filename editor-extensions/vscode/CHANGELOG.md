@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
+## [0.15.0](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.14.1...vscode-grain-v0.15.0) (2021-10-26)
+
+
+### Features
+
+* Basic syntax highlighting for type aliases ([#97](https://www.github.com/grain-lang/grain-language-server/issues/97)) ([8af29fd](https://www.github.com/grain-lang/grain-language-server/commit/8af29fd2dde6a06c26da41b9065a953e87d99dac))
+
 ### [0.14.1](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.14.0...vscode-grain-v0.14.1) (2021-10-12)
 
 
