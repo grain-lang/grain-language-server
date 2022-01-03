@@ -126,7 +126,7 @@
   "scripts": {
     "compile": "tsc -b && node syntaxes/generate-grain-type.js",
     "watch": "tsc -b -w",
-    "postinstall": "cd client && npm install && cd ../server && npm install && cd ..",
+    "postinstall": "cd client && npm install && cd ..",
     "test": "sh ./scripts/e2e.sh",
     "vscode:prepublish": "npm run compile",
     "package": "vsce package",
