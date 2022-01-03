@@ -163,9 +163,9 @@ connection.onInitialize((params: InitializeParams) => {
       // to get VSCode to update as needed.   The server is still providing the lenses,
       // but we ask for them manually.  Once LSP 3.16.0 is out we'll revert to advertising
       // being a lense provider again as below.
-      // codeLensProvider: {
-      // 	resolveProvider: true
-      // },
+      codeLensProvider: {
+      	resolveProvider: true
+      },
       hoverProvider: true,
       documentFormattingProvider: true,
       // Tell the client that this server supports code completion.
@@ -380,7 +380,7 @@ async function validateWithCompiler(textDocumentUri: string): Promise<void> {
                 // work around LSP not having an onDidChangeCodeLenses yet
                 // If we don' call this we are always one step behind
 
-                connection.sendNotification("grainlsp/lensesLoaded", []);
+               // connection.sendNotification("grainlsp/lensesLoaded", []);
               } else {
                 // clear the lenses the first time we find any left over
                 // after a switch to no lenses
@@ -536,6 +536,8 @@ connection.onDocumentFormatting(async (handler) => {
 // look the lenses up from the info from the last compile
 
 connection.onCodeLens((handler) => {
+
+  connection.console.log("oncodelens");
   let codeLenses: CodeLens[] = [];
 
   if (documentLenses.has(handler.textDocument.uri)) {
@@ -567,6 +569,9 @@ connection.onCodeLens((handler) => {
 
 // we already know the info to return so this is a simple function
 connection.onCodeLensResolve((codeLens) => {
+
+  connection.console.log("onCodeLensResolve");
+
   let data = codeLens.data;
 
   codeLens.command = {
@@ -577,7 +582,11 @@ connection.onCodeLensResolve((codeLens) => {
   return codeLens;
 });
 
+
 connection.onHover((params: TextDocumentPositionParams): Hover | undefined => {
+
+  connection.console.log("onHover");
+
   //let bestmatch: LSP_Lens | undefined = undefined;
   let bestmatch: any = undefined;
   let bestrange = 0;

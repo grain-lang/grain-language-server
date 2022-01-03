@@ -28,6 +28,12 @@
   ],
   "main": "./client/out/extension",
   "contributes": {
+    "commands": [
+      {
+        "command": "grain_language_server.startStreaming",
+        "title": "Start Stream Logs into grain_language_server.port"
+      }
+    ],
     "languages": [
       {
         "id": "grain",
@@ -86,6 +92,10 @@
           "type": "number",
           "default": 100,
           "description": "Controls the maximum number of problems produced by the server."
+        },
+        "grain_language_server.trace.server": {
+          "format": "json",
+          "verbosity": "verbose"
         },
         "grain_language_server.trace": {
           "scope": "window",
