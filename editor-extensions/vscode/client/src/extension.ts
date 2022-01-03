@@ -24,33 +24,12 @@ let client: LanguageClient;
 
 let disposables: Disposable[] = [];
 
-//let codelensProvider: CodelensProvider;
 let grainDocCompletionProvider: GrainDocCompletionProvider;
 
 export function activate(context: ExtensionContext) {
-  // The server is implemented in node
-  // let serverModule = context.asAbsolutePath(
-  //   path.join("server", "out", "server.js")
-  // );
-  // // The debug options for the server
-  // // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
-  // let debugOptions = { execArgv: ["--nolazy", "--inspect=6009"] };
-
-  // // If the extension is launched in debug mode then the debug server options are used
-  // // Otherwise the run options are used
-  // let serverOptions: ServerOptions = {
-  //   run: { module: serverModule, transport: TransportKind.ipc },
-  //   debug: {
-  //     module: serverModule,
-  //     transport: TransportKind.ipc,
-  //     options: debugOptions,
-  //   },
-  // };
 
   const socketPort = workspace.getConfiguration('grain_language_server').get('port', 7000);
   let socket: WebSocket | null = null;
-
-
 
   commands.registerCommand('grain_language_server.startStreaming', () => {
     // Establish websocket connection
@@ -116,23 +95,12 @@ export function activate(context: ExtensionContext) {
   );
 
   client.onReady().then(() => {
-    // register a dummy code lens provider
-    // so I can trigger lens updates
-    // until LSP 3.16.0 arrives
-    // codelensProvider = new CodelensProvider(client);
-    // languages.registerCodeLensProvider("grain", codelensProvider);
-
     grainDocCompletionProvider = new GrainDocCompletionProvider(client);
     languages.registerCompletionItemProvider(
       "grain",
       grainDocCompletionProvider,
       "*"
     );
-
-   // codelensProvider.triggerRefresh();
-    // client.onNotification("grainlsp/lensesLoaded", (files: Array<String>) => {
-    //   codelensProvider.triggerRefresh();
-    // });
   });
 
   // Start the client. This will also launch the server
