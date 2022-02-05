@@ -6,16 +6,16 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from "path";
-import { workspace, commands, ExtensionContext, languages, Disposable, OutputChannel } from "vscode";
+import {  workspace, commands, ExtensionContext, languages, Disposable, OutputChannel } from "vscode";
 
 import {
   LanguageClient,
   LanguageClientOptions,
+ // RegistrationRequest,
   ServerOptions,
   TransportKind,
 } from "vscode-languageclient";
 
-//import { CodelensProvider } from "./CodelensProvider";
 import { GrainDocCompletionProvider } from "./GrainDocCompletionProvider";
 
 import * as WebSocket from 'ws';
@@ -26,67 +26,32 @@ let disposables: Disposable[] = [];
 
 let grainDocCompletionProvider: GrainDocCompletionProvider;
 
-export function activate(context: ExtensionContext) {
+let runArgs: string[] = ["lsp"];
+let debugArgs: string[] = ["lsp"];
 
-  const socketPort = workspace.getConfiguration('grain_language_server').get('port', 7000);
-  let socket: WebSocket | null = null;
+let executablePath = "grain";
 
-  commands.registerCommand('grain_language_server.startStreaming', () => {
-    // Establish websocket connection
-    socket = new WebSocket(`ws://localhost:${socketPort}`);
-  });
+let serverOptions: ServerOptions = {
+  run: { command: executablePath, transport: TransportKind.stdio, args: runArgs },
+  debug: {
+    command: executablePath,
+    transport: TransportKind.stdio,
+    args: debugArgs,
+  },
+};
 
-  // The log to send
-  let log = '';
-  const websocketOutputChannel: OutputChannel = {
-    name: 'websocket',
-    // Only append the logs but send them later
-    append(value: string) {
-      log += value;
-      console.log(value);
-    },
-    appendLine(value: string) {
-      log += value;
-      // Don't send logs until WebSocket initialization
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(log);
-      }
-      log = '';
-    },
-    clear() { /* empty */ },
-    show() { /* empty */ },
-    hide() { /* empty */ },
-    dispose() { /* empty */ }
-  };
+// Options to control the language client
+let clientOptions: LanguageClientOptions = {
+  // Register the server for plain text documents
+  documentSelector: [{ scheme: "file", language: "grain" }],
+  synchronize: {
+    // Notify the server about file changes to '.clientrc files contained in the workspace
+    fileEvents: workspace.createFileSystemWatcher("**/.clientrc"),
+  },
+  //  outputChannel: websocketOutputChannel
+};
 
-  let runArgs: string[] = [];
-  let debugArgs: string[] = [];
-
-  let executablePath = "/Users/marcus/Projects/grain/cli/bin/grainlsp.exe";
-
-  let serverOptions: ServerOptions = {
-    run: { command: executablePath, transport: TransportKind.stdio, args: runArgs },
-    debug: {
-      command: executablePath,
-      transport: TransportKind.stdio,
-      args: debugArgs,
-    },
-  };
-
-
-
-  // Options to control the language client
-  let clientOptions: LanguageClientOptions = {
-    // Register the server for plain text documents
-    documentSelector: [{ scheme: "file", language: "grain" }],
-    synchronize: {
-      // Notify the server about file changes to '.clientrc files contained in the workspace
-      fileEvents: workspace.createFileSystemWatcher("**/.clientrc"),
-    },
-    //  outputChannel: websocketOutputChannel
-  };
-
-  // Create the language client and start the client.
+const startClient = () => {
   client = new LanguageClient(
     "grain_langage_server",
     "Grain Language Server",
@@ -105,6 +70,32 @@ export function activate(context: ExtensionContext) {
 
   // Start the client. This will also launch the server
   client.start();
+}
+
+const restart = () => {
+  if (client) {    
+      client.stop().then(() => {
+        if (disposables) {
+          disposables.forEach((item) => item.dispose());
+        }
+        disposables = [];
+        client = undefined;
+        startClient()})
+  } 
+  else startClient()
+
+}
+
+commands.registerCommand('grain_language_server.restart', restart);
+
+
+export function activate(context: ExtensionContext) {
+
+  const socketPort = workspace.getConfiguration('grain_language_server').get('port', 7000);
+  let socket: WebSocket | null = null;
+
+
+ restart()
 }
 
 export function deactivate(): Thenable<void> | undefined {

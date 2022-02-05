@@ -30,8 +30,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "grain_language_server.startStreaming",
-        "title": "Start Stream Logs into grain_language_server.port"
+        "command": "grain_language_server.restart",
+        "title": "Grain: Restart Language Server"
       }
     ],
     "languages": [
