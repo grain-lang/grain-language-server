@@ -6,19 +6,26 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from "path";
-import {  workspace, commands, ExtensionContext, languages, Disposable, OutputChannel } from "vscode";
+import {
+  workspace,
+  commands,
+  ExtensionContext,
+  languages,
+  Disposable,
+  OutputChannel,
+} from "vscode";
 
 import {
   LanguageClient,
   LanguageClientOptions,
- // RegistrationRequest,
+  // RegistrationRequest,
   ServerOptions,
   TransportKind,
 } from "vscode-languageclient";
 
 import { GrainDocCompletionProvider } from "./GrainDocCompletionProvider";
 
-import * as WebSocket from 'ws';
+import * as WebSocket from "ws";
 
 let client: LanguageClient;
 
@@ -32,7 +39,11 @@ let debugArgs: string[] = ["lsp"];
 let executablePath = "grain";
 
 let serverOptions: ServerOptions = {
-  run: { command: executablePath, transport: TransportKind.stdio, args: runArgs },
+  run: {
+    command: executablePath,
+    transport: TransportKind.stdio,
+    args: runArgs,
+  },
   debug: {
     command: executablePath,
     transport: TransportKind.stdio,
@@ -70,32 +81,30 @@ const startClient = () => {
 
   // Start the client. This will also launch the server
   client.start();
-}
+};
 
 const restart = () => {
-  if (client) {    
-      client.stop().then(() => {
-        if (disposables) {
-          disposables.forEach((item) => item.dispose());
-        }
-        disposables = [];
-        client = undefined;
-        startClient()})
-  } 
-  else startClient()
+  if (client) {
+    client.stop().then(() => {
+      if (disposables) {
+        disposables.forEach((item) => item.dispose());
+      }
+      disposables = [];
+      client = undefined;
+      startClient();
+    });
+  } else startClient();
+};
 
-}
-
-commands.registerCommand('grain_language_server.restart', restart);
-
+commands.registerCommand("grain_language_server.restart", restart);
 
 export function activate(context: ExtensionContext) {
-
-  const socketPort = workspace.getConfiguration('grain_language_server').get('port', 7000);
+  const socketPort = workspace
+    .getConfiguration("grain_language_server")
+    .get("port", 7000);
   let socket: WebSocket | null = null;
 
-
- restart()
+  restart();
 }
 
 export function deactivate(): Thenable<void> | undefined {
