@@ -12,13 +12,11 @@ import {
   ExtensionContext,
   languages,
   Disposable,
-  OutputChannel,
 } from "vscode";
 
 import {
   LanguageClient,
   LanguageClientOptions,
-  // RegistrationRequest,
   ServerOptions,
   TransportKind,
 } from "vscode-languageclient";
@@ -59,7 +57,6 @@ let clientOptions: LanguageClientOptions = {
     // Notify the server about file changes to '.clientrc files contained in the workspace
     fileEvents: workspace.createFileSystemWatcher("**/.clientrc"),
   },
-  //  outputChannel: websocketOutputChannel
 };
 
 const startClient = () => {
