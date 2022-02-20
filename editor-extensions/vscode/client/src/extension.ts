@@ -23,8 +23,6 @@ import {
 
 import { GrainDocCompletionProvider } from "./GrainDocCompletionProvider";
 
-import * as WebSocket from "ws";
-
 let client: LanguageClient;
 
 let disposables: Disposable[] = [];
@@ -96,11 +94,6 @@ const restart = () => {
 commands.registerCommand("grain_language_server.restart", restart);
 
 export function activate(context: ExtensionContext) {
-  const socketPort = workspace
-    .getConfiguration("grain_language_server")
-    .get("port", 7000);
-  let socket: WebSocket | null = null;
-
   restart();
 }
 
