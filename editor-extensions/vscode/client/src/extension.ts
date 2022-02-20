@@ -49,7 +49,7 @@ let serverOptions: ServerOptions = {
 
 // Options to control the language client
 let clientOptions: LanguageClientOptions = {
-  // Register the server for plain text documents
+  // Register the server for grain documents
   documentSelector: [{ scheme: "file", language: "grain" }],
   synchronize: {
     // Notify the server about file changes to '.clientrc files contained in the workspace
