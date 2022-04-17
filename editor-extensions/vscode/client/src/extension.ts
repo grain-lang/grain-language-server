@@ -29,8 +29,8 @@ let disposables: Disposable[] = [];
 
 let grainDocCompletionProvider: GrainDocCompletionProvider;
 
-let runArgs: string[] = ["lsp"];
-let debugArgs: string[] = ["lsp"];
+let runArgs: string[] = ["lsp","--debuglsp"];
+let debugArgs: string[] = ["lsp","--debuglsp"];
 
 let executablePath = "grain";
 
@@ -79,6 +79,7 @@ const startClient = () => {
 };
 
 const restart = () => {
+  console.log("restart");
   if (client) {
     client.stop().then(() => {
       if (disposables) {
