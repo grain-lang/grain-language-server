@@ -257,5 +257,5 @@ export function activate(context: ExtensionContext) {
 
 
 export async function deactivate(): Promise<void> {
- stopLsp()
+ await stopLsp()
 }
