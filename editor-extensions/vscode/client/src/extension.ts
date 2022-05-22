@@ -171,7 +171,7 @@ const restart = () => {
   });
 };
 
-commands.registerCommand("grain_language_server.restart", restart);
+commands.registerCommand("grain.restart", restart);
 
 async function didOpenTextDocument(document: TextDocument): Promise<void> {
   // We are only interested in language mode text
