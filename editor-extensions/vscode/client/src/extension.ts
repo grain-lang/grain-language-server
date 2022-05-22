@@ -14,7 +14,6 @@ import {
   TextDocument,
   WorkspaceFolder,
   Uri,
-  // window,
 } from "vscode";
 
 import {
@@ -124,7 +123,6 @@ async function startClient(workspace_uri?: Uri) {
     args: localRunArgs,
   };
 
-  // let outputChannel = window.createOutputChannel('Grain Language Server');
 
   // Options to control the language client
   let clientOptions: LanguageClientOptions = {
@@ -134,8 +132,6 @@ async function startClient(workspace_uri?: Uri) {
       // Notify the server about file changes to '.clientrc files contained in the workspace
       fileEvents: workspace.createFileSystemWatcher("**/.clientrc"),
     },
-    // outputChannel: outputChannel,
-    // traceOutputChannel: outputChannel,
   };
 
   const client = new LanguageClient(
