@@ -123,7 +123,6 @@ async function startClient(workspace_uri?: Uri) {
     args: localRunArgs,
   };
 
-
   // Options to control the language client
   let clientOptions: LanguageClientOptions = {
     // Register the server for grain documents
@@ -151,7 +150,7 @@ async function startClient(workspace_uri?: Uri) {
   );
 
   return client;
-};
+}
 
 const restart = () => {
   const promises: Thenable<void>[] = [];
