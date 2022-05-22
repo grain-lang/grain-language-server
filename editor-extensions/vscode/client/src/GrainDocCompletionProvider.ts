@@ -1,6 +1,6 @@
 // Based on https://github.com/microsoft/vscode/blob/94c9ea46838a9a619aeafb7e8afd1170c967bb55/extensions/typescript-language-features/src/languageFeatures/jsDocCompletions.ts
 import * as vscode from "vscode";
-import { LanguageClient } from "vscode-languageclient";
+import { LanguageClient } from "vscode-languageclient/node";
 
 const defaultGrainDoc = new vscode.SnippetString(`/**\n * $0\n */`);
 
