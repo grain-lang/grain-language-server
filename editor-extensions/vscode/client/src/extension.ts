@@ -35,6 +35,16 @@ let runArgs: string[] = ["lsp"];
 
 let executablePath = "grain";
 
+const config = workspace.getConfiguration("", { languageId: "grain" });
+
+const configPath: string = config.get("grain.cliPath");
+
+if (configPath != undefined && configPath != "") {
+  executablePath = configPath;
+}
+
+let lspEnabled : boolean = config.get("grain.enableLSP");;
+
 const isWindows = /^win32/.test(process.platform);
 
 let defaultClient: LanguageClient;
@@ -93,6 +103,7 @@ function filenameFromUri(uri: Uri) {
 async function startClient(workspace_uri?: Uri) {
   // Not sure if this can technically change between VSCode restarts. Even if it does,
   // it is likely to be swapped with PowerShell, which understands the `.cmd` executables.
+
   const needsCMD =
     isWindows && process.env.ComSpec && /cmd.exe$/.test(process.env.ComSpec);
 
@@ -173,6 +184,34 @@ const restart = () => {
 
 commands.registerCommand("grain.restart", restart);
 
+async function stopLsp() {
+  const promises: Thenable<void>[] = [];
+  if (defaultClient) {
+    promises.push(defaultClient.stop());
+  }
+  for (const client of clients.values()) {
+    promises.push(client.stop());
+  }
+  await Promise.all(promises);
+}
+
+workspace.onDidChangeConfiguration((e) => {
+  if (e.affectsConfiguration("grain.cliPath")) {
+    const configPath: string = config.get("grain.cliPath");
+
+    if (configPath != undefined && configPath != "") {
+      executablePath = configPath;
+      restart();
+    }
+  }
+
+  if (e.affectsConfiguration("grain.enableLSP")) {
+     lspEnabled = config.get("grain.enableLSP");
+     if (lspEnabled) restart(); else stopLsp();
+  }
+
+});
+
 async function didOpenTextDocument(document: TextDocument): Promise<void> {
   // We are only interested in language mode text
   if (document.languageId !== "grain") {
@@ -215,13 +254,8 @@ export function activate(context: ExtensionContext) {
   });
 }
 
+
+
 export async function deactivate(): Promise<void> {
-  const promises: Thenable<void>[] = [];
-  if (defaultClient) {
-    promises.push(defaultClient.stop());
-  }
-  for (const client of clients.values()) {
-    promises.push(client.stop());
-  }
-  await Promise.all(promises);
+ stopLsp()
 }
