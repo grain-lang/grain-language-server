@@ -123,9 +123,8 @@ async function startClient(workspace_uri) {
     clientOptions
   );
   await client.start();
-  const grainDocCompletionProvider = new GrainDocCompletionProvider_1.GrainDocCompletionProvider(
-    client
-  );
+  const grainDocCompletionProvider =
+    new GrainDocCompletionProvider_1.GrainDocCompletionProvider(client);
   vscode_1.languages.registerCompletionItemProvider(
     "grain",
     grainDocCompletionProvider,
