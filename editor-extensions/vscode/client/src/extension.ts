@@ -20,8 +20,7 @@ import {
   LanguageClient,
   LanguageClientOptions,
   ServerOptions,
-  TransportKind,
-} from "vscode-languageclient";
+} from "vscode-languageclient/node";
 
 import * as path from "path";
 
@@ -32,10 +31,7 @@ import { GrainDocCompletionProvider } from "./GrainDocCompletionProvider";
 let buildScriptPath = "script/grainfind.js";
 //let client: LanguageClient;
 
-let grainDocCompletionProvider: GrainDocCompletionProvider;
-
 let runArgs: string[] = ["lsp"];
-let debugArgs: string[] = ["lsp", "--debuglsp"];
 
 let executablePath = "grain";
 
@@ -94,7 +90,7 @@ function filenameFromUri(uri: Uri) {
   return filename;
 }
 
-const startClient = (workspace_uri: Uri) => {
+async function startClient(workspace_uri?: Uri) {
   // Not sure if this can technically change between VSCode restarts. Even if it does,
   // it is likely to be swapped with PowerShell, which understands the `.cmd` executables.
   const needsCMD =
@@ -110,7 +106,6 @@ const startClient = (workspace_uri: Uri) => {
 
   let run_path = executablePath;
   let localRunArgs = [...runArgs];
-  let localDebugArgs = [...debugArgs];
 
   if (workspace_uri) {
     let workspaceFolder = filenameFromUri(workspace_uri);
@@ -121,21 +116,13 @@ const startClient = (workspace_uri: Uri) => {
     if (fs.existsSync(absoluteBuildScript)) {
       run_path = "node";
       localRunArgs = [absoluteBuildScript, ...localRunArgs];
-      localDebugArgs = [absoluteBuildScript, ...localDebugArgs];
     }
   }
   let serverOptions: ServerOptions = {
-    run: {
-      command: run_path,
-      transport: TransportKind.stdio,
-      args: localRunArgs,
-    },
-    debug: {
-      command: run_path,
-      transport: TransportKind.stdio,
-      args: localDebugArgs,
-    },
+    command: run_path,
+    args: localRunArgs,
   };
+
 
   // Options to control the language client
   let clientOptions: LanguageClientOptions = {
@@ -148,20 +135,20 @@ const startClient = (workspace_uri: Uri) => {
   };
 
   const client = new LanguageClient(
-    "grain_langage_server",
+    "grain",
     "Grain Language Server",
     serverOptions,
     clientOptions
   );
 
-  client.onReady().then(() => {
-    grainDocCompletionProvider = new GrainDocCompletionProvider(client);
-    languages.registerCompletionItemProvider(
-      "grain",
-      grainDocCompletionProvider,
-      "*"
-    );
-  });
+  await client.start();
+
+  const grainDocCompletionProvider = new GrainDocCompletionProvider(client);
+  languages.registerCompletionItemProvider(
+    "grain",
+    grainDocCompletionProvider,
+    "*"
+  );
 
   return client;
 };
@@ -187,37 +174,35 @@ const restart = () => {
 
 commands.registerCommand("grain_language_server.restart", restart);
 
-export function activate(context: ExtensionContext) {
-  function didOpenTextDocument(document: TextDocument): void {
-    // We are only interested in language mode text
-    if (document.languageId !== "grain") {
-      return;
-    }
-
-    const uri = document.uri;
-    // Untitled files go to a default client.
-    if (uri.scheme === "untitled" && !defaultClient) {
-      defaultClient = startClient(undefined);
-      defaultClient.start();
-      return;
-    }
-    let folder = workspace.getWorkspaceFolder(uri);
-    // Files outside a folder can't be handled. This might depend on the language.
-    // Single file languages like JSON might handle files outside the workspace folders.
-    if (!folder) {
-      return;
-    }
-    // If we have nested workspace folders we only start a server on the outer most workspace folder.
-    folder = getOuterMostWorkspaceFolder(folder);
-
-    if (!clients.has(folder.uri.toString())) {
-      const client = startClient(folder.uri);
-      clients.set(folder.uri.toString(), client);
-      // Start the client. This will also launch the server
-      client.start();
-    }
+async function didOpenTextDocument(document: TextDocument): Promise<void> {
+  // We are only interested in language mode text
+  if (document.languageId !== "grain") {
+    return;
   }
 
+  const uri = document.uri;
+  // Untitled files go to a default client.
+  if (uri.scheme === "untitled" && !defaultClient) {
+    defaultClient = await startClient();
+    return;
+  }
+  let folder = workspace.getWorkspaceFolder(uri);
+  // Files outside a folder can't be handled. This might depend on the language.
+  // Single file languages like JSON might handle files outside the workspace folders.
+  if (!folder) {
+    return;
+  }
+  // If we have nested workspace folders we only start a server on the outer most workspace folder.
+  folder = getOuterMostWorkspaceFolder(folder);
+
+  if (!clients.has(folder.uri.toString())) {
+    // Start the client. This will also launch the server
+    const client = await startClient(folder.uri);
+    clients.set(folder.uri.toString(), client);
+  }
+}
+
+export function activate(context: ExtensionContext) {
   workspace.onDidOpenTextDocument(didOpenTextDocument);
   workspace.textDocuments.forEach(didOpenTextDocument);
   workspace.onDidChangeWorkspaceFolders((event) => {
@@ -231,7 +216,7 @@ export function activate(context: ExtensionContext) {
   });
 }
 
-export function deactivate(): Thenable<void> | undefined {
+export async function deactivate(): Promise<void> {
   const promises: Thenable<void>[] = [];
   if (defaultClient) {
     promises.push(defaultClient.stop());
@@ -239,5 +224,5 @@ export function deactivate(): Thenable<void> | undefined {
   for (const client of clients.values()) {
     promises.push(client.stop());
   }
-  return Promise.all(promises).then(() => undefined);
+  await Promise.all(promises);
 }
