@@ -43,7 +43,7 @@ if (configPath != undefined && configPath != "") {
   executablePath = configPath;
 }
 
-let lspEnabled : boolean = config.get("grain.enableLSP");;
+let lspEnabled: boolean = config.get("grain.enableLSP");
 
 const isWindows = /^win32/.test(process.platform);
 
@@ -206,10 +206,10 @@ workspace.onDidChangeConfiguration((e) => {
   }
 
   if (e.affectsConfiguration("grain.enableLSP")) {
-     lspEnabled = config.get("grain.enableLSP");
-     if (lspEnabled) restart(); else stopLsp();
+    lspEnabled = config.get("grain.enableLSP");
+    if (lspEnabled) restart();
+    else stopLsp();
   }
-
 });
 
 async function didOpenTextDocument(document: TextDocument): Promise<void> {
@@ -254,8 +254,6 @@ export function activate(context: ExtensionContext) {
   });
 }
 
-
-
 export async function deactivate(): Promise<void> {
- await stopLsp()
+  await stopLsp();
 }
