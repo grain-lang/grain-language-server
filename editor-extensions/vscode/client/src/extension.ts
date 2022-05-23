@@ -13,7 +13,9 @@ import {
   Disposable,
   TextDocument,
   WorkspaceFolder,
+  WorkspaceFoldersChangeEvent,
   Uri,
+  window,
 } from "vscode";
 
 import {
@@ -22,72 +24,30 @@ import {
   ServerOptions,
 } from "vscode-languageclient/node";
 
-import * as path from "path";
-
 import * as fs from "fs";
 
 import { GrainDocCompletionProvider } from "./GrainDocCompletionProvider";
 
-let buildScriptPath = "script/grainfind.js";
-//let client: LanguageClient;
+let extensionName = "Grain Language Server";
 
-let runArgs: string[] = ["lsp"];
+let languageId = "grain";
 
-let executablePath = "grain";
+let outputChannel = window.createOutputChannel(extensionName, languageId);
 
-const config = workspace.getConfiguration("", { languageId: "grain" });
-
-const configPath: string = config.get("grain.cliPath");
-
-if (configPath != undefined && configPath != "") {
-  executablePath = configPath;
-}
-
-let lspEnabled: boolean = config.get("grain.enableLSP");
-
-const isWindows = /^win32/.test(process.platform);
+let isWindows = /^win32/.test(process.platform);
 
 let defaultClient: LanguageClient;
-const clients: Map<string, LanguageClient> = new Map();
+let clients: Map<string, LanguageClient> = new Map();
 
-let _sortedWorkspaceFolders: string[] | undefined;
-function sortedWorkspaceFolders(): string[] {
-  if (_sortedWorkspaceFolders === void 0) {
-    _sortedWorkspaceFolders = workspace.workspaceFolders
-      ? workspace.workspaceFolders
-          .map((folder) => {
-            let result = folder.uri.toString();
-            if (result.charAt(result.length - 1) !== "/") {
-              result = result + "/";
-            }
-            return result;
-          })
-          .sort((a, b) => {
-            return a.length - b.length;
-          })
-      : [];
+function dirpathFromUri(uri: Uri): string {
+  let dirPath = uri.toString();
+  if (!dirPath.endsWith("/")) {
+    return dirPath + "/";
   }
-  return _sortedWorkspaceFolders;
-}
-workspace.onDidChangeWorkspaceFolders(
-  () => (_sortedWorkspaceFolders = undefined)
-);
-
-function getOuterMostWorkspaceFolder(folder: WorkspaceFolder): WorkspaceFolder {
-  const sorted = sortedWorkspaceFolders();
-  for (const element of sorted) {
-    let uri = folder.uri.toString();
-    if (uri.charAt(uri.length - 1) !== "/") {
-      uri = uri + "/";
-    }
-    if (uri.startsWith(element)) {
-      return workspace.getWorkspaceFolder(Uri.parse(element))!;
-    }
-  }
-  return folder;
+  return dirPath;
 }
 
-function filenameFromUri(uri: Uri) {
+function filepathFromUri(uri: Uri) {
   let filename = uri.fsPath;
 
   // Packaged Grain doesn't understand lowercase drive letters.
@@ -100,11 +60,45 @@ function filenameFromUri(uri: Uri) {
   return filename;
 }
 
-async function startClient(workspace_uri?: Uri) {
+let workspaceFolders: string[] = [];
+function sortWorkspaceFolders(): string[] {
+  if (workspaceFolders.length === 0) {
+    if (!workspace.workspaceFolders) {
+      workspaceFolders = [];
+    } else {
+      workspaceFolders = workspace.workspaceFolders
+        .map((folder) => dirpathFromUri(folder.uri))
+        .sort((a, b) => a.length - b.length);
+    }
+  }
+  return workspaceFolders;
+}
+
+function getOuterMostWorkspaceFolder(folder: WorkspaceFolder): WorkspaceFolder {
+  let sorted = sortWorkspaceFolders();
+  for (let element of sorted) {
+    let dirpath = dirpathFromUri(folder.uri);
+    if (dirpath.startsWith(element)) {
+      return workspace.getWorkspaceFolder(Uri.parse(element))!;
+    }
+  }
+  return folder;
+}
+
+async function startClient(workspaceFolder?: WorkspaceFolder) {
+  let config = workspace.getConfiguration("grain", workspaceFolder?.uri);
+
+  let lspEnabled: boolean = config.get("enableLSP");
+
+  if (!lspEnabled) {
+    return;
+  }
+
+  let executablePath: string = config.get("cliPath") || "grain";
+
   // Not sure if this can technically change between VSCode restarts. Even if it does,
   // it is likely to be swapped with PowerShell, which understands the `.cmd` executables.
-
-  const needsCMD =
+  let needsCMD =
     isWindows && process.env.ComSpec && /cmd.exe$/.test(process.env.ComSpec);
 
   if (
@@ -115,45 +109,60 @@ async function startClient(workspace_uri?: Uri) {
     executablePath += ".cmd";
   }
 
-  let run_path = executablePath;
-  let localRunArgs = [...runArgs];
+  let command = executablePath;
+  let args = ["lsp"];
 
-  if (workspace_uri) {
-    let workspaceFolder = filenameFromUri(workspace_uri);
-    const absoluteBuildScript = path.join(
-      workspaceFolder + "/" + buildScriptPath
+  let clientOptions: LanguageClientOptions;
+  if (workspaceFolder) {
+    let buildScriptUri = Uri.joinPath(
+      workspaceFolder.uri,
+      "script/grainfind.js"
     );
+    let buildScriptPath = filepathFromUri(buildScriptUri);
 
-    if (fs.existsSync(absoluteBuildScript)) {
-      run_path = "node";
-      localRunArgs = [absoluteBuildScript, ...localRunArgs];
+    if (fs.existsSync(buildScriptPath)) {
+      command = "node";
+      args = [buildScriptPath, ...args];
     }
+
+    clientOptions = {
+      documentSelector: [
+        {
+          scheme: "file",
+          language: languageId,
+          pattern: `${filepathFromUri(workspaceFolder.uri)}/**/*`,
+        },
+      ],
+      workspaceFolder,
+      outputChannel,
+    };
+  } else {
+    clientOptions = {
+      documentSelector: [
+        {
+          scheme: "untitled",
+          language: languageId,
+        },
+      ],
+      outputChannel,
+    };
   }
+
   let serverOptions: ServerOptions = {
-    command: run_path,
-    args: localRunArgs,
+    command,
+    args,
   };
 
-  // Options to control the language client
-  let clientOptions: LanguageClientOptions = {
-    // Register the server for grain documents
-    documentSelector: [{ scheme: "file", language: "grain" }],
-    synchronize: {
-      // Notify the server about file changes to '.clientrc files contained in the workspace
-      fileEvents: workspace.createFileSystemWatcher("**/.clientrc"),
-    },
-  };
-
-  const client = new LanguageClient(
-    "grain",
-    "Grain Language Server",
+  let client = new LanguageClient(
+    languageId,
+    extensionName,
     serverOptions,
     clientOptions
   );
 
   await client.start();
 
-  const grainDocCompletionProvider = new GrainDocCompletionProvider(client);
+  let grainDocCompletionProvider = new GrainDocCompletionProvider(client);
   languages.registerCompletionItemProvider(
     "grain",
     grainDocCompletionProvider,
@@ -163,97 +172,109 @@ async function startClient(workspace_uri?: Uri) {
   return client;
 }
 
-const restart = () => {
-  const promises: Thenable<void>[] = [];
-  if (defaultClient) {
-    promises.push(defaultClient.stop());
+async function addClient(workspaceFolder: WorkspaceFolder) {
+  let workspacePath = workspaceFolder.uri.toString();
+  if (!clients.has(workspacePath)) {
+    // Start the client. This will also launch the server
+    let client = await startClient(workspaceFolder);
+    clients.set(workspacePath, client);
   }
-  for (const client of clients.values()) {
-    promises.push(client.stop());
-  }
-
-  Promise.all(promises).then(() => {
-    if (defaultClient) {
-      defaultClient.start();
-    }
-    for (const client of clients.values()) {
-      client.start();
-    }
-  });
-};
-
-commands.registerCommand("grain.restart", restart);
-
-async function stopLsp() {
-  const promises: Thenable<void>[] = [];
-  if (defaultClient) {
-    promises.push(defaultClient.stop());
-  }
-  for (const client of clients.values()) {
-    promises.push(client.stop());
-  }
-  await Promise.all(promises);
 }
 
-workspace.onDidChangeConfiguration((e) => {
-  if (e.affectsConfiguration("grain.cliPath")) {
-    const configPath: string = config.get("grain.cliPath");
-
-    if (configPath != undefined && configPath != "") {
-      executablePath = configPath;
-      restart();
-    }
+async function removeClient(workspaceFolder: WorkspaceFolder) {
+  let workspacePath = workspaceFolder.uri.toString();
+  let client = clients.get(workspacePath);
+  if (client) {
+    await client.stop();
+    clients.delete(workspacePath);
   }
+}
 
-  if (e.affectsConfiguration("grain.enableLSP")) {
-    lspEnabled = config.get("grain.enableLSP");
-    if (lspEnabled) restart();
-    else stopLsp();
+async function restartAllClients() {
+  if (defaultClient) {
+    await defaultClient.restart();
   }
-});
+  for (let client of clients.values()) {
+    await client.restart();
+  }
+}
 
-async function didOpenTextDocument(document: TextDocument): Promise<void> {
+async function didOpenTextDocument(
+  document: TextDocument
+): Promise<Disposable> {
   // We are only interested in language mode text
-  if (document.languageId !== "grain") {
-    return;
+  if (document.languageId !== languageId) {
+    return Disposable.from();
   }
 
-  const uri = document.uri;
+  let uri = document.uri;
   // Untitled files go to a default client.
   if (uri.scheme === "untitled" && !defaultClient) {
     defaultClient = await startClient();
-    return;
+    return Disposable.from();
   }
   let folder = workspace.getWorkspaceFolder(uri);
   // Files outside a folder can't be handled. This might depend on the language.
   // Single file languages like JSON might handle files outside the workspace folders.
   if (!folder) {
-    return;
+    return Disposable.from();
   }
   // If we have nested workspace folders we only start a server on the outer most workspace folder.
   folder = getOuterMostWorkspaceFolder(folder);
 
-  if (!clients.has(folder.uri.toString())) {
-    // Start the client. This will also launch the server
-    const client = await startClient(folder.uri);
-    clients.set(folder.uri.toString(), client);
-  }
-}
+  addClient(folder);
 
-export function activate(context: ExtensionContext) {
-  workspace.onDidOpenTextDocument(didOpenTextDocument);
-  workspace.textDocuments.forEach(didOpenTextDocument);
-  workspace.onDidChangeWorkspaceFolders((event) => {
-    for (const folder of event.removed) {
-      const client = clients.get(folder.uri.toString());
-      if (client) {
-        clients.delete(folder.uri.toString());
-        client.stop();
-      }
+  return workspace.onDidChangeConfiguration((e) => {
+    if (e.affectsConfiguration("grain.cliPath", folder.uri)) {
+      removeClient(folder);
+      addClient(folder);
+    }
+
+    if (e.affectsConfiguration("grain.enableLSP", folder.uri)) {
+      removeClient(folder);
+      addClient(folder);
     }
   });
 }
 
+async function didChangeWorkspaceFolders(event: WorkspaceFoldersChangeEvent) {
+  // Reset the workspace folders so it'll sort them again
+  workspaceFolders = [];
+
+  // Do nothing for newly added workspaces because their LSP will be booted
+  // up when a file is opened
+
+  // Remove any clients for workspaces that were closed
+  for (let folder of event.removed) {
+    removeClient(folder);
+  }
+}
+
+export async function activate(context: ExtensionContext): Promise<void> {
+  let didOpenTextDocument$ =
+    workspace.onDidOpenTextDocument(didOpenTextDocument);
+  let didChangeWorkspaceFolders$ = workspace.onDidChangeWorkspaceFolders(
+    didChangeWorkspaceFolders
+  );
+  let restart$ = commands.registerCommand("grain.restart", restartAllClients);
+
+  context.subscriptions.push(
+    didOpenTextDocument$,
+    didChangeWorkspaceFolders$,
+    restart$
+  );
+
+  for (let doc of workspace.textDocuments) {
+    const disposable = await didOpenTextDocument(doc);
+    context.subscriptions.push(disposable);
+  }
+}
+
 export async function deactivate(): Promise<void> {
-  await stopLsp();
+  if (defaultClient) {
+    await defaultClient.stop();
+  }
+  for (let client of clients.values()) {
+    await client.stop();
+  }
 }
