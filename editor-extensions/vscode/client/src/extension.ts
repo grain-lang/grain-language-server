@@ -60,6 +60,11 @@ function filepathFromUri(uri: Uri) {
   return filename;
 }
 
+function globFromUri(uri: Uri, glob: string) {
+  // globs always need to use `/`
+  return uri.fsPath.replaceAll("\\", "/") + "/" + glob;
+}
+
 let workspaceFolders: string[] = [];
 function sortWorkspaceFolders(): string[] {
   if (workspaceFolders.length === 0) {
@@ -130,7 +135,7 @@ async function startClient(workspaceFolder?: WorkspaceFolder) {
         {
           scheme: "file",
           language: languageId,
-          pattern: `${filepathFromUri(workspaceFolder.uri)}/**/*`,
+          pattern: `${globFromUri(workspaceFolder.uri, "**/*")}`,
         },
       ],
       workspaceFolder,
