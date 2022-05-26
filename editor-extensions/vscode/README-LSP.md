@@ -9,7 +9,6 @@ This Language Server Protocol client works for grain files. It has the following
 - Show compilation warnings and errors
 - Code lenses
 - Hover support
-- Code completion
 
 ## Structure
 

@@ -81,18 +81,6 @@
           "default": true,
           "description": "Enable the language server"
         },
-        "grain.enableStatementLenses": {
-          "scope": "window",
-          "type": "boolean",
-          "default": true,
-          "description": "Enable per-statement lenses"
-        },
-        "grain.maxNumberOfProblems": {
-          "scope": "resource",
-          "type": "number",
-          "default": 100,
-          "description": "Controls the maximum number of problems produced by the server."
-        },
         "grain.trace.server": {
           "scope": "window",
           "type": "string",
