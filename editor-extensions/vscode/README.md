@@ -1,10 +1,12 @@
-# LSP client for Grain
+# VSCode extension for Grain
 
-LSP client for VSCode for https://github.com/grain-lang
+The VSCode extension for the [Grain programming language](https://github.com/grain-lang/grain).
+
+**Requires:** vscode 1.67+
 
 ## Functionality
 
-This Language Server Protocol client works for grain files. It has the following language features:
+This LSP Protocol client provides the the following language features for grain (`.gr`) files:
 
 - Show compilation warnings and errors
 - Code lenses
@@ -12,12 +14,11 @@ This Language Server Protocol client works for grain files. It has the following
 
 ## Running the extension
 
-- The Grain compiler and cli should be on your path. If not, set the extension cliPath setting to the cli location
-- Run `npm install` in this folder. This installs all necessary npm modules in both the client and server folder
-- Open VS Code on this folder.
-- Press Ctrl+Shift+B to compile the client.
-- Switch to the Debug viewlet.
-- Select `Launch Client` from the drop down.
-- Run the launch config.
-- If you want to debug the server as well use the launch configuration `Attach to Server`
-- In the [Extension Development Host] instance of VSCode, open a document in 'grain' language mode.
+- Run `npm ci` in this folder.
+- Open VSCode inside this folder.
+- Switch to the "Run and Debug" pane.
+- Select "Launch Extension" from the drop down.
+- Press the ▶️ button next to "Launch Extension", which will start a TypeScript watcher and launch a new VSCode instance titled `[Extension Development Host]`.
+- The Grain CLI needs to be on your path. If not, set the `cliPath` setting inside the `[Extension Development Host]` instance to the location of your Grain CLI.
+- In the `[Extension Development Host]` instance of VSCode, open a document in 'grain' language mode.
+- After a code change, you'll likely need to trigger a "Developer: Reload Window" action in the `[Extension Development Host]` instance before the extension will pick up the changes.
