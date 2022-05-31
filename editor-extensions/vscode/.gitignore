@@ -1,0 +1,3 @@
+*.vsix
+out
+syntaxes/grain-type.json

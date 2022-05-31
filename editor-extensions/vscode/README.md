@@ -22,3 +22,11 @@ This LSP Protocol client provides the the following language features for grain 
 - The Grain CLI needs to be on your path. If not, set the `cliPath` setting inside the `[Extension Development Host]` instance to the location of your Grain CLI.
 - In the `[Extension Development Host]` instance of VSCode, open a document in 'grain' language mode.
 - After a code change, you'll likely need to trigger a "Developer: Reload Window" action in the `[Extension Development Host]` instance before the extension will pick up the changes.
+
+## Useful files
+
+- `package.json` - this is the manifest file in which you declare your language support and define
+  the location of the grammar file that has been copied into your extension.
+- `syntaxes/grain.tmLanguage.json` - this is the Text mate grammar file that is used for tokenization.
+- `language-configuration.json` - this the language configuration, defining the tokens that are used for
+  comments and brackets.

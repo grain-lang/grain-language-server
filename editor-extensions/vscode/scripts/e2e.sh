@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export CODE_TESTS_PATH="$(pwd)/client/out/test"
-export CODE_TESTS_WORKSPACE="$(pwd)/client/testFixture"
+export CODE_TESTS_PATH="$(pwd)/out/test"
+export CODE_TESTS_WORKSPACE="$(pwd)/testFixture"
 
-#node "$(pwd)/client/out/test/runTest"
+#node "$(pwd)/out/test/runTest"

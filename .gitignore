@@ -2,9 +2,3 @@ node_modules
 dist/
 *.gr
 .DS_Store
-
-# VSCode stuff
-*.vsix
-editor-extensions/vscode/client/out
-editor-extensions/vscode/server/out
-editor-extensions/vscode/syntaxes/grain-type.json
