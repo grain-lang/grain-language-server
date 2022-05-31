@@ -10,18 +10,6 @@ This Language Server Protocol client works for grain files. It has the following
 - Code lenses
 - Hover support
 
-## Structure
-
-```
-.
-├── client // Language Client
-│   ├── src
-│   │   ├── test // End to End tests for Language Client / Server
-│   │   └── extension.ts // Language Client entry point
-├── package.json // The extension manifest.
-
-```
-
 ## Running the extension
 
 - The Grain compiler and cli should be on your path. If not, set the extension cliPath setting to the cli location
