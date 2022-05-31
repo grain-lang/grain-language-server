@@ -1,4 +1,6 @@
 .vscode/
+node_modules/
+out/*.js.map
 scripts/
 src/
 test/
@@ -9,10 +11,3 @@ CHANGELOG.md
 package-lock.json
 tsconfig.json
 *.vsix
-node_modules/**
-!node_modules/vscode-jsonrpc/**
-!node_modules/vscode-languageclient/**
-!node_modules/vscode-languageserver-protocol/**
-!node_modules/vscode-languageserver-types/**
-!node_modules/semver/**
-
