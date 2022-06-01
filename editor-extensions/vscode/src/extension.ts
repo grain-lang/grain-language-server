@@ -36,8 +36,8 @@ let outputChannel = window.createOutputChannel(extensionName, languageId);
 
 let isWindows = /^win32/.test(process.platform);
 
-let defaultClient: LanguageClient;
-let clients: Map<string, LanguageClient> = new Map();
+let fileClients: Map<string, LanguageClient> = new Map();
+let workspaceClients: Map<string, LanguageClient> = new Map();
 
 function dirpathFromUri(uri: Uri): string {
   let dirPath = uri.toString();
@@ -62,7 +62,7 @@ function filepathFromUri(uri: Uri) {
 
 function globFromUri(uri: Uri, glob: string) {
   // globs always need to use `/`
-  return uri.fsPath.replaceAll("\\", "/") + "/" + glob;
+  return `${uri.fsPath}${glob}`.replaceAll("\\", "/");
 }
 
 let workspaceFolders: string[] = [];
@@ -90,8 +90,8 @@ function getOuterMostWorkspaceFolder(folder: WorkspaceFolder): WorkspaceFolder {
   return folder;
 }
 
-async function startClient(workspaceFolder?: WorkspaceFolder) {
-  let config = workspace.getConfiguration("grain", workspaceFolder?.uri);
+function getLspCommand(uri: Uri) {
+  let config = workspace.getConfiguration("grain", uri);
 
   let lspEnabled: boolean = config.get("enableLSP");
 
@@ -117,41 +117,30 @@ async function startClient(workspaceFolder?: WorkspaceFolder) {
   let command = executablePath;
   let args = ["lsp"];
 
-  let clientOptions: LanguageClientOptions;
-  if (workspaceFolder) {
-    let buildScriptUri = Uri.joinPath(
-      workspaceFolder.uri,
-      "script/grainfind.js"
-    );
-    let buildScriptPath = filepathFromUri(buildScriptUri);
+  let buildScriptUri = Uri.joinPath(uri, "script/grainfind.js");
+  let buildScriptPath = filepathFromUri(buildScriptUri);
 
-    if (fs.existsSync(buildScriptPath)) {
-      command = "node";
-      args = [buildScriptPath, ...args];
-    }
-
-    clientOptions = {
-      documentSelector: [
-        {
-          scheme: "file",
-          language: languageId,
-          pattern: `${globFromUri(workspaceFolder.uri, "**/*")}`,
-        },
-      ],
-      workspaceFolder,
-      outputChannel,
-    };
-  } else {
-    clientOptions = {
-      documentSelector: [
-        {
-          scheme: "untitled",
-          language: languageId,
-        },
-      ],
-      outputChannel,
-    };
+  if (fs.existsSync(buildScriptPath)) {
+    command = "node";
+    args = [buildScriptPath, ...args];
   }
+
+  return [command, args] as const;
+}
+
+async function startFileClient(uri: Uri) {
+  let [command, args] = getLspCommand(uri);
+
+  let clientOptions = {
+    documentSelector: [
+      {
+        scheme: uri.scheme,
+        language: languageId,
+        pattern: `${globFromUri(uri, "")}`,
+      },
+    ],
+    outputChannel,
+  };
 
   let serverOptions: ServerOptions = {
     command,
@@ -177,29 +166,87 @@ async function startClient(workspaceFolder?: WorkspaceFolder) {
   return client;
 }
 
-async function addClient(workspaceFolder: WorkspaceFolder) {
-  let workspacePath = workspaceFolder.uri.toString();
-  if (!clients.has(workspacePath)) {
+async function addFileClient(uri: Uri) {
+  let file = uri.toString();
+  if (!fileClients.has(file)) {
     // Start the client. This will also launch the server
-    let client = await startClient(workspaceFolder);
-    clients.set(workspacePath, client);
+    let client = await startFileClient(uri);
+    fileClients.set(file, client);
   }
 }
 
-async function removeClient(workspaceFolder: WorkspaceFolder) {
-  let workspacePath = workspaceFolder.uri.toString();
-  let client = clients.get(workspacePath);
+async function removeFileClient(uri: Uri) {
+  let file = uri.toString();
+  let client = fileClients.get(file);
   if (client) {
     await client.stop();
-    clients.delete(workspacePath);
+    fileClients.delete(file);
+  }
+}
+
+async function startWorkspaceClient(workspaceFolder: WorkspaceFolder) {
+  let [command, args] = getLspCommand(workspaceFolder.uri);
+
+  let clientOptions: LanguageClientOptions = {
+    documentSelector: [
+      {
+        scheme: "file",
+        language: languageId,
+        // Glob starts with `/` because it just appends both segments
+        pattern: `${globFromUri(workspaceFolder.uri, "/**/*")}`,
+      },
+    ],
+    workspaceFolder,
+    outputChannel,
+  };
+
+  let serverOptions: ServerOptions = {
+    command,
+    args,
+  };
+
+  let client = new LanguageClient(
+    languageId,
+    extensionName,
+    serverOptions,
+    clientOptions
+  );
+
+  await client.start();
+
+  let grainDocCompletionProvider = new GrainDocCompletionProvider(client);
+  languages.registerCompletionItemProvider(
+    "grain",
+    grainDocCompletionProvider,
+    "*"
+  );
+
+  return client;
+}
+
+async function addWorkspaceClient(workspaceFolder: WorkspaceFolder) {
+  let workspacePath = workspaceFolder.uri.toString();
+  if (!workspaceClients.has(workspacePath)) {
+    // Start the client. This will also launch the server
+    let client = await startWorkspaceClient(workspaceFolder);
+    workspaceClients.set(workspacePath, client);
+  }
+}
+
+async function removeWorkspaceClient(workspaceFolder: WorkspaceFolder) {
+  let workspacePath = workspaceFolder.uri.toString();
+  let client = workspaceClients.get(workspacePath);
+  if (client) {
+    await client.stop();
+    workspaceClients.delete(workspacePath);
   }
 }
 
 async function restartAllClients() {
-  if (defaultClient) {
-    await defaultClient.restart();
+  for (let client of fileClients.values()) {
+    await client.restart();
   }
-  for (let client of clients.values()) {
+  for (let client of workspaceClients.values()) {
     await client.restart();
   }
 }
@@ -213,33 +260,43 @@ async function didOpenTextDocument(
   }
 
   let uri = document.uri;
-  // Untitled files go to a default client.
-  if (uri.scheme === "untitled" && !defaultClient) {
-    defaultClient = await startClient();
-    return Disposable.from();
-  }
   let folder = workspace.getWorkspaceFolder(uri);
-  // Files outside a folder can't be handled. This might depend on the language.
-  // Single file languages like JSON might handle files outside the workspace folders.
-  if (!folder) {
-    return Disposable.from();
+  let configHandler;
+  if (folder) {
+    // If we have nested workspace folders we only start a server on the outer most workspace folder.
+    folder = getOuterMostWorkspaceFolder(folder);
+
+    await addWorkspaceClient(folder);
+
+    configHandler = (e) => {
+      if (e.affectsConfiguration("grain.cliPath", folder.uri)) {
+        removeWorkspaceClient(folder);
+        addWorkspaceClient(folder);
+      }
+
+      if (e.affectsConfiguration("grain.enableLSP", folder.uri)) {
+        removeWorkspaceClient(folder);
+        addWorkspaceClient(folder);
+      }
+    };
+  } else {
+    // Each file outside of a workspace gets it's own client
+    await addFileClient(uri);
+
+    configHandler = (e) => {
+      if (e.affectsConfiguration("grain.cliPath", uri)) {
+        removeFileClient(uri);
+        addFileClient(uri);
+      }
+
+      if (e.affectsConfiguration("grain.enableLSP", uri)) {
+        removeFileClient(uri);
+        addFileClient(uri);
+      }
+    };
   }
-  // If we have nested workspace folders we only start a server on the outer most workspace folder.
-  folder = getOuterMostWorkspaceFolder(folder);
 
-  addClient(folder);
-
-  return workspace.onDidChangeConfiguration((e) => {
-    if (e.affectsConfiguration("grain.cliPath", folder.uri)) {
-      removeClient(folder);
-      addClient(folder);
-    }
-
-    if (e.affectsConfiguration("grain.enableLSP", folder.uri)) {
-      removeClient(folder);
-      addClient(folder);
-    }
-  });
+  return workspace.onDidChangeConfiguration(configHandler);
 }
 
 async function didChangeWorkspaceFolders(event: WorkspaceFoldersChangeEvent) {
@@ -251,7 +308,7 @@ async function didChangeWorkspaceFolders(event: WorkspaceFoldersChangeEvent) {
 
   // Remove any clients for workspaces that were closed
   for (let folder of event.removed) {
-    removeClient(folder);
+    removeWorkspaceClient(folder);
   }
 }
 
@@ -276,10 +333,10 @@ export async function activate(context: ExtensionContext): Promise<void> {
 }
 
 export async function deactivate(): Promise<void> {
-  if (defaultClient) {
-    await defaultClient.stop();
+  for (let client of fileClients.values()) {
+    await client.stop();
   }
-  for (let client of clients.values()) {
+  for (let client of workspaceClients.values()) {
     await client.stop();
   }
 }
