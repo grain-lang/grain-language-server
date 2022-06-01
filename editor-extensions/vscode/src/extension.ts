@@ -268,30 +268,30 @@ async function didOpenTextDocument(
 
     await addWorkspaceClient(folder);
 
-    configHandler = (e) => {
+    configHandler = async (e) => {
       if (e.affectsConfiguration("grain.cliPath", folder.uri)) {
-        removeWorkspaceClient(folder);
-        addWorkspaceClient(folder);
+        await removeWorkspaceClient(folder);
+        await addWorkspaceClient(folder);
       }
 
       if (e.affectsConfiguration("grain.enableLSP", folder.uri)) {
-        removeWorkspaceClient(folder);
-        addWorkspaceClient(folder);
+        await removeWorkspaceClient(folder);
+        await addWorkspaceClient(folder);
       }
     };
   } else {
     // Each file outside of a workspace gets it's own client
     await addFileClient(uri);
 
-    configHandler = (e) => {
+    configHandler = async (e) => {
       if (e.affectsConfiguration("grain.cliPath", uri)) {
-        removeFileClient(uri);
-        addFileClient(uri);
+        await removeFileClient(uri);
+        await addFileClient(uri);
       }
 
       if (e.affectsConfiguration("grain.enableLSP", uri)) {
-        removeFileClient(uri);
-        addFileClient(uri);
+        await removeFileClient(uri);
+        await addFileClient(uri);
       }
     };
   }
