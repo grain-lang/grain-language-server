@@ -75,14 +75,20 @@
       "type": "object",
       "title": "Grain Language Server configuration",
       "properties": {
+        "grain.cliPath": {
+          "scope": "resource",
+          "type": "string",
+          "default": "grain",
+          "description": "Path to the grain cli"
+        },
         "grain.enableLSP": {
-          "scope": "window",
+          "scope": "resource",
           "type": "boolean",
           "default": true,
           "description": "Enable the language server"
         },
         "grain.trace.server": {
-          "scope": "window",
+          "scope": "resource",
           "type": "string",
           "enum": [
             "off",
@@ -91,12 +97,6 @@
           ],
           "default": "off",
           "description": "Traces the communication between VS Code and the language server."
-        },
-        "grain.cliPath": {
-          "scope": "window",
-          "type": "string",
-          "default": "grain",
-          "description": "Path to the grain cli"
         }
       }
     }
