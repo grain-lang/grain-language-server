@@ -44,6 +44,10 @@
         "extensions": [
           ".gr"
         ],
+        "icon": {
+          "light": "./icons/grain_shorthand_color.svg",
+          "dark": "./icons/grain_shorthand_color.svg"
+        },
         "configuration": "./language-configuration.json"
       },
       {
