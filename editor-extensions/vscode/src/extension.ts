@@ -26,6 +26,8 @@ import {
 
 import * as fs from "fs";
 
+import which from "which";
+
 import { GrainDocCompletionProvider } from "./GrainDocCompletionProvider";
 
 let extensionName = "Grain Language Server";
@@ -38,6 +40,26 @@ let isWindows = /^win32/.test(process.platform);
 
 let fileClients: Map<string, LanguageClient> = new Map();
 let workspaceClients: Map<string, LanguageClient> = new Map();
+
+const grainBinaries = [
+  "grain",
+  "grain-mac-x64",
+  "grain-linux-x64",
+  "grain-win-x64",
+];
+
+function findGrain() {
+  for (const bin of grainBinaries) {
+    try {
+      const grain = which.sync(bin);
+      // If it didn't throw, we found a grain binary
+      return grain;
+    } catch (err) {
+      // Not found
+    }
+  }
+  throw new Error("Unable to locate any Grain binary. Did you install it?");
+}
 
 function dirpathFromUri(uri: Uri): string {
   let dirPath = uri.toString();
@@ -99,22 +121,11 @@ function getLspCommand(uri: Uri) {
     return;
   }
 
-  let executablePath: string = config.get("cliPath") || "grain";
+  let command: string = config.get("cliPath") || findGrain();
+  // For some reason, if you specify a capitalized EXE extension for our pkg binary,
+  // it crashes the LSP so we just lowercase any .EXE ending in the command
+  command = command.replace(/\.EXE$/, ".exe");
 
-  // Not sure if this can technically change between VSCode restarts. Even if it does,
-  // it is likely to be swapped with PowerShell, which understands the `.cmd` executables.
-  let needsCMD =
-    isWindows && process.env.ComSpec && /cmd.exe$/.test(process.env.ComSpec);
-
-  if (
-    needsCMD &&
-    !executablePath.endsWith(".cmd") &&
-    !executablePath.endsWith(".exe")
-  ) {
-    executablePath += ".cmd";
-  }
-
-  let command = executablePath;
   let args = ["lsp"];
 
   let buildScriptUri = Uri.joinPath(uri, "script/grainfind.js");
@@ -153,6 +164,8 @@ async function startFileClient(uri: Uri) {
     serverOptions,
     clientOptions
   );
+
+  client.info(`Starting LSP client using executable: ${command}`);
 
   await client.start();
 
@@ -211,6 +224,8 @@ async function startWorkspaceClient(workspaceFolder: WorkspaceFolder) {
     serverOptions,
     clientOptions
   );
+
+  client.info(`Starting LSP client using executable: ${command}`);
 
   await client.start();
 
