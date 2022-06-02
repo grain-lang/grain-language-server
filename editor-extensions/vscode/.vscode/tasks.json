@@ -3,27 +3,43 @@
   "tasks": [
     {
       "type": "npm",
-      "script": "compile",
-      "group": "build",
-      "presentation": {
-        "panel": "dedicated",
-        "reveal": "never"
-      },
-      "problemMatcher": ["$tsc"]
-    },
-    {
-      "type": "npm",
-      "script": "watch",
-      "isBackground": true,
+      "script": "esbuild-watch",
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "presentation": {
-        "panel": "dedicated",
-        "reveal": "never"
-      },
-      "problemMatcher": ["$tsc-watch"]
+      // https://github.com/connor4312/esbuild-problem-matchers/blob/0cd222036a0f0dcccda4df35d094d2882b93ddc1/package.json#L28-L67
+      "problemMatcher": [
+        {
+          "severity": "error",
+          "applyTo": "closedDocuments",
+          "source": "esbuild",
+          "owner": "typescript",
+          "fileLocation": "relative",
+          "pattern": [
+            {
+              "regexp": "> (.*?):([0-9]+):([0-9]+): (warning|error): (.+)$",
+              "file": 1,
+              "line": 2,
+              "column": 3,
+              "severity": 4,
+              "message": 5
+            }
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": {
+              "regexp": "\\[watch\\] build started"
+            },
+            "endsPattern": {
+              "regexp": "\\[watch\\] build finished"
+            }
+          }
+        }
+      ],
+      "label": "npm: esbuild-watch",
+      "detail": "npm run esbuild-base -- --sourcemap --watch",
+      "isBackground": true
     }
   ]
 }
