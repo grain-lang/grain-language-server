@@ -79,6 +79,11 @@
       "type": "object",
       "title": "Grain Language Server configuration",
       "properties": {
+        "grain.cliFlags": {
+          "scope": "resource",
+          "type": "string",
+          "description": "Space-separated list of flags to pass to the grain CLI"
+        },
         "grain.cliPath": {
           "scope": "resource",
           "type": "string",

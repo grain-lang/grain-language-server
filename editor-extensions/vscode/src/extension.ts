@@ -24,8 +24,6 @@ import {
   ServerOptions,
 } from "vscode-languageclient/node";
 
-import * as fs from "fs";
-
 import which from "which";
 
 import { GrainDocCompletionProvider } from "./GrainDocCompletionProvider";
@@ -35,8 +33,6 @@ let extensionName = "Grain Language Server";
 let languageId = "grain";
 
 let outputChannel = window.createOutputChannel(extensionName, languageId);
-
-let isWindows = /^win32/.test(process.platform);
 
 let fileClients: Map<string, LanguageClient> = new Map();
 let workspaceClients: Map<string, LanguageClient> = new Map();
@@ -67,19 +63,6 @@ function dirpathFromUri(uri: Uri): string {
     return dirPath + "/";
   }
   return dirPath;
-}
-
-function filepathFromUri(uri: Uri) {
-  let filename = uri.fsPath;
-
-  // Packaged Grain doesn't understand lowercase drive letters.
-  // If authority is not empty, then we can skip since this is
-  // a UNC path.
-  if (isWindows && uri.authority === "") {
-    filename = filename[0].toUpperCase() + filename.substring(1);
-  }
-
-  return filename;
 }
 
 function globFromUri(uri: Uri, glob: string) {
@@ -126,15 +109,9 @@ function getLspCommand(uri: Uri) {
   // it crashes the LSP so we just lowercase any .EXE ending in the command
   command = command.replace(/\.EXE$/, ".exe");
 
-  let args = ["lsp"];
+  let flags = config.get<string | undefined>("cliFlags") || "";
 
-  let buildScriptUri = Uri.joinPath(uri, "script/grainfind.js");
-  let buildScriptPath = filepathFromUri(buildScriptUri);
-
-  if (fs.existsSync(buildScriptPath)) {
-    command = "node";
-    args = [buildScriptPath, ...args];
-  }
+  let args = ["lsp", ...flags.split(" ")];
 
   return [command, args] as const;
 }
@@ -165,7 +142,9 @@ async function startFileClient(uri: Uri) {
     clientOptions
   );
 
-  client.info(`Starting LSP client using executable: ${command}`);
+  client.info(
+    `Starting LSP client using command: ${command} ${args.join(" ")}`
+  );
 
   await client.start();
 
@@ -225,7 +204,9 @@ async function startWorkspaceClient(workspaceFolder: WorkspaceFolder) {
     clientOptions
   );
 
-  client.info(`Starting LSP client using executable: ${command}`);
+  client.info(
+    `Starting LSP client using command: ${command} ${args.join(" ")}`
+  );
 
   await client.start();
 
@@ -284,6 +265,11 @@ async function didOpenTextDocument(
     await addWorkspaceClient(folder);
 
     configHandler = async (e) => {
+      if (e.affectsConfiguration("grain.cliFlags", folder.uri)) {
+        await removeWorkspaceClient(folder);
+        await addWorkspaceClient(folder);
+      }
+
       if (e.affectsConfiguration("grain.cliPath", folder.uri)) {
         await removeWorkspaceClient(folder);
         await addWorkspaceClient(folder);
@@ -299,6 +285,11 @@ async function didOpenTextDocument(
     await addFileClient(uri);
 
     configHandler = async (e) => {
+      if (e.affectsConfiguration("grain.cliFlags", uri)) {
+        await removeFileClient(uri);
+        await addFileClient(uri);
+      }
+
       if (e.affectsConfiguration("grain.cliPath", uri)) {
         await removeFileClient(uri);
         await addFileClient(uri);
