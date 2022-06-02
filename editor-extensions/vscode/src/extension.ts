@@ -98,13 +98,13 @@ function getOuterMostWorkspaceFolder(folder: WorkspaceFolder): WorkspaceFolder {
 function getLspCommand(uri: Uri) {
   let config = workspace.getConfiguration("grain", uri);
 
-  let lspEnabled: boolean = config.get("enableLSP");
+  let lspEnabled = config.get<boolean>("enableLSP");
 
   if (!lspEnabled) {
     return;
   }
 
-  let command: string = config.get("cliPath") || findGrain();
+  let command = config.get<string | undefined>("cliPath") || findGrain();
   // For some reason, if you specify a capitalized EXE extension for our pkg binary,
   // it crashes the LSP so we just lowercase any .EXE ending in the command
   command = command.replace(/\.EXE$/, ".exe");
