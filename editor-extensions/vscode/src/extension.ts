@@ -281,6 +281,12 @@ async function didOpenTextDocument(
       }
     };
   } else {
+    // We only want to handle `file:` and `untitled:` schemes because
+    //vscode sends `output:` schemes for markdown responses from our LSP
+    if (uri.scheme !== "file" && uri.scheme !== "untitled") {
+      return Disposable.from();
+    }
+
     // Each file outside of a workspace gets it's own client
     await addFileClient(uri);
 
