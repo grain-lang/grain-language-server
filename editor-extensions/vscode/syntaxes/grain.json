@@ -1084,6 +1084,7 @@
                 "1": { "name": "punctuation.definition.parameters.grain" }
               },
               "patterns": [
+                { "include": "#constant" },
                 {
                   "match": "\\b([a-z]\\w*)\\b",
                   "captures": {
@@ -1109,6 +1110,7 @@
             }
           ]
         },
+        { "include": "#constant" },
         {
           "match": "\\b([a-z]\\w*)\\b",
           "captures": {
@@ -1135,8 +1137,7 @@
         },
         { "include": "#type-destructor-tuple" },
         { "include": "#type-destructor-record" },
-        { "include": "#type-destructor-list" },
-        { "include": "#constant" }
+        { "include": "#type-destructor-list" }
       ]
     },
     "pattern-variant": {
