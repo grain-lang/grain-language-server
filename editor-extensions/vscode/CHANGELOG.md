@@ -1,6 +1,42 @@
 # Changelog
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
+## [0.16.0](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.15.0...vscode-grain-v0.16.0) (2022-06-06)
+
+
+### ⚠ BREAKING CHANGES
+
+* Replace grainfind with cliFlags setting (#113)
+* Upgrade dependencies & require much newer VSCode
+* Remove unused plugin options
+* Rename settings namespace to just "grain"
+* Implement plugin as only an LSP client (#100)
+
+### Features
+
+* Add LSP restart command ([8c12b49](https://www.github.com/grain-lang/grain-language-server/commit/8c12b494641fddad4b2488b53febbc312802390c))
+* Build extension into a single JS file ([8c12b49](https://www.github.com/grain-lang/grain-language-server/commit/8c12b494641fddad4b2488b53febbc312802390c))
+* Contribute file icons to grain files ([#109](https://www.github.com/grain-lang/grain-language-server/issues/109)) ([77d6691](https://www.github.com/grain-lang/grain-language-server/commit/77d66911ee81e2617da0caa7b64cd1fc2e78d190))
+* Implement plugin as only an LSP client ([#100](https://www.github.com/grain-lang/grain-language-server/issues/100)) ([8c12b49](https://www.github.com/grain-lang/grain-language-server/commit/8c12b494641fddad4b2488b53febbc312802390c))
+* Replace grainfind with cliFlags setting ([#113](https://www.github.com/grain-lang/grain-language-server/issues/113)) ([68c1816](https://www.github.com/grain-lang/grain-language-server/commit/68c1816f9169f7fc250c97e5da2bffe1d3e3f49d))
+* Search for a variety of grain CLIs in PATH ([#111](https://www.github.com/grain-lang/grain-language-server/issues/111)) ([28e1e9c](https://www.github.com/grain-lang/grain-language-server/commit/28e1e9c5ec62f662feedadc94d8d72e3f55709c8))
+* Support multiple workspaces & individual files ([8c12b49](https://www.github.com/grain-lang/grain-language-server/commit/8c12b494641fddad4b2488b53febbc312802390c))
+* Support or-pattern and alias syntax ([#116](https://www.github.com/grain-lang/grain-language-server/issues/116)) ([38e8ed8](https://www.github.com/grain-lang/grain-language-server/commit/38e8ed8698d943e5eb9618efc5a99628e53f4d44))
+
+
+### Bug Fixes
+
+* Avoid handling output scheme messages ([#114](https://www.github.com/grain-lang/grain-language-server/issues/114)) ([b71c7ad](https://www.github.com/grain-lang/grain-language-server/commit/b71c7ada6246d639885755f6413df67fef768441))
+* Only highlight valid string escapes ([#118](https://www.github.com/grain-lang/grain-language-server/issues/118)) ([d82dea3](https://www.github.com/grain-lang/grain-language-server/commit/d82dea382865f939711567805333c4721ac728fc))
+* Properly highlight true/false in pattern matching ([#117](https://www.github.com/grain-lang/grain-language-server/issues/117)) ([43d2cba](https://www.github.com/grain-lang/grain-language-server/commit/43d2cba033c3396fb86cb47fa5e55b8aa5fae268))
+
+
+### Miscellaneous Chores
+
+* Remove unused plugin options ([8c12b49](https://www.github.com/grain-lang/grain-language-server/commit/8c12b494641fddad4b2488b53febbc312802390c))
+* Rename settings namespace to just "grain" ([8c12b49](https://www.github.com/grain-lang/grain-language-server/commit/8c12b494641fddad4b2488b53febbc312802390c))
+* Upgrade dependencies & require much newer VSCode ([8c12b49](https://www.github.com/grain-lang/grain-language-server/commit/8c12b494641fddad4b2488b53febbc312802390c))
+
 ## [0.15.0](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.14.1...vscode-grain-v0.15.0) (2021-10-26)
 
 
