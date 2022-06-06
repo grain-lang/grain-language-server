@@ -1085,6 +1085,12 @@
               },
               "patterns": [
                 {
+                  "match": "(\\||\\bas\\b)",
+                  "captures": {
+                    "1": { "name": "keyword.operator.grain" }
+                  }
+                },
+                {
                   "match": "\\b([a-z]\\w*)\\b",
                   "captures": {
                     "1": { "name": "variable.language.grain" }
@@ -1108,6 +1114,12 @@
               ]
             }
           ]
+        },
+        {
+          "match": "(\\||\\bas\\b)",
+          "captures": {
+            "1": { "name": "keyword.operator.grain" }
+          }
         },
         {
           "match": "\\b([a-z]\\w*)\\b",
