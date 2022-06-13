@@ -1219,7 +1219,7 @@
               "begin": "\\b(match)\\b\\s*(\\()",
               "end": "(\\))",
               "beginCaptures": {
-                "1": { "name": "keyword.operator.grain" },
+                "1": { "name": "keyword.control.grain" },
                 "2": { "name": "punctuation.definition.parameters.begin.grain" }
               },
               "endCaptures": {
@@ -1236,7 +1236,7 @@
         {
           "match": "\\b(match)\\b\\s*(?=\\()",
           "captures": {
-            "1": { "name": "keyword.operator.grain" }
+            "1": { "name": "keyword.control.grain" }
           }
         }
       ]
