@@ -221,7 +221,7 @@
           ]
         },
         {
-          "match": "->",
+          "match": "(->|\\.)",
           "name": "keyword.operator.grain"
         },
         { "include": "#type-args" },
@@ -239,28 +239,28 @@
           "patterns": [{ "include": "#type" }]
         },
         {
-          "match": "(->)\\s*(\\w+(<.*?>)?)",
+          "match": "(->)\\s*(\\w+(\\.\\w+)*(<.*?>)?)",
           "captures": {
             "1": { "name": "keyword.operator.grain" },
             "2": { "patterns": [{ "include": "#type" }] }
           }
         },
         {
-          "match": "(:)\\s*(\\w+(<.*?>)?\\s*->\\s*\\w+(<.*?>)?)",
+          "match": "(:)\\s*(\\w+(\\.\\w+)*(<.*?>)?\\s*->\\s*\\w+(<.*?>)?)",
           "captures": {
             "1": { "name": "keyword.operator.grain" },
             "2": { "patterns": [{ "include": "#type" }] }
           }
         },
         {
-          "match": "(:)\\s*(\\w+(<.*?>)?\\s*->\\s*\\(.*\\))",
+          "match": "(:)\\s*(\\w+(\\.\\w+)*(<.*?>)?\\s*->\\s*\\(.*\\))",
           "captures": {
             "1": { "name": "keyword.operator.grain" },
             "2": { "patterns": [{ "include": "#type" }] }
           }
         },
         {
-          "match": "(:)\\s*(\\w+(<.*?>)?)",
+          "match": "(:)\\s*(\\w+(\\.\\w+)*(<.*?>)?)",
           "captures": {
             "1": { "name": "keyword.operator.grain" },
             "2": { "patterns": [{ "include": "#type" }] }
