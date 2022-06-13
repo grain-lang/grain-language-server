@@ -1,6 +1,15 @@
 # Changelog
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
+### [0.16.1](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.16.0...vscode-grain-v0.16.1) (2022-06-13)
+
+
+### Bug Fixes
+
+* Adjust icon size ([#119](https://www.github.com/grain-lang/grain-language-server/issues/119)) ([5f7ef16](https://www.github.com/grain-lang/grain-language-server/commit/5f7ef16f32e1b2dc3cd51efa247d5257a2cd47db))
+* Highlight match keyword correctly ([#121](https://www.github.com/grain-lang/grain-language-server/issues/121)) ([3b40fc4](https://www.github.com/grain-lang/grain-language-server/commit/3b40fc417d6a28230eeeaf32757fb6c6c7740466))
+* Highlight module scoped types properly ([#122](https://www.github.com/grain-lang/grain-language-server/issues/122)) ([e046b6b](https://www.github.com/grain-lang/grain-language-server/commit/e046b6bd999274d85258c020eca7d7614939be90))
+
 ## [0.16.0](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.15.0...vscode-grain-v0.16.0) (2022-06-06)
 
 
