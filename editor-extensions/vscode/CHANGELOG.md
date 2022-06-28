@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
+## [0.17.0](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.16.1...vscode-grain-v0.17.0) (2022-06-28)
+
+
+### Features
+
+* Add bigint syntax highlighting ([#123](https://www.github.com/grain-lang/grain-language-server/issues/123)) ([dab8981](https://www.github.com/grain-lang/grain-language-server/commit/dab89815ba7a1d30300b01dd70136071cf74decb))
+
 ### [0.16.1](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.16.0...vscode-grain-v0.16.1) (2022-06-13)
 
 
