@@ -660,19 +660,19 @@
           "name": "constant.numeric.grain"
         },
         {
-          "match": "\\b(\\d[\\d_]*)([lLnN]?)\\b",
+          "match": "\\b(\\d[\\d_]*)([lLnNt]?)\\b",
           "name": "constant.numeric.grain"
         },
         {
-          "match": "\\b(0[xX][\\da-fA-F][\\da-fA-F_]*)([lLnN]?)\\b",
+          "match": "\\b(0[xX][\\da-fA-F][\\da-fA-F_]*)([lLnNt]?)\\b",
           "name": "constant.numeric.grain"
         },
         {
-          "match": "\\b(0[oO][0-7][0-7_]*)([lLnN]?)\\b",
+          "match": "\\b(0[oO][0-7][0-7_]*)([lLnNt]?)\\b",
           "name": "constant.numeric.grain"
         },
         {
-          "match": "\\b(0[bB][01][01_]*)([lLnN]?)\\b",
+          "match": "\\b(0[bB][01][01_]*)([lLnNt]?)\\b",
           "name": "constant.numeric.grain"
         }
       ]
