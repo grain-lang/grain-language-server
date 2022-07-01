@@ -46,9 +46,16 @@ function mutex(key: string, fn: (...args: unknown[]) => Promise<void>) {
 
     activeMutex.add(key);
 
-    fn(...args).finally(() => {
-      activeMutex.delete(key);
-    });
+    fn(...args)
+      .catch((err) =>
+        // Rethrow on a "next tick" to break out of the promise wrapper
+        queueMicrotask(() => {
+          throw err;
+        })
+      )
+      .finally(() => {
+        activeMutex.delete(key);
+      });
   };
 }
 
