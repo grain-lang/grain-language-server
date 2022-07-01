@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
+### [0.17.1](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.17.0...vscode-grain-v0.17.1) (2022-07-01)
+
+
+### Bug Fixes
+
+* Add naive mutex around config change events ([#125](https://www.github.com/grain-lang/grain-language-server/issues/125)) ([2dd2068](https://www.github.com/grain-lang/grain-language-server/commit/2dd2068d19a857f33f8e8fa3bed12d0bc3ab4eff))
+
 ## [0.17.0](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.16.1...vscode-grain-v0.17.0) (2022-06-28)
 
 
