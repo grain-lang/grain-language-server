@@ -14,6 +14,7 @@ import {
   TextDocument,
   WorkspaceFolder,
   WorkspaceFoldersChangeEvent,
+  ConfigurationChangeEvent,
   Uri,
   window,
 } from "vscode";
@@ -36,6 +37,27 @@ let outputChannel = window.createOutputChannel(extensionName, languageId);
 
 let fileClients: Map<string, LanguageClient> = new Map();
 let workspaceClients: Map<string, LanguageClient> = new Map();
+
+let activeMutex: Set<string> = new Set();
+
+function mutex(key: string, fn: (...args: unknown[]) => Promise<void>) {
+  return (...args) => {
+    if (activeMutex.has(key)) return;
+
+    activeMutex.add(key);
+
+    fn(...args)
+      .catch((err) =>
+        // Rethrow on a "next tick" to break out of the promise wrapper
+        queueMicrotask(() => {
+          throw err;
+        })
+      )
+      .finally(() => {
+        activeMutex.delete(key);
+      });
+  };
+}
 
 const grainBinaries = [
   "grain",
@@ -264,22 +286,25 @@ async function didOpenTextDocument(
 
     await addWorkspaceClient(folder);
 
-    configHandler = async (e) => {
-      if (e.affectsConfiguration("grain.cliFlags", folder.uri)) {
-        await removeWorkspaceClient(folder);
-        await addWorkspaceClient(folder);
-      }
+    configHandler = mutex(
+      folder.uri.toString(),
+      async (e: ConfigurationChangeEvent) => {
+        if (e.affectsConfiguration("grain.cliFlags", folder.uri)) {
+          await removeWorkspaceClient(folder);
+          await addWorkspaceClient(folder);
+        }
 
-      if (e.affectsConfiguration("grain.cliPath", folder.uri)) {
-        await removeWorkspaceClient(folder);
-        await addWorkspaceClient(folder);
-      }
+        if (e.affectsConfiguration("grain.cliPath", folder.uri)) {
+          await removeWorkspaceClient(folder);
+          await addWorkspaceClient(folder);
+        }
 
-      if (e.affectsConfiguration("grain.enableLSP", folder.uri)) {
-        await removeWorkspaceClient(folder);
-        await addWorkspaceClient(folder);
+        if (e.affectsConfiguration("grain.enableLSP", folder.uri)) {
+          await removeWorkspaceClient(folder);
+          await addWorkspaceClient(folder);
+        }
       }
-    };
+    );
   } else {
     // We only want to handle `file:` and `untitled:` schemes because
     //vscode sends `output:` schemes for markdown responses from our LSP
@@ -290,22 +315,25 @@ async function didOpenTextDocument(
     // Each file outside of a workspace gets it's own client
     await addFileClient(uri);
 
-    configHandler = async (e) => {
-      if (e.affectsConfiguration("grain.cliFlags", uri)) {
-        await removeFileClient(uri);
-        await addFileClient(uri);
-      }
+    configHandler = mutex(
+      uri.toString(),
+      async (e: ConfigurationChangeEvent) => {
+        if (e.affectsConfiguration("grain.cliFlags", uri)) {
+          await removeFileClient(uri);
+          await addFileClient(uri);
+        }
 
-      if (e.affectsConfiguration("grain.cliPath", uri)) {
-        await removeFileClient(uri);
-        await addFileClient(uri);
-      }
+        if (e.affectsConfiguration("grain.cliPath", uri)) {
+          await removeFileClient(uri);
+          await addFileClient(uri);
+        }
 
-      if (e.affectsConfiguration("grain.enableLSP", uri)) {
-        await removeFileClient(uri);
-        await addFileClient(uri);
+        if (e.affectsConfiguration("grain.enableLSP", uri)) {
+          await removeFileClient(uri);
+          await addFileClient(uri);
+        }
       }
-    };
+    );
   }
 
   return workspace.onDidChangeConfiguration(configHandler);
@@ -320,7 +348,7 @@ async function didChangeWorkspaceFolders(event: WorkspaceFoldersChangeEvent) {
 
   // Remove any clients for workspaces that were closed
   for (let folder of event.removed) {
-    removeWorkspaceClient(folder);
+    await removeWorkspaceClient(folder);
   }
 }
 
