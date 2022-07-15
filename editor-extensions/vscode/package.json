@@ -110,10 +110,11 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "vscode:prepublish": "npm run build-type-grammar && npm run esbuild-base -- --minify",
     "esbuild-base": "esbuild ./src/extension.ts --bundle --outfile=out/extension.js --external:vscode --format=cjs --platform=node",
     "esbuild": "npm run esbuild-base -- --sourcemap",
     "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+    "build-type-grammar": "node ./syntaxes/generate-grain-type.js",
     "test": "sh ./scripts/e2e.sh",
     "package": "vsce package",
     "test-compile": "tsc -p ./",
