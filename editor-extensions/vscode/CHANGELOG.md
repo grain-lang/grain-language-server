@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
+### [0.17.2](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.17.1...vscode-grain-v0.17.2) (2022-07-15)
+
+
+### Bug Fixes
+
+* Correctly highlight type hovers ([#128](https://www.github.com/grain-lang/grain-language-server/issues/128)) ([51d3e44](https://www.github.com/grain-lang/grain-language-server/commit/51d3e44c9a835983e646f1bcd4e97a35c7180c55))
+
 ### [0.17.1](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.17.0...vscode-grain-v0.17.1) (2022-07-01)
 
 
