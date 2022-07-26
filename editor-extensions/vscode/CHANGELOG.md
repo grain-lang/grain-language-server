@@ -1,6 +1,18 @@
 # Changelog
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
+## [0.18.0](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.17.2...vscode-grain-v0.18.0) (2022-07-26)
+
+
+### Features
+
+* Graindoc highlighting ([#132](https://www.github.com/grain-lang/grain-language-server/issues/132)) ([11a61af](https://www.github.com/grain-lang/grain-language-server/commit/11a61affa9b51c159b287813fa0beb0cca5b36ee))
+
+
+### Bug Fixes
+
+* Correctly highlight function type annotations in type vectors ([#131](https://www.github.com/grain-lang/grain-language-server/issues/131)) ([5b025e9](https://www.github.com/grain-lang/grain-language-server/commit/5b025e95351df8f824142abfa256f3c8325caed6))
+
 ### [0.17.2](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.17.1...vscode-grain-v0.17.2) (2022-07-15)
 
 
