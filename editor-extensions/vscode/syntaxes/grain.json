@@ -155,7 +155,7 @@
               }
             },
             {
-              "match": "((@)since)\\s+(v\\d+\\.\\d+\\.\\d+)",
+              "match": "((@)since)\\s+\\b(v\\d+\\.\\d+\\.\\d+|next)\\b",
               "captures": {
                 "1": { "name": "storage.type.graindoc" },
                 "2": { "name": "punctuation.definition.block.tag.graindoc" },
