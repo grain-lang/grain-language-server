@@ -133,6 +133,72 @@
           "name": "comment.line.grain"
         },
         {
+          "begin": "\\/\\**",
+          "end": "\\*\\/",
+          "name": "comment.block.grain",
+          "patterns": [
+            {
+              "match": "((@)module)\\s+(\\b\\w+\\b)(:)",
+              "captures": {
+                "1": { "name": "storage.type.graindoc" },
+                "2": { "name": "punctuation.definition.block.tag.graindoc" },
+                "3": { "name": "entity.name.type.graindoc" },
+                "4": { "name": "punctuation.definition.block.tag.graindoc" }
+              }
+            },
+            {
+              "match": "((@)example)\\s+(.*)",
+              "captures": {
+                "1": { "name": "storage.type.graindoc" },
+                "2": { "name": "punctuation.definition.block.tag.graindoc" },
+                "3": { "patterns": [{ "include": "#top-level-statements" }] }
+              }
+            },
+            {
+              "match": "((@)since)\\s+\\b(v\\d+\\.\\d+\\.\\d+|next)\\b",
+              "captures": {
+                "1": { "name": "storage.type.graindoc" },
+                "2": { "name": "punctuation.definition.block.tag.graindoc" },
+                "3": { "name": "constant.numeric.graindoc" }
+              }
+            },
+            {
+              "match": "((@)history)\\s+(v\\d+\\.\\d+\\.\\d+)(:)",
+              "captures": {
+                "1": { "name": "storage.type.graindoc" },
+                "2": { "name": "punctuation.definition.block.tag.graindoc" },
+                "3": { "name": "constant.numeric.graindoc" },
+                "4": { "name": "punctuation.definition.block.tag.graindoc" }
+              }
+            },
+            {
+              "match": "((@)param)\\s+(\\b\\w+\\b)(:)",
+              "captures": {
+                "1": { "name": "storage.type.graindoc" },
+                "2": { "name": "punctuation.definition.block.tag.graindoc" },
+                "3": { "name": "variable.other.graindoc" },
+                "4": { "name": "punctuation.definition.block.tag.graindoc" }
+              }
+            },
+            {
+              "match": "((@)section)\\s+(\\b\\w+\\b)(:)",
+              "captures": {
+                "1": { "name": "storage.type.graindoc" },
+                "2": { "name": "punctuation.definition.block.tag.graindoc" },
+                "3": { "name": "variable.other.graindoc" },
+                "4": { "name": "punctuation.definition.block.tag.graindoc" }
+              }
+            },
+            {
+              "match": "((@)(param|returns|module|example|section|deprecated|since|history))",
+              "captures": {
+                "1": { "name": "storage.type.graindoc" },
+                "2": { "name": "punctuation.definition.block.tag.graindoc" }
+              }
+            }
+          ]
+        },
+        {
           "begin": "\\/\\*",
           "end": "\\*\\/",
           "name": "comment.block.grain"
