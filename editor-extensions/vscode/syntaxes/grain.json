@@ -133,7 +133,7 @@
           "name": "comment.line.grain"
         },
         {
-          "begin": "\\/\\**",
+          "begin": "\\/\\*\\*",
           "end": "\\*\\/",
           "name": "comment.block.grain",
           "patterns": [
