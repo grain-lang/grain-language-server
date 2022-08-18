@@ -1,4 +1,4 @@
-# Editor extensions support for Grain 
+# Editor extension support for Grain 
 
 Grain has a standard LSP implementation built into the compiler.
 
