@@ -695,7 +695,9 @@
         { "include": "#number" },
         { "include": "#strings" },
         { "include": "#boolean" },
-        { "include": "#void" }
+        { "include": "#void" },
+        { "include": "#infinity" },
+        { "include": "#nan" }
       ]
     },
     "boolean": {
@@ -710,6 +712,22 @@
       "patterns": [
         {
           "match": "\\b(void)\\b",
+          "name": "constant.language.grain"
+        }
+      ]
+    },
+    "infinity": {
+      "patterns": [
+        {
+          "match": "\\b(Infinity)\\b",
+          "name": "constant.language.grain"
+        }
+      ]
+    },
+    "nan": {
+      "patterns": [
+        {
+          "match": "\\b(NaN)\\b",
           "name": "constant.language.grain"
         }
       ]
