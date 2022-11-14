@@ -695,9 +695,7 @@
         { "include": "#number" },
         { "include": "#strings" },
         { "include": "#boolean" },
-        { "include": "#void" },
-        { "include": "#infinity" },
-        { "include": "#nan" }
+        { "include": "#void" }
       ]
     },
     "boolean": {
@@ -712,22 +710,6 @@
       "patterns": [
         {
           "match": "\\b(void)\\b",
-          "name": "constant.language.grain"
-        }
-      ]
-    },
-    "infinity": {
-      "patterns": [
-        {
-          "match": "\\b(Infinity)\\b",
-          "name": "constant.language.grain"
-        }
-      ]
-    },
-    "nan": {
-      "patterns": [
-        {
-          "match": "\\b(NaN)\\b",
           "name": "constant.language.grain"
         }
       ]
@@ -756,6 +738,14 @@
         },
         {
           "match": "\\b(0[bB][01][01_]*)([lLnNt]?)\\b",
+          "name": "constant.numeric.grain"
+        },
+        {
+          "match": "\\b(Infinity)\\b",
+          "name": "constant.numeric.grain"
+        },
+        {
+          "match": "\\b(NaN)\\b",
           "name": "constant.numeric.grain"
         }
       ]
