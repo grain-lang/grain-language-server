@@ -905,7 +905,7 @@
     "keywords": {
       "patterns": [
         {
-          "match": "\\b(throw|while|for|continue|break|match|when|pattern|assert|fail|import|export|from|except|as)\\b",
+          "match": "\\b(throw|while|for|continue|break|return|match|when|pattern|assert|fail|import|export|from|except|as)\\b",
           "name": "keyword.control.grain"
         },
         {
