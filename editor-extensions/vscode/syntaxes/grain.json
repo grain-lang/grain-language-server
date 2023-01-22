@@ -739,6 +739,14 @@
         {
           "match": "\\b(0[bB][01][01_]*)([lLnNt]?)\\b",
           "name": "constant.numeric.grain"
+        },
+        {
+          "match": "\\b(Infinity)\\b",
+          "name": "constant.numeric.grain"
+        },
+        {
+          "match": "\\b(NaN)\\b",
+          "name": "constant.numeric.grain"
         }
       ]
     },
