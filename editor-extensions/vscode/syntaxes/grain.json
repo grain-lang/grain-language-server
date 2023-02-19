@@ -717,28 +717,58 @@
     "number": {
       "patterns": [
         {
-          "match": "\\b(\\d[\\d_]*)\\s*/\\s*(\\d[\\d_]*)\\b",
-          "name": "constant.numeric.grain"
+          "match": "\\b(\\d[\\d_]*)\\s*/\\s*(\\d[\\d_]*)(r?)\\b",
+          "name": "constant.numeric.grain",
+          "captures": {
+            "3": {
+              "name": "entity.name.type.numeric.grain"
+            }
+          }
         },
         {
-          "match": "\\b(\\d[\\d_]*)(\\.[\\d_]*)?([eE][+-]?\\d[\\d_]*)?[fdwW]?\\b",
-          "name": "constant.numeric.grain"
+          "match": "\\b(\\d[\\d_]*)(\\.[\\d_]*)?([eE][+-]?\\d[\\d_]*)?([fdwW]?)\\b",
+          "name": "constant.numeric.grain",
+          "captures": {
+            "4": {
+              "name": "entity.name.type.numeric.grain"
+            }
+          }
         },
         {
-          "match": "\\b(\\d[\\d_]*)([lLnNt]?)\\b",
-          "name": "constant.numeric.grain"
+          "match": "\\b(\\d[\\d_]*)(([sSlLnNt]|u[lLsS])?)\\b",
+          "name": "constant.numeric.grain",
+          "captures": {
+            "2": {
+              "name": "entity.name.type.numeric.grain"
+            }
+          }
         },
         {
-          "match": "\\b(0[xX][\\da-fA-F][\\da-fA-F_]*)([lLnNt]?)\\b",
-          "name": "constant.numeric.grain"
+          "match": "\\b(0[xX][\\da-fA-F][\\da-fA-F_]*)(([sSlLnNt]|u[lLsS])?)\\b",
+          "name": "constant.numeric.grain",
+          "captures": {
+            "3": {
+              "name": "entity.name.type.numeric.grain"
+            }
+          }
         },
         {
-          "match": "\\b(0[oO][0-7][0-7_]*)([lLnNt]?)\\b",
-          "name": "constant.numeric.grain"
+          "match": "\\b(0[oO][0-7][0-7_]*)(([sSlLnNt]|u[lLsS])?)\\b",
+          "name": "constant.numeric.grain",
+          "captures": {
+            "3": {
+              "name": "entity.name.type.numeric.grain"
+            }
+          }
         },
         {
-          "match": "\\b(0[bB][01][01_]*)([lLnNt]?)\\b",
-          "name": "constant.numeric.grain"
+          "match": "\\b(0[bB][01][01_]*)(([sSlLnNt]|u[lLsS])?)\\b",
+          "name": "constant.numeric.grain",
+          "captures": {
+            "3": {
+              "name": "entity.name.type.numeric.grain"
+            }
+          }
         },
         {
           "match": "\\b(Infinity)\\b",
