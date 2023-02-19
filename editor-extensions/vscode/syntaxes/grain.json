@@ -625,10 +625,20 @@
     "identifier": {
       "patterns": [
         {
-          "match": "(\\bis(nt)?\\b|=|(\\+|-|\\*|\\/)=|\\+|-|\\*|\\/|%|<=|>=|<|>|==|!=|:=|\\!|&&|&|\\|\\||\\||\\^|\\.\\.\\.|\\.)",
-          "captures": {
-            "1": { "name": "keyword.operator.grain" }
-          }
+          "match": "(==|!=|<|>|\\^|\\+|-|\\*|%|/|&|\\||\\?\\?)[$&\\*/\\+\\-=><\\^\\|\\!\\?%:\\.]*",
+          "name": "keyword.operator.grain"
+        },
+        {
+          "match": "(<=|>=|<|>|==|!=|:=|\\!)",
+          "name": "keyword.operator.grain"
+        },
+        {
+          "match": "\\bis(nt)?\\b",
+          "name": "keyword.operator.grain"
+        },
+        {
+          "match": "(\\.\\.\\.|\\.)",
+          "name": "keyword.operator.grain"
         },
         {
           "match": "\\b_[A-Z0-9_]+\\b",
