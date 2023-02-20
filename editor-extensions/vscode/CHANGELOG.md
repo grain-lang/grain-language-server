@@ -1,6 +1,17 @@
 # Changelog
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
+## [0.19.0](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.18.2...vscode-grain-v0.19.0) (2023-02-20)
+
+
+### Features
+
+* Support `Infinity` and `NaN` keywords ([#142](https://www.github.com/grain-lang/grain-language-server/issues/142)) ([d940a07](https://www.github.com/grain-lang/grain-language-server/commit/d940a07a34b2302efd1d6c59354e7b81126403b0))
+* Support custom operators ([#149](https://www.github.com/grain-lang/grain-language-server/issues/149)) ([4b4c75e](https://www.github.com/grain-lang/grain-language-server/commit/4b4c75e6b517f27509e323cffb3485ed60a58013))
+* Support new module system ([#151](https://www.github.com/grain-lang/grain-language-server/issues/151)) ([5240131](https://www.github.com/grain-lang/grain-language-server/commit/524013101c8dc843ca8693221c2d606cef23f533))
+* Support short and unsigned ints ([#150](https://www.github.com/grain-lang/grain-language-server/issues/150)) ([9998689](https://www.github.com/grain-lang/grain-language-server/commit/999868996f8328210fb6c35f649aa169c73ef4f9))
+* Support the `return` keyword ([#146](https://www.github.com/grain-lang/grain-language-server/issues/146)) ([c540e52](https://www.github.com/grain-lang/grain-language-server/commit/c540e52ba401f90b1866b3489e2d116795293ca0))
+
 ### [0.18.2](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.18.1...vscode-grain-v0.18.2) (2022-08-01)
 
 
