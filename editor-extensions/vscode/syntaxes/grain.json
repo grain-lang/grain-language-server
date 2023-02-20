@@ -7,6 +7,29 @@
     }
   ],
   "repository": {
+    "modules": {
+      "patterns": [
+        {
+          "begin": "\\b(module)\\b\\s+([A-Z]\\w*)\\s*(\\{)",
+          "end": "(\\})",
+          "beginCaptures": {
+            "1": { "name": "storage.type.grain" },
+            "2": { "name": "entity.name.type.grain" }
+          },
+          "endCaptures": {
+            "1": { "name": "punctuation.definition.parameters.end.grain" }
+          },
+          "patterns": [{ "include": "#top-level-statements" }]
+        },
+        {
+          "match": "\\b(module)\\b\\s+([A-Z]\\w*)",
+          "captures": {
+            "1": { "name": "storage.type.grain" },
+            "2": { "name": "entity.name.type.grain" }
+          }
+        }
+      ]
+    },
     "bindings": {
       "patterns": [
         {
@@ -604,6 +627,7 @@
       "patterns": [
         { "include": "#comments" },
         { "include": "#bindings" },
+        { "include": "#use" },
         { "include": "#function-body" },
         { "include": "#block-body" },
         { "include": "#tuple" },
@@ -620,6 +644,76 @@
         { "include": "#external-identifier" },
         { "include": "#identifier" },
         { "include": "#type-variant-constructor" }
+      ]
+    },
+    "use": {
+      "patterns": [
+        {
+          "begin": "\\b(from)\\b\\s*\\b([A-Z]\\w*((\\.)[A-Z]\\w*)*)\\b\\s*\\b(use)\\b\\s*(\\{)",
+          "end": "(\\})",
+          "beginCaptures": {
+            "1": { "patterns": [{ "include": "#keywords" }] },
+            "2": { "name": "entity.name.module.grain" },
+            "4": {
+              "name": "keyword.operator.accessor.grain"
+            },
+            "5": { "patterns": [{ "include": "#keywords" }] },
+            "6": { "name": "punctuation.definition.start.grain" }
+          },
+          "endCaptures": {
+            "1": { "name": "punctuation.definition.end.grain" }
+          },
+          "patterns": [
+            {
+              "match": "(\\*|\\,)",
+              "name": "punctuation.support.grain"
+            },
+            {
+              "match": "\\b(type)\\b\\s*([A-Z]\\w*)\\b",
+              "captures": {
+                "1": { "patterns": [{ "include": "#keywords" }] },
+                "2": { "patterns": [{ "include": "#type" }] }
+              }
+            },
+            {
+              "include": "#keywords"
+            },
+            {
+              "match": "\\b[A-Z]\\w*\\b",
+              "name": "entity.name.module.grain"
+            },
+            {
+              "match": "(\\b\\w+\\b)",
+              "captures": {
+                "1": { "patterns": [{ "include": "#identifier" }] }
+              }
+            }
+          ]
+        },
+        {
+          "match": "\\b(from)\\b\\s*\\b([A-Z]\\w*((\\.)[A-Z]\\w*)*)\\b\\s*\\b(use)\\b\\s*(\\*)?",
+          "captures": {
+            "1": { "patterns": [{ "include": "#keywords" }] },
+            "2": { "name": "entity.name.module.grain" },
+            "4": {
+              "name": "keyword.operator.accessor.grain"
+            },
+            "5": { "patterns": [{ "include": "#keywords" }] },
+            "6": {
+              "name": "keyword.operator.grain"
+            }
+          }
+        },
+        {
+          "match": "\\b(from)\\b\\s*\\b([A-Z]\\w*((\\.)[A-Z]\\w*)*)\\b",
+          "captures": {
+            "1": { "patterns": [{ "include": "#keywords" }] },
+            "2": { "name": "entity.name.module.grain" },
+            "4": {
+              "name": "keyword.operator.accessor.grain"
+            }
+          }
+        }
       ]
     },
     "identifier": {
@@ -831,6 +925,23 @@
               "name": "entity.name.module.grain"
             }
           ]
+        },
+        {
+          "match": "\\b(include)\\b\\s*(\\\".*\\\")\\s*\\b(as)\\b\\s*\\b([A-Z]\\w*)\\b",
+          "captures": {
+            "1": {
+              "patterns": [{ "include": "#keywords" }]
+            },
+            "2": {
+              "patterns": [{ "include": "#constant" }]
+            },
+            "3": {
+              "patterns": [{ "include": "#keywords" }]
+            },
+            "4": {
+              "name": "entity.name.module.grain"
+            }
+          }
         }
       ]
     },
@@ -943,17 +1054,18 @@
     "keywords": {
       "patterns": [
         {
-          "match": "\\b(throw|while|for|continue|break|return|match|when|pattern|assert|fail|import|export|from|except|as)\\b",
+          "match": "\\b(throw|while|for|continue|break|return|match|when|pattern|assert|fail|import|export|from|include|use|provide|abstract|except|as)\\b",
           "name": "keyword.control.grain"
         },
         {
-          "match": "\\b(let|rec|mut|record|type|enum|foreign|primitive)\\b",
+          "match": "\\b(module|let|rec|mut|record|type|enum|foreign|primitive)\\b",
           "name": "storage.type.grain"
         }
       ]
     },
     "top-level-statements": {
       "patterns": [
+        { "include": "#modules" },
         { "include": "#foreigns" },
         { "include": "#imports" },
         { "include": "#exports" },
