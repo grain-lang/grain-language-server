@@ -178,7 +178,7 @@
               }
             },
             {
-              "match": "((@)since)\\s+\\b(v\\d+\\.\\d+\\.\\d+|next)\\b",
+              "match": "((@)since)\\s+\\b(v\\d+\\.\\d+\\.\\d+)\\b",
               "captures": {
                 "1": { "name": "storage.type.graindoc" },
                 "2": { "name": "punctuation.definition.block.tag.graindoc" },
