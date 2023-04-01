@@ -2,7 +2,7 @@ name: Release & publish to marketplaces
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   release-please:
@@ -17,7 +17,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           command: manifest
-  
+
   publish:
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created }}
@@ -36,7 +36,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2.1.2
         with:
-          node-version: '14'
+          node-version: "14"
           check-latest: true
 
       - name: Checkout project
