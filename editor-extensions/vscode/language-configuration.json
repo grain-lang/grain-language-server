@@ -15,7 +15,8 @@
     ["[", "]"],
     ["(", ")"],
     ["\"", "\""],
-    ["'", "'"]
+    ["'", "'"],
+    ["/*", "*/"],
   ],
   // symbols that that can be used to surround a selection
   "surroundingPairs": [
@@ -36,6 +37,17 @@
     {
       // e.g. /** ...|
       "beforeText": "^\\s*\\/\\*\\*(?!\\/)([^\\*]|\\*(?!\\/))*$",
+      "action": { "indent": "none", "appendText": " * " }
+    },
+    {
+      // e.g. /* | */
+      "beforeText": "^\\s*\\/\\*(?!\\/)([^\\*]|\\*(?!\\/))*$",
+      "afterText": "^\\s*\\*\\/$",
+      "action": { "indent": "indentOutdent", "appendText": " * " }
+    },
+    {
+      // e.g. / * ...| <- Space is removed but it was messing up highlighting
+      "beforeText": "^\\s*\\/\\*(?!\\/)([^\\*]|\\*(?!\\/))*$",
       "action": { "indent": "none", "appendText": " * " }
     },
     {
