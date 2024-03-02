@@ -431,6 +431,13 @@
           ]
         },
         {
+          "match": "\\b(exception)\\b\\s+(.*)",
+          "captures": {
+            "1": { "patterns": [{ "include": "#keywords" }] },
+            "2": { "patterns": [{ "include": "#type-variant" }] }
+          }
+        },
+        {
           "match": "(type|record|enum)\\s+([A-Z]\\w*)(<.*>)?",
           "captures": {
             "1": { "name": "storage.type.grain" },
@@ -1077,7 +1084,7 @@
     "keywords": {
       "patterns": [
         {
-          "match": "\\b(throw|while|for|continue|break|return|match|when|pattern|assert|fail|import|export|from|include|use|provide|abstract|except|as)\\b",
+          "match": "\\b(throw|exception|while|for|continue|break|return|match|when|pattern|assert|fail|import|export|from|include|use|provide|abstract|except|as)\\b",
           "name": "keyword.control.grain"
         },
         {
