@@ -649,7 +649,7 @@
     "use": {
       "patterns": [
         {
-          "begin": "\\b(from)\\b\\s*\\b([A-Z]\\w*((\\.)[A-Z]\\w*)*)\\b\\s*\\b(use)\\b\\s*(\\{)",
+          "begin": "\\b(use)\\b\\s*\\b([A-Z]\\w*((\\.)[A-Z]\\w*)*)\\b\\s*(\\.)\\s*(\\{)",
           "end": "(\\})",
           "beginCaptures": {
             "1": { "patterns": [{ "include": "#keywords" }] },
@@ -657,7 +657,9 @@
             "4": {
               "name": "keyword.operator.accessor.grain"
             },
-            "5": { "patterns": [{ "include": "#keywords" }] },
+            "5": {
+              "name": "keyword.operator.accessor.grain"
+            },
             "6": { "name": "punctuation.definition.start.grain" }
           },
           "endCaptures": {
@@ -691,25 +693,30 @@
           ]
         },
         {
-          "match": "\\b(from)\\b\\s*\\b([A-Z]\\w*((\\.)[A-Z]\\w*)*)\\b\\s*\\b(use)\\b\\s*(\\*)?",
+          "match": "\\b(use)\\b\\s*\\b([A-Z]\\w*((\\.)[A-Z]\\w*)*)\\b\\s*(\\.)\\s*(\\*)?",
           "captures": {
             "1": { "patterns": [{ "include": "#keywords" }] },
             "2": { "name": "entity.name.module.grain" },
             "4": {
               "name": "keyword.operator.accessor.grain"
             },
-            "5": { "patterns": [{ "include": "#keywords" }] },
+            "5": {
+              "name": "keyword.operator.accessor.grain"
+            },
             "6": {
               "name": "keyword.operator.grain"
             }
           }
         },
         {
-          "match": "\\b(from)\\b\\s*\\b([A-Z]\\w*((\\.)[A-Z]\\w*)*)\\b",
+          "match": "\\b(use)\\b\\s*\\b([A-Z]\\w*((\\.)[A-Z]\\w*)*)\\b(\\.)?",
           "captures": {
             "1": { "patterns": [{ "include": "#keywords" }] },
             "2": { "name": "entity.name.module.grain" },
             "4": {
+              "name": "keyword.operator.accessor.grain"
+            },
+            "5": {
               "name": "keyword.operator.accessor.grain"
             }
           }
