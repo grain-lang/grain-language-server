@@ -944,7 +944,7 @@
           ]
         },
         {
-          "match": "\\b(include)\\b\\s*(\\\".*\\\")\\s*\\b(as)\\b\\s*\\b([A-Z]\\w*)\\b",
+          "match": "\\b(from)\\b\\s*(\\\".*\\\")\\s*\\b(include)\\b\\s*\\b([A-Z]\\w*)\\b(\\s*(as)\\s*\\b([A-Z]\\w*)\\b)?",
           "captures": {
             "1": {
               "patterns": [{ "include": "#keywords" }]
@@ -956,6 +956,12 @@
               "patterns": [{ "include": "#keywords" }]
             },
             "4": {
+              "name": "entity.name.module.grain"
+            },
+            "5": {
+              "patterns": [{ "include": "#keywords" }]
+            },
+            "6": {
               "name": "entity.name.module.grain"
             }
           }
