@@ -839,7 +839,7 @@
           }
         },
         {
-          "match": "\\b(0[xX][\\da-fA-F]+)(\\.[\\da-fA-F]*)?([p`P][+-]?\\d[\\d_]*)?([fdwW]?)\\b",
+          "match": "\\b(0[xX][\\da-fA-F]+)(\\.[\\da-fA-F]*)?([pP][+-]?\\d[\\d_]*)?([fdwW]?)\\b",
           "name": "constant.numeric.grain",
           "captures": {
             "4": {
