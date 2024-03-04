@@ -375,13 +375,14 @@
           }
         },
         {
-          "begin": "\\b(enum)\\b\\s+([A-Z]\\w*\\s*(<.*>\\s*)?)\\s*(\\{)",
+          "begin": "\\b(enum)\\b\\s+(\\b(rec)\\b\\s+)?([A-Z]\\w*\\s*(<.*>\\s*)?)\\s*(\\{)",
           "end": "(\\})",
           "beginCaptures": {
             "1": { "name": "storage.type.grain" },
-            "2": { "name": "entity.name.type.grain" },
-            "3": { "patterns": [{ "include": "#type-vector" }] },
-            "4": { "name": "punctuation.definition.parameters.begin.grain" }
+            "3": { "name": "storage.type.grain" },
+            "4": { "name": "entity.name.type.grain" },
+            "5": { "patterns": [{ "include": "#type-vector" }] },
+            "6": { "name": "punctuation.definition.parameters.begin.grain" }
           },
           "endCaptures": {
             "1": { "name": "punctuation.definition.parameters.end.grain" }
@@ -395,13 +396,14 @@
           ]
         },
         {
-          "begin": "\\b(record)\\b\\s+([A-Z]\\w*\\s*(<.*>\\s*)?)\\s*(\\{)",
+          "begin": "\\b(record)\\b\\s+(\\b(rec)\\b\\s+)?([A-Z]\\w*\\s*(<.*>\\s*)?)\\s*(\\{)",
           "end": "(\\})",
           "beginCaptures": {
             "1": { "name": "storage.type.grain" },
-            "2": { "name": "entity.name.type.grain" },
-            "3": { "patterns": [{ "include": "#type-vector" }] },
-            "4": { "name": "punctuation.definition.parameters.begin.grain" }
+            "3": { "name": "storage.type.grain" },
+            "4": { "name": "entity.name.type.grain" },
+            "5": { "patterns": [{ "include": "#type-vector" }] },
+            "6": { "name": "punctuation.definition.parameters.begin.grain" }
           },
           "endCaptures": {
             "1": { "name": "punctuation.definition.parameters.end.grain" }
@@ -438,11 +440,12 @@
           }
         },
         {
-          "match": "(type|record|enum)\\s+([A-Z]\\w*)(<.*>)?",
+          "match": "(type|record|enum)\\s+(\\b(rec)\\b\\s+)?([A-Z]\\w*)(<.*>)?",
           "captures": {
             "1": { "name": "storage.type.grain" },
-            "2": { "name": "entity.name.type.grain" },
-            "3": { "patterns": [{ "include": "#type-vector" }] }
+            "3": { "name": "storage.type.grain" },
+            "4": { "name": "entity.name.type.grain" },
+            "5": { "patterns": [{ "include": "#type-vector" }] }
           }
         }
       ]
@@ -1097,7 +1100,7 @@
           "name": "keyword.control.grain"
         },
         {
-          "match": "\\b(module|let|rec|mut|record|type|enum|foreign|primitive)\\b",
+          "match": "\\b(module|let|rec|mut|record|type|enum|and|foreign|primitive)\\b",
           "name": "storage.type.grain"
         }
       ]
