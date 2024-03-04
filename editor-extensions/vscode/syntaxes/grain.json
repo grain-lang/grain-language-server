@@ -233,7 +233,7 @@
         {
           "match": "(\\b[a-z]\\w*\\b)(,)?",
           "captures": {
-            "1": { "name": "variable.parameter.grain" },
+            "1": { "name": "variable.language.grain" },
             "2": { "name": "punctuation.definition.parameters.begin.grain" }
           }
         }
