@@ -681,7 +681,7 @@
               "name": "punctuation.support.grain"
             },
             {
-              "match": "\\b(type)\\b\\s*([A-Z]\\w*)\\b",
+              "match": "\\b(type|exception)\\b\\s*([A-Z]\\w*)\\b",
               "captures": {
                 "1": { "patterns": [{ "include": "#keywords" }] },
                 "2": { "patterns": [{ "include": "#type" }] }
@@ -694,12 +694,7 @@
               "match": "\\b[A-Z]\\w*\\b",
               "name": "entity.name.module.grain"
             },
-            {
-              "match": "(\\b\\w+\\b)",
-              "captures": {
-                "1": { "patterns": [{ "include": "#identifier" }] }
-              }
-            }
+            { "include": "#identifier" }
           ]
         },
         {
@@ -733,7 +728,7 @@
         }
       ]
     },
-    "identifier": {
+    "operator": {
       "patterns": [
         {
           "match": "(==|!=|<|>|\\^|\\+|-|\\*|%|/|&|\\||\\?\\?)[$&\\*/\\+\\-=><\\^\\|\\!\\?%:\\.]*",
@@ -746,6 +741,24 @@
         {
           "match": "\\bis(nt)?\\b",
           "name": "keyword.operator.grain"
+        },
+        {
+          "begin": "(\\()",
+          "end": "(\\))",
+          "beginCaptures": {
+            "1": { "name": "punctuation.definition.parameters.begin.grain" }
+          },
+          "endCaptures": {
+            "1": { "name": "punctuation.definition.parameters.end.grain" }
+          },
+          "patterns": [{ "include": "#operator" }]
+        }
+      ]
+    },
+    "identifier": {
+      "patterns": [
+        {
+          "include": "#operator"
         },
         {
           "match": "(\\.\\.\\.|\\.)",
