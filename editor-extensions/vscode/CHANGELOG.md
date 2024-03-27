@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to the `vscode-grain` extension will be documented in this file.
 
+## [0.20.0](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.19.0...vscode-grain-v0.20.0) (2024-03-27)
+
+
+### Features
+
+* Support [@throws](https://www.github.com/throws) graindoc ([#175](https://www.github.com/grain-lang/grain-language-server/issues/175)) ([33c3aa0](https://www.github.com/grain-lang/grain-language-server/commit/33c3aa06237c05788998d5b33715a792b6eed6bc))
+
 ## [0.19.0](https://www.github.com/grain-lang/grain-language-server/compare/vscode-grain-v0.18.2...vscode-grain-v0.19.0) (2024-03-04)
 
 
