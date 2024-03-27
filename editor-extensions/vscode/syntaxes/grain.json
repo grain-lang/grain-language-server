@@ -213,7 +213,18 @@
               }
             },
             {
-              "match": "((@)(param|returns|module|example|section|deprecated|since|history))",
+              "match": "((@)throws)\\s+(.*?)(:)",
+              "captures": {
+                "1": { "name": "storage.type.graindoc" },
+                "2": { "name": "punctuation.definition.block.tag.graindoc" },
+                "3": {
+                  "patterns": [{ "include": "#type-variant" }]
+                },
+                "4": { "name": "punctuation.definition.block.tag.graindoc" }
+              }
+            },
+            {
+              "match": "((@)(param|returns|module|example|section|deprecated|since|history|throws))",
               "captures": {
                 "1": { "name": "storage.type.graindoc" },
                 "2": { "name": "punctuation.definition.block.tag.graindoc" }
