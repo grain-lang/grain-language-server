@@ -138,6 +138,21 @@ function getLspCommand(uri: Uri) {
   return [command, args] as const;
 }
 
+function getRunCommand(uri: Uri) {
+  let config = workspace.getConfiguration("grain", uri);
+
+  let command = config.get<string | undefined>("cliPath") || findGrain();
+  // For some reason, if you specify a capitalized EXE extension for our pkg binary,
+  // it crashes the LSP so we just lowercase any .EXE ending in the command
+  command = command.replace(/\.EXE$/, ".exe");
+
+  let flags = config.get<string | undefined>("cliFlags") || "";
+
+  let args = flags.split(" ");
+
+  return [command, args] as const;
+}
+
 async function startFileClient(uri: Uri) {
   let [command, args] = getLspCommand(uri);
 
@@ -268,6 +283,34 @@ async function restartAllClients() {
     await client.restart();
   }
 }
+async function runEditorFile(resource: Uri) {
+  let targetResource = resource;
+  if (!targetResource && window.activeTextEditor) {
+    targetResource = window.activeTextEditor.document.uri;
+  }
+  if (targetResource) {
+    const [command, args] = getRunCommand(targetResource);
+
+    const config = workspace.getConfiguration();
+    const grainRunCommand = config
+      .get<string>(
+        "grain.runCommandLayout",
+        "${cliPath} ${activeFile} ${cliFlags}"
+      )
+      .replaceAll("${cliPath}", command)
+      .replaceAll("${activeFile}", targetResource.fsPath)
+      .replaceAll("${cliFlags}", args.join(" "));
+
+    // Create a new terminal instance
+    const terminal = window.createTerminal("Grain");
+
+    // Send a command to the terminal
+    terminal.sendText(grainRunCommand);
+
+    // Show the terminal
+    terminal.show();
+  }
+}
 
 async function didOpenTextDocument(
   document: TextDocument
@@ -359,11 +402,13 @@ export async function activate(context: ExtensionContext): Promise<void> {
     didChangeWorkspaceFolders
   );
   let restart$ = commands.registerCommand("grain.restart", restartAllClients);
+  const run$ = commands.registerCommand("grain.runEditorFile", runEditorFile);
 
   context.subscriptions.push(
     didOpenTextDocument$,
     didChangeWorkspaceFolders$,
-    restart$
+    restart$,
+    run$
   );
 
   for (let doc of workspace.textDocuments) {
