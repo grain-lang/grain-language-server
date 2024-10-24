@@ -17,6 +17,7 @@ import {
   ConfigurationChangeEvent,
   Uri,
   window,
+  type LanguageStatusItem,
 } from "vscode";
 
 import {
@@ -28,17 +29,19 @@ import {
 import which from "which";
 
 import { GrainDocCompletionProvider } from "./GrainDocCompletionProvider";
+import GrainErrorHandler from "./GrainErrorHandler";
 
 let extensionName = "Grain Language Server";
 
 let languageId = "grain";
-
 let outputChannel = window.createOutputChannel(extensionName, languageId);
-
 let fileClients: Map<string, LanguageClient> = new Map();
 let workspaceClients: Map<string, LanguageClient> = new Map();
 
 let activeMutex: Set<string> = new Set();
+
+let grainStatusBarItem: LanguageStatusItem | null = null;
+let grainRestartStatusItem: LanguageStatusItem | null = null;
 
 function mutex(key: string, fn: (...args: unknown[]) => Promise<void>) {
   return (...args) => {
@@ -141,7 +144,7 @@ function getLspCommand(uri: Uri) {
 async function startFileClient(uri: Uri) {
   let [command, args] = getLspCommand(uri);
 
-  let clientOptions = {
+  let clientOptions: LanguageClientOptions = {
     documentSelector: [
       {
         scheme: uri.scheme,
@@ -150,6 +153,10 @@ async function startFileClient(uri: Uri) {
       },
     ],
     outputChannel,
+    errorHandler:
+      grainStatusBarItem != null
+        ? new GrainErrorHandler(extensionName, grainStatusBarItem, 5)
+        : undefined,
   };
 
   let serverOptions: ServerOptions = {
@@ -261,12 +268,14 @@ async function removeWorkspaceClient(workspaceFolder: WorkspaceFolder) {
 }
 
 async function restartAllClients() {
+  if (grainRestartStatusItem != null) grainRestartStatusItem.busy = true;
   for (let client of fileClients.values()) {
     await client.restart();
   }
   for (let client of workspaceClients.values()) {
     await client.restart();
   }
+  if (grainRestartStatusItem != null) grainRestartStatusItem.busy = false;
 }
 
 async function didOpenTextDocument(
@@ -352,19 +361,54 @@ async function didChangeWorkspaceFolders(event: WorkspaceFoldersChangeEvent) {
   }
 }
 
+function createStatusBarEntries(context: ExtensionContext) {
+  // Language status bar
+  const statusScope = { language: languageId };
+
+  // Main extension entry
+  grainStatusBarItem = languages.createLanguageStatusItem("grain", statusScope);
+  grainStatusBarItem.busy = false;
+  grainStatusBarItem.name = "grain";
+  grainStatusBarItem.text = "grain";
+  grainStatusBarItem.command = {
+    title: "Open Grain Output",
+    command: "grain.openOutput",
+  };
+  context.subscriptions.push(grainStatusBarItem);
+
+  // Restart command entry
+  grainRestartStatusItem = languages.createLanguageStatusItem(
+    "grain.restart",
+    statusScope
+  );
+  grainStatusBarItem.busy = false;
+  grainRestartStatusItem.name = "grain.restart";
+  grainRestartStatusItem.text = "grain";
+  grainRestartStatusItem.command = {
+    title: "Restart Extension",
+    command: "grain.restart",
+  };
+  context.subscriptions.push(grainRestartStatusItem);
+}
+
 export async function activate(context: ExtensionContext): Promise<void> {
-  let didOpenTextDocument$ =
+  const didOpenTextDocument$ =
     workspace.onDidOpenTextDocument(didOpenTextDocument);
-  let didChangeWorkspaceFolders$ = workspace.onDidChangeWorkspaceFolders(
+  const didChangeWorkspaceFolders$ = workspace.onDidChangeWorkspaceFolders(
     didChangeWorkspaceFolders
   );
-  let restart$ = commands.registerCommand("grain.restart", restartAllClients);
+  const restart$ = commands.registerCommand("grain.restart", restartAllClients);
+  const output$ = commands.registerCommand("grain.openOutput", () => {
+    outputChannel.show();
+  });
 
   context.subscriptions.push(
     didOpenTextDocument$,
     didChangeWorkspaceFolders$,
-    restart$
+    restart$,
+    output$
   );
+  createStatusBarEntries(context);
 
   for (let doc of workspace.textDocuments) {
     const disposable = await didOpenTextDocument(doc);
