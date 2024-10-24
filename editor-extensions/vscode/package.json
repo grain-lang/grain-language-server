@@ -28,10 +28,24 @@
   ],
   "main": "./out/extension",
   "contributes": {
+    "menus": {
+      "editor/title/run": [
+        {
+          "command": "grain.runEditorFile",
+          "when": "resourceLangId == grain",
+          "group": "navigation@1"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "grain.restart",
         "title": "Grain: Restart Language Server"
+      },
+      {
+        "command": "grain.runEditorFile",
+        "title": "Grain: Run File",
+        "icon": "$(play)"
       }
     ],
     "languages": [
@@ -88,6 +102,12 @@
           "scope": "resource",
           "type": "string",
           "description": "Absolute path to the grain CLI (detected in PATH if not specified)"
+        },
+        "grain.runCommandLayout": {
+          "scope": "resource",
+          "type": "string",
+          "default": "${cliPath} ${activeFile} ${cliFlags}",
+          "description": "The layout of the run command"
         },
         "grain.enableLSP": {
           "scope": "resource",
