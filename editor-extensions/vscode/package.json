@@ -32,6 +32,10 @@
       {
         "command": "grain.restart",
         "title": "Grain: Restart Language Server"
+      },
+      {
+        "command": "grain.openOutput",
+        "title": "Grain: Show Extension Output"
       }
     ],
     "languages": [
