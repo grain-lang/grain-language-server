@@ -594,15 +594,11 @@
               "patterns": [{ "include": "#expressions" }]
             },
             {
-              "match": "\\b(\\w+)\\b",
-              "name": "entity.name.grain"
+              "include": "#expressions"
             },
             {
               "match": ",",
               "name": "punctuation.description.parameters.grain"
-            },
-            {
-              "include": "#comments"
             }
           ]
         }
@@ -1328,6 +1324,7 @@
             "1": { "name": "punctuation.description.grain" }
           },
           "patterns": [
+            { "include": "#comments" },
             {
               "match": "\\b([a-z]\\w*)\\b\\s*(:)",
               "captures": {
