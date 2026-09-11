@@ -959,34 +959,6 @@
     "imports": {
       "patterns": [
         {
-          "begin": "(?<=import)",
-          "end": "(?=from)",
-          "patterns": [
-            {
-              "match": "(\\*|\\,)",
-              "name": "punctuation.support.grain"
-            },
-            {
-              "begin": "(\\{)",
-              "end": "(\\})",
-              "beginCaptures": {
-                "1": { "name": "punctuation.definition.start.grain" }
-              },
-              "endCaptures": {
-                "1": { "name": "punctuation.definition.end.grain" }
-              },
-              "patterns": [
-                { "match": ",", "name": "punctuation.definition.grain" },
-                { "include": "#expressions" }
-              ]
-            },
-            {
-              "match": "\\b[A-Z]\\w*\\b",
-              "name": "entity.name.module.grain"
-            }
-          ]
-        },
-        {
           "match": "\\b(from)\\b\\s*(\\\".*\\\")\\s*\\b(include)\\b\\s*\\b([A-Z]\\w*)\\b(\\s*(as)\\s*\\b([A-Z]\\w*)\\b)?",
           "captures": {
             "1": {
@@ -1011,36 +983,10 @@
         }
       ]
     },
-    "exports": {
-      "patterns": [
-        {
-          "match": "\\b(export)\\b\\s*(\\*)\\s*\\b(except)\\b(.*?)(?=$|;)",
-          "captures": {
-            "1": { "name": "keyword.control.grain" },
-            "2": { "name": "punctuation.support.grain" },
-            "3": { "name": "keyword.control.grain" },
-            "4": {
-              "patterns": [
-                {
-                  "include": "#expressions"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "match": "\\b(export)\\b\\s*(\\*)",
-          "captures": {
-            "1": { "name": "keyword.control.grain" },
-            "2": { "name": "punctuation.support.grain" }
-          }
-        }
-      ]
-    },
     "foreigns": {
       "patterns": [
         {
-          "begin": "\\b(import|export)\\s*\\b(foreign)\\b(\\s*\\bwasm\\b)\\s*",
+          "begin": "\\b(foreign)\\b(\\s*\\bwasm\\b)\\s*",
           "end": "\\b(from)\\b\\s+(.*)(?=$|;)",
           "beginCaptures": {
             "1": { "name": "keyword.control.grain" },
@@ -1120,7 +1066,7 @@
     "keywords": {
       "patterns": [
         {
-          "match": "\\b(throw|exception|while|for|continue|break|return|match|when|pattern|assert|fail|import|export|from|include|use|provide|abstract|except|as)\\b",
+          "match": "\\b(throw|exception|while|for|continue|break|return|match|when|pattern|assert|fail|from|include|use|provide|abstract|as)\\b",
           "name": "keyword.control.grain"
         },
         {
@@ -1134,7 +1080,6 @@
         { "include": "#modules" },
         { "include": "#foreigns" },
         { "include": "#imports" },
-        { "include": "#exports" },
         { "include": "#primitives" },
         { "include": "#data-declarations" },
         { "include": "#expressions" },
